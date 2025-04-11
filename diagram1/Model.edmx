@@ -1,0 +1,616 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+  <!-- EF Runtime content -->
+  <edmx:Runtime>
+    <!-- SSDL content -->
+    <edmx:StorageModels>
+      <Schema xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl" Namespace="Model.Store" Alias="Self" Provider="System.Data.SqlClient" ProviderManifestToken="2005">
+        <EntityContainer Name="ModelTargetContainer" >
+        </EntityContainer>
+      </Schema>
+    </edmx:StorageModels>
+    <!-- CSDL content -->
+    <edmx:ConceptualModels>
+      <Schema xmlns="http://schemas.microsoft.com/ado/2009/11/edm" xmlns:cg="http://schemas.microsoft.com/ado/2006/04/codegeneration" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" Namespace="Model" Alias="Self" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" annotation:UseStrongSpatialTypes="false">
+        <EntityContainer Name="ModelContainer" annotation:LazyLoadingEnabled="true">
+          <EntitySet Name="ModuleSet" EntityType="Model.Module" />
+          <EntitySet Name="FormModuleSet" EntityType="Model.FormModule" />
+          <AssociationSet Name="ModuleFormModule" Association="Model.ModuleFormModule">
+            <End Role="Module" EntitySet="ModuleSet" />
+            <End Role="FormModule" EntitySet="FormModuleSet" />
+          </AssociationSet>
+          <EntitySet Name="FormsSet" EntityType="Model.Forms" />
+          <AssociationSet Name="FormsFormModule" Association="Model.FormsFormModule">
+            <End Role="Forms" EntitySet="FormsSet" />
+            <End Role="FormModule" EntitySet="FormModuleSet" />
+          </AssociationSet>
+          <EntitySet Name="FormRolPermissionSet" EntityType="Model.FormRolPermission" />
+          <EntitySet Name="RoleSet" EntityType="Model.Role" />
+          <EntitySet Name="PermissionsSet" EntityType="Model.Permissions" />
+          <AssociationSet Name="FormsFormRolPermission" Association="Model.FormsFormRolPermission">
+            <End Role="Forms" EntitySet="FormsSet" />
+            <End Role="FormRolPermission" EntitySet="FormRolPermissionSet" />
+          </AssociationSet>
+          <AssociationSet Name="RoleFormRolPermission" Association="Model.RoleFormRolPermission">
+            <End Role="Role" EntitySet="RoleSet" />
+            <End Role="FormRolPermission" EntitySet="FormRolPermissionSet" />
+          </AssociationSet>
+          <AssociationSet Name="PermissionsFormRolPermission" Association="Model.PermissionsFormRolPermission">
+            <End Role="Permissions" EntitySet="PermissionsSet" />
+            <End Role="FormRolPermission" EntitySet="FormRolPermissionSet" />
+          </AssociationSet>
+          <EntitySet Name="RolUserSet" EntityType="Model.RolUser" />
+          <EntitySet Name="UserSet" EntityType="Model.User" />
+          <AssociationSet Name="RoleRolUser" Association="Model.RoleRolUser">
+            <End Role="Role" EntitySet="RoleSet" />
+            <End Role="RolUser" EntitySet="RolUserSet" />
+          </AssociationSet>
+          <AssociationSet Name="UserRolUser" Association="Model.UserRolUser">
+            <End Role="User" EntitySet="UserSet" />
+            <End Role="RolUser" EntitySet="RolUserSet" />
+          </AssociationSet>
+          <EntitySet Name="PersonsSet" EntityType="Model.Persons" />
+          <AssociationSet Name="PersonsUser" Association="Model.PersonsUser">
+            <End Role="Persons" EntitySet="PersonsSet" />
+            <End Role="User" EntitySet="UserSet" />
+          </AssociationSet>
+          <EntitySet Name="ClientSet" EntityType="Model.Client" />
+          <AssociationSet Name="UserClient" Association="Model.UserClient">
+            <End Role="User" EntitySet="UserSet" />
+            <End Role="Client" EntitySet="ClientSet" />
+          </AssociationSet>
+          <EntitySet Name="BlackListSet" EntityType="Model.BlackList" />
+          <AssociationSet Name="ClientBlackList" Association="Model.ClientBlackList">
+            <End Role="Client" EntitySet="ClientSet" />
+            <End Role="BlackList" EntitySet="BlackListSet" />
+          </AssociationSet>
+          <EntitySet Name="VehicleSet" EntityType="Model.Vehicle" />
+          <AssociationSet Name="ClientVehicle" Association="Model.ClientVehicle">
+            <End Role="Client" EntitySet="ClientSet" />
+            <End Role="Vehicle" EntitySet="VehicleSet" />
+          </AssociationSet>
+          <EntitySet Name="MembersShipsVehicleSet" EntityType="Model.MembersShipsVehicle" />
+          <EntitySet Name="MemberShipsSet" EntityType="Model.MemberShips" />
+          <AssociationSet Name="MemberShipsMembersShipsVehicle" Association="Model.MemberShipsMembersShipsVehicle">
+            <End Role="MemberShips" EntitySet="MemberShipsSet" />
+            <End Role="MembersShipsVehicle" EntitySet="MembersShipsVehicleSet" />
+          </AssociationSet>
+          <AssociationSet Name="VehicleMembersShipsVehicle" Association="Model.VehicleMembersShipsVehicle">
+            <End Role="Vehicle" EntitySet="VehicleSet" />
+            <End Role="MembersShipsVehicle" EntitySet="MembersShipsVehicleSet" />
+          </AssociationSet>
+          <EntitySet Name="TypeVehicleSet" EntityType="Model.TypeVehicle" />
+          <EntitySet Name="RegisteredVehicleSet" EntityType="Model.RegisteredVehicle" />
+          <AssociationSet Name="VehicleRegisteredVehicle" Association="Model.VehicleRegisteredVehicle">
+            <End Role="Vehicle" EntitySet="VehicleSet" />
+            <End Role="RegisteredVehicle" EntitySet="RegisteredVehicleSet" />
+          </AssociationSet>
+          <EntitySet Name="VehicleHistorySet" EntityType="Model.VehicleHistory" />
+          <AssociationSet Name="RegisteredVehicleVehicleHistory" Association="Model.RegisteredVehicleVehicleHistory">
+            <End Role="RegisteredVehicle" EntitySet="RegisteredVehicleSet" />
+            <End Role="VehicleHistory" EntitySet="VehicleHistorySet" />
+          </AssociationSet>
+          <AssociationSet Name="TypeVehicleVehicleHistory" Association="Model.TypeVehicleVehicleHistory">
+            <End Role="TypeVehicle" EntitySet="TypeVehicleSet" />
+            <End Role="VehicleHistory" EntitySet="VehicleHistorySet" />
+          </AssociationSet>
+          <EntitySet Name="vehicleHistoryParkingRatesSet" EntityType="Model.vehicleHistoryParkingRates" />
+          <EntitySet Name="RatesSet" EntityType="Model.Rates" />
+          <EntitySet Name="TypeRatesSet" EntityType="Model.TypeRates" />
+          <AssociationSet Name="TypeRatesRates" Association="Model.TypeRatesRates">
+            <End Role="TypeRates" EntitySet="TypeRatesSet" />
+            <End Role="Rates" EntitySet="RatesSet" />
+          </AssociationSet>
+          <EntitySet Name="ParkingSet" EntityType="Model.Parking" />
+          <EntitySet Name="invoiceSet" EntityType="Model.invoice" />
+          <EntitySet Name="CamarasSet" EntityType="Model.Camaras" />
+          <AssociationSet Name="VehicleHistoryinvoice" Association="Model.VehicleHistoryinvoice">
+            <End Role="VehicleHistory" EntitySet="VehicleHistorySet" />
+            <End Role="invoice" EntitySet="invoiceSet" />
+          </AssociationSet>
+          <AssociationSet Name="VehicleHistoryvehicleHistoryParkingRates" Association="Model.VehicleHistoryvehicleHistoryParkingRates">
+            <End Role="VehicleHistory" EntitySet="VehicleHistorySet" />
+            <End Role="vehicleHistoryParkingRates" EntitySet="vehicleHistoryParkingRatesSet" />
+          </AssociationSet>
+          <AssociationSet Name="RatesvehicleHistoryParkingRates" Association="Model.RatesvehicleHistoryParkingRates">
+            <End Role="Rates" EntitySet="RatesSet" />
+            <End Role="vehicleHistoryParkingRates" EntitySet="vehicleHistoryParkingRatesSet" />
+          </AssociationSet>
+          <AssociationSet Name="ParkingvehicleHistoryParkingRates" Association="Model.ParkingvehicleHistoryParkingRates">
+            <End Role="Parking" EntitySet="ParkingSet" />
+            <End Role="vehicleHistoryParkingRates" EntitySet="vehicleHistoryParkingRatesSet" />
+          </AssociationSet>
+          <AssociationSet Name="CamarasParking" Association="Model.CamarasParking">
+            <End Role="Camaras" EntitySet="CamarasSet" />
+            <End Role="Parking" EntitySet="ParkingSet" />
+          </AssociationSet>
+        </EntityContainer>
+        <EntityType Name="Module">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Name" Type="String" Nullable="false" />
+          <NavigationProperty Name="FormModule" Relationship="Model.ModuleFormModule" FromRole="Module" ToRole="FormModule" />
+        </EntityType>
+        <EntityType Name="FormModule">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <NavigationProperty Name="Module" Relationship="Model.ModuleFormModule" FromRole="FormModule" ToRole="Module" />
+          <Property Name="ModuleId" Type="Int32" Nullable="false" />
+          <NavigationProperty Name="Forms" Relationship="Model.FormsFormModule" FromRole="FormModule" ToRole="Forms" />
+          <Property Name="FormsId" Type="Int32" Nullable="false" />
+        </EntityType>
+        <Association Name="ModuleFormModule">
+          <End Type="Model.Module" Role="Module" Multiplicity="1" />
+          <End Type="Model.FormModule" Role="FormModule" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Module">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="FormModule">
+              <PropertyRef Name="ModuleId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityType Name="Forms">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Name" Type="String" Nullable="false" />
+          <Property Name="Url" Type="String" Nullable="false" />
+          <NavigationProperty Name="FormModule" Relationship="Model.FormsFormModule" FromRole="Forms" ToRole="FormModule" />
+          <NavigationProperty Name="FormRolPermission" Relationship="Model.FormsFormRolPermission" FromRole="Forms" ToRole="FormRolPermission" />
+        </EntityType>
+        <Association Name="FormsFormModule">
+          <End Type="Model.Forms" Role="Forms" Multiplicity="1" />
+          <End Type="Model.FormModule" Role="FormModule" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Forms">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="FormModule">
+              <PropertyRef Name="FormsId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityType Name="FormRolPermission">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <NavigationProperty Name="Forms" Relationship="Model.FormsFormRolPermission" FromRole="FormRolPermission" ToRole="Forms" />
+          <Property Name="FormsId" Type="Int32" Nullable="false" />
+          <NavigationProperty Name="Role" Relationship="Model.RoleFormRolPermission" FromRole="FormRolPermission" ToRole="Role" />
+          <Property Name="RoleId" Type="Int32" Nullable="false" />
+          <NavigationProperty Name="Permissions" Relationship="Model.PermissionsFormRolPermission" FromRole="FormRolPermission" ToRole="Permissions" />
+          <Property Name="PermissionsId" Type="Int32" Nullable="false" />
+        </EntityType>
+        <EntityType Name="Role">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Name" Type="String" Nullable="false" />
+          <Property Name="Description" Type="String" Nullable="false" />
+          <NavigationProperty Name="FormRolPermission" Relationship="Model.RoleFormRolPermission" FromRole="Role" ToRole="FormRolPermission" />
+          <NavigationProperty Name="RolUser" Relationship="Model.RoleRolUser" FromRole="Role" ToRole="RolUser" />
+        </EntityType>
+        <EntityType Name="Permissions">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Name" Type="String" Nullable="false" />
+          <NavigationProperty Name="FormRolPermission" Relationship="Model.PermissionsFormRolPermission" FromRole="Permissions" ToRole="FormRolPermission" />
+        </EntityType>
+        <Association Name="FormsFormRolPermission">
+          <End Type="Model.Forms" Role="Forms" Multiplicity="1" />
+          <End Type="Model.FormRolPermission" Role="FormRolPermission" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Forms">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="FormRolPermission">
+              <PropertyRef Name="FormsId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="RoleFormRolPermission">
+          <End Type="Model.Role" Role="Role" Multiplicity="1" />
+          <End Type="Model.FormRolPermission" Role="FormRolPermission" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Role">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="FormRolPermission">
+              <PropertyRef Name="RoleId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="PermissionsFormRolPermission">
+          <End Type="Model.Permissions" Role="Permissions" Multiplicity="1" />
+          <End Type="Model.FormRolPermission" Role="FormRolPermission" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Permissions">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="FormRolPermission">
+              <PropertyRef Name="PermissionsId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityType Name="RolUser">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <NavigationProperty Name="Role" Relationship="Model.RoleRolUser" FromRole="RolUser" ToRole="Role" />
+          <Property Name="RoleId" Type="Int32" Nullable="false" />
+          <NavigationProperty Name="User" Relationship="Model.UserRolUser" FromRole="RolUser" ToRole="User" />
+          <Property Name="UserId" Type="Int32" Nullable="false" />
+        </EntityType>
+        <EntityType Name="User">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="UserName" Type="String" Nullable="false" />
+          <Property Name="Password" Type="String" Nullable="false" />
+          <NavigationProperty Name="RolUser" Relationship="Model.UserRolUser" FromRole="User" ToRole="RolUser" />
+          <NavigationProperty Name="Persons" Relationship="Model.PersonsUser" FromRole="User" ToRole="Persons" />
+          <NavigationProperty Name="Client" Relationship="Model.UserClient" FromRole="User" ToRole="Client" />
+        </EntityType>
+        <Association Name="RoleRolUser">
+          <End Type="Model.Role" Role="Role" Multiplicity="1" />
+          <End Type="Model.RolUser" Role="RolUser" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Role">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="RolUser">
+              <PropertyRef Name="RoleId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="UserRolUser">
+          <End Type="Model.User" Role="User" Multiplicity="1" />
+          <End Type="Model.RolUser" Role="RolUser" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="User">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="RolUser">
+              <PropertyRef Name="UserId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityType Name="Persons">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Name" Type="String" Nullable="false" />
+          <Property Name="Document" Type="String" Nullable="false" />
+          <Property Name="Phone" Type="String" Nullable="false" />
+          <Property Name="LastName" Type="String" Nullable="false" />
+          <Property Name="Email" Type="String" Nullable="false" />
+          <NavigationProperty Name="User" Relationship="Model.PersonsUser" FromRole="Persons" ToRole="User" />
+        </EntityType>
+        <Association Name="PersonsUser">
+          <End Type="Model.Persons" Role="Persons" Multiplicity="1" />
+          <End Type="Model.User" Role="User" Multiplicity="1" />
+        </Association>
+        <EntityType Name="Client">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Name" Type="String" Nullable="false" />
+          <NavigationProperty Name="User" Relationship="Model.UserClient" FromRole="Client" ToRole="User" />
+          <Property Name="UserId" Type="Int32" Nullable="false" />
+          <NavigationProperty Name="BlackList" Relationship="Model.ClientBlackList" FromRole="Client" ToRole="BlackList" />
+          <NavigationProperty Name="Vehicle" Relationship="Model.ClientVehicle" FromRole="Client" ToRole="Vehicle" />
+        </EntityType>
+        <Association Name="UserClient">
+          <End Type="Model.User" Role="User" Multiplicity="1" />
+          <End Type="Model.Client" Role="Client" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="User">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="Client">
+              <PropertyRef Name="UserId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityType Name="BlackList">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Reason" Type="String" Nullable="false" />
+          <Property Name="RestrictionDate" Type="String" Nullable="false" />
+          <NavigationProperty Name="Client" Relationship="Model.ClientBlackList" FromRole="BlackList" ToRole="Client" />
+        </EntityType>
+        <Association Name="ClientBlackList">
+          <End Type="Model.Client" Role="Client" Multiplicity="1" />
+          <End Type="Model.BlackList" Role="BlackList" Multiplicity="1" />
+        </Association>
+        <EntityType Name="Vehicle">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Plate" Type="String" Nullable="false" />
+          <Property Name="Color" Type="String" Nullable="false" />
+          <NavigationProperty Name="Client" Relationship="Model.ClientVehicle" FromRole="Vehicle" ToRole="Client" />
+          <Property Name="ClientId" Type="Int32" Nullable="false" />
+          <NavigationProperty Name="MembersShipsVehicle" Relationship="Model.VehicleMembersShipsVehicle" FromRole="Vehicle" ToRole="MembersShipsVehicle" />
+          <NavigationProperty Name="RegisteredVehicle" Relationship="Model.VehicleRegisteredVehicle" FromRole="Vehicle" ToRole="RegisteredVehicle" />
+        </EntityType>
+        <Association Name="ClientVehicle">
+          <End Type="Model.Client" Role="Client" Multiplicity="1" />
+          <End Type="Model.Vehicle" Role="Vehicle" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Client">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="Vehicle">
+              <PropertyRef Name="ClientId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityType Name="MembersShipsVehicle">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <NavigationProperty Name="MemberShips" Relationship="Model.MemberShipsMembersShipsVehicle" FromRole="MembersShipsVehicle" ToRole="MemberShips" />
+          <Property Name="MemberShipsId" Type="Int32" Nullable="false" />
+          <NavigationProperty Name="Vehicle" Relationship="Model.VehicleMembersShipsVehicle" FromRole="MembersShipsVehicle" ToRole="Vehicle" />
+          <Property Name="VehicleId" Type="Int32" Nullable="false" />
+        </EntityType>
+        <EntityType Name="MemberShips">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="MemberShipType" Type="String" Nullable="false" />
+          <Property Name="StartDate" Type="String" Nullable="false" />
+          <Property Name="EndDate" Type="String" Nullable="false" />
+          <Property Name="Start" Type="String" Nullable="false" />
+          <NavigationProperty Name="MembersShipsVehicle" Relationship="Model.MemberShipsMembersShipsVehicle" FromRole="MemberShips" ToRole="MembersShipsVehicle" />
+        </EntityType>
+        <Association Name="MemberShipsMembersShipsVehicle">
+          <End Type="Model.MemberShips" Role="MemberShips" Multiplicity="1" />
+          <End Type="Model.MembersShipsVehicle" Role="MembersShipsVehicle" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="MemberShips">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="MembersShipsVehicle">
+              <PropertyRef Name="MemberShipsId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="VehicleMembersShipsVehicle">
+          <End Type="Model.Vehicle" Role="Vehicle" Multiplicity="1" />
+          <End Type="Model.MembersShipsVehicle" Role="MembersShipsVehicle" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Vehicle">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="MembersShipsVehicle">
+              <PropertyRef Name="VehicleId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityType Name="TypeVehicle">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Name" Type="String" Nullable="false" />
+          <NavigationProperty Name="VehicleHistory" Relationship="Model.TypeVehicleVehicleHistory" FromRole="TypeVehicle" ToRole="VehicleHistory" />
+        </EntityType>
+        <EntityType Name="RegisteredVehicle">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="EntryDateTime" Type="String" Nullable="false" />
+          <Property Name="ExitDateTime" Type="String" Nullable="false" />
+          <NavigationProperty Name="Vehicle" Relationship="Model.VehicleRegisteredVehicle" FromRole="RegisteredVehicle" ToRole="Vehicle" />
+          <Property Name="VehicleId" Type="Int32" Nullable="false" />
+          <NavigationProperty Name="VehicleHistory" Relationship="Model.RegisteredVehicleVehicleHistory" FromRole="RegisteredVehicle" ToRole="VehicleHistory" />
+        </EntityType>
+        <Association Name="VehicleRegisteredVehicle">
+          <End Type="Model.Vehicle" Role="Vehicle" Multiplicity="1" />
+          <End Type="Model.RegisteredVehicle" Role="RegisteredVehicle" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Vehicle">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="RegisteredVehicle">
+              <PropertyRef Name="VehicleId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityType Name="VehicleHistory">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="TotalTime" Type="String" Nullable="false" />
+          <NavigationProperty Name="RegisteredVehicle" Relationship="Model.RegisteredVehicleVehicleHistory" FromRole="VehicleHistory" ToRole="RegisteredVehicle" />
+          <NavigationProperty Name="TypeVehicle" Relationship="Model.TypeVehicleVehicleHistory" FromRole="VehicleHistory" ToRole="TypeVehicle" />
+          <NavigationProperty Name="invoice" Relationship="Model.VehicleHistoryinvoice" FromRole="VehicleHistory" ToRole="invoice" />
+          <NavigationProperty Name="vehicleHistoryParkingRates" Relationship="Model.VehicleHistoryvehicleHistoryParkingRates" FromRole="VehicleHistory" ToRole="vehicleHistoryParkingRates" />
+        </EntityType>
+        <Association Name="RegisteredVehicleVehicleHistory">
+          <End Type="Model.RegisteredVehicle" Role="RegisteredVehicle" Multiplicity="1" />
+          <End Type="Model.VehicleHistory" Role="VehicleHistory" Multiplicity="1" />
+        </Association>
+        <Association Name="TypeVehicleVehicleHistory">
+          <End Type="Model.TypeVehicle" Role="TypeVehicle" Multiplicity="1" />
+          <End Type="Model.VehicleHistory" Role="VehicleHistory" Multiplicity="1" />
+        </Association>
+        <EntityType Name="vehicleHistoryParkingRates">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="HoursUsed" Type="String" Nullable="false" />
+          <Property Name="SubTotal" Type="String" Nullable="false" />
+          <NavigationProperty Name="VehicleHistory" Relationship="Model.VehicleHistoryvehicleHistoryParkingRates" FromRole="vehicleHistoryParkingRates" ToRole="VehicleHistory" />
+          <Property Name="VehicleHistoryId" Type="Int32" Nullable="false" />
+          <NavigationProperty Name="Rates" Relationship="Model.RatesvehicleHistoryParkingRates" FromRole="vehicleHistoryParkingRates" ToRole="Rates" />
+          <Property Name="RatesId" Type="Int32" Nullable="false" />
+          <NavigationProperty Name="Parking" Relationship="Model.ParkingvehicleHistoryParkingRates" FromRole="vehicleHistoryParkingRates" ToRole="Parking" />
+          <Property Name="ParkingId" Type="Int32" Nullable="false" />
+        </EntityType>
+        <EntityType Name="Rates">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Amount" Type="String" Nullable="false" />
+          <Property Name="StartDuration" Type="String" Nullable="false" />
+          <Property Name="EndDuration" Type="String" Nullable="false" />
+          <NavigationProperty Name="TypeRates" Relationship="Model.TypeRatesRates" FromRole="Rates" ToRole="TypeRates" />
+          <NavigationProperty Name="vehicleHistoryParkingRates" Relationship="Model.RatesvehicleHistoryParkingRates" FromRole="Rates" ToRole="vehicleHistoryParkingRates" />
+        </EntityType>
+        <EntityType Name="TypeRates">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Name" Type="String" Nullable="false" />
+          <Property Name="Price" Type="String" Nullable="false" />
+          <NavigationProperty Name="Rates" Relationship="Model.TypeRatesRates" FromRole="TypeRates" ToRole="Rates" />
+        </EntityType>
+        <Association Name="TypeRatesRates">
+          <End Type="Model.TypeRates" Role="TypeRates" Multiplicity="1" />
+          <End Type="Model.Rates" Role="Rates" Multiplicity="1" />
+        </Association>
+        <EntityType Name="Parking">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Name" Type="String" Nullable="false" />
+          <Property Name="Localtion" Type="String" Nullable="false" />
+          <Property Name="Ability" Type="String" Nullable="false" />
+          <NavigationProperty Name="vehicleHistoryParkingRates" Relationship="Model.ParkingvehicleHistoryParkingRates" FromRole="Parking" ToRole="vehicleHistoryParkingRates" />
+          <NavigationProperty Name="Camaras" Relationship="Model.CamarasParking" FromRole="Parking" ToRole="Camaras" />
+        </EntityType>
+        <EntityType Name="invoice">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="TotalAmount" Type="String" Nullable="false" />
+          <Property Name="PaymentStatus" Type="String" Nullable="false" />
+          <Property Name="PaymentDate" Type="String" Nullable="false" />
+          <NavigationProperty Name="VehicleHistory" Relationship="Model.VehicleHistoryinvoice" FromRole="invoice" ToRole="VehicleHistory" />
+          <Property Name="VehicleHistoryId" Type="Int32" Nullable="false" />
+        </EntityType>
+        <EntityType Name="Camaras">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="HighShutterSpeed" Type="String" Nullable="false" />
+          <Property Name="NightVisionInfrared" Type="String" Nullable="false" />
+          <Property Name="OptimizedAngleOfSision" Type="String" Nullable="false" />
+          <Property Name="HighResolution" Type="String" Nullable="false" />
+          <Property Name="InfraredLighting" Type="String" Nullable="false" />
+          <NavigationProperty Name="Parking" Relationship="Model.CamarasParking" FromRole="Camaras" ToRole="Parking" />
+        </EntityType>
+        <Association Name="VehicleHistoryinvoice">
+          <End Type="Model.VehicleHistory" Role="VehicleHistory" Multiplicity="1" />
+          <End Type="Model.invoice" Role="invoice" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="VehicleHistory">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="invoice">
+              <PropertyRef Name="VehicleHistoryId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="VehicleHistoryvehicleHistoryParkingRates">
+          <End Type="Model.VehicleHistory" Role="VehicleHistory" Multiplicity="1" />
+          <End Type="Model.vehicleHistoryParkingRates" Role="vehicleHistoryParkingRates" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="VehicleHistory">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="vehicleHistoryParkingRates">
+              <PropertyRef Name="VehicleHistoryId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="RatesvehicleHistoryParkingRates">
+          <End Type="Model.Rates" Role="Rates" Multiplicity="1" />
+          <End Type="Model.vehicleHistoryParkingRates" Role="vehicleHistoryParkingRates" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Rates">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="vehicleHistoryParkingRates">
+              <PropertyRef Name="RatesId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="ParkingvehicleHistoryParkingRates">
+          <End Type="Model.Parking" Role="Parking" Multiplicity="1" />
+          <End Type="Model.vehicleHistoryParkingRates" Role="vehicleHistoryParkingRates" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Parking">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="vehicleHistoryParkingRates">
+              <PropertyRef Name="ParkingId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="CamarasParking">
+          <End Type="Model.Camaras" Role="Camaras" Multiplicity="*" />
+          <End Type="Model.Parking" Role="Parking" Multiplicity="1" />
+        </Association>
+      </Schema>
+    </edmx:ConceptualModels>
+    <!-- C-S mapping content -->
+    <edmx:Mappings>
+      <Mapping xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs" Space="C-S">
+        <Alias Key="Model" Value="Model" />
+        <Alias Key="Target" Value="Model.Store" />
+        <EntityContainerMapping CdmEntityContainer="ModelContainer" StorageEntityContainer="ModelTargetContainer">
+        </EntityContainerMapping>
+      </Mapping>
+    </edmx:Mappings>
+  </edmx:Runtime>
+  <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <edmx:Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <edmx:Connection>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="MetadataArtifactProcessing" Value="EmbedInOutputAssembly" />
+      </DesignerInfoPropertySet>
+    </edmx:Connection>
+    <edmx:Options>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="ValidateOnBuild" Value="true" />
+        <DesignerProperty Name="EnablePluralization" Value="False" />
+        <DesignerProperty Name="CodeGenerationStrategy" Value="Ninguno" />
+      </DesignerInfoPropertySet>
+    </edmx:Options>
+    <!-- Diagram content (shape and connector positions) -->
+    <edmx:Diagrams>
+    </edmx:Diagrams>
+  </edmx:Designer>
+</edmx:Edmx>

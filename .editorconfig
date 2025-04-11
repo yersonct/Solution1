@@ -1,0 +1,7 @@
+﻿[*.cs]
+
+# IDE0005: El uso de la directiva no es necesario.
+dotnet_diagnostic.IDE0005.severity = suggestion
+
+# IDE0290: Usar constructor principal
+dotnet_diagnostic.IDE0290.severity = suggestion

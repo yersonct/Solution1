@@ -8,10 +8,10 @@ namespace Entity.DTOs
 {
     public class RolUserDTO
     {
-        public int Id { get; set; }
-        public int RolId { get; set; }
+        public int id { get; set; }
+        public int id_rol { get; set; }
 
-        public int UserId { get; set; }
+        public int id_user { get; set; }
         public String RolName { get; set; }
         public String UserName { get; set; }
     }

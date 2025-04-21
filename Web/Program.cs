@@ -1,10 +1,15 @@
 ﻿using Business;
+using Business.Interfaces;
+using Business.Services;
 using Data;
+using Data.Interfaces;
+using Data.Repository;
 using Entity.Context;
 using Entity.DTOs;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Npgsql;
+using Repository;
 using System.Data;
 
 internal class Program
@@ -15,78 +20,87 @@ internal class Program
 
         // 🔹 Registrar el DbContext con PostgreSQL (esto maneja la conexión correctamente)
         builder.Services.AddDbContext<ApplicationDbContext>(options =>
-            options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+           options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
         // 🔹 Registrar servicios de datos y negocios
-        builder.Services.AddScoped<FormData>();
-        builder.Services.AddScoped<FormBusiness>();
+        builder.Services.AddScoped<IFormService, FormService>();
+        builder.Services.AddScoped<IFormRepository, FormRepository>();
 
-        builder.Services.AddScoped<ParkingData>();
-        builder.Services.AddScoped<ParkingBusiness>();
-
-        builder.Services.AddScoped<PersonData>();
-        builder.Services.AddScoped<PersonBusiness>();
-
-        builder.Services.AddScoped<ModuleData>();
-        builder.Services.AddScoped<ModuleBusiness>();
-
-        builder.Services.AddScoped<PermissionData>();
-        builder.Services.AddScoped<PermissionBusiness>();
        
-        builder.Services.AddScoped<RolData>();
-        builder.Services.AddScoped<RolBusiness>();
+        builder.Services.AddScoped<IParkingService, ParkingService>();
+        builder.Services.AddScoped<IParkingRepository, ParkingRepository>();
 
-        builder.Services.AddScoped<RolUserData>();
-        builder.Services.AddScoped<RolUserBusiness>();
+        builder.Services.AddScoped<IPersonService, PersonService>();
+        builder.Services.AddScoped<IPersonRepository, PersonRepository>();
 
-        builder.Services.AddScoped<RatesData>();
-        builder.Services.AddScoped<RatesBusiness>(); 
-        //builder.Services.AddScoped<RatesDTO>();
+        builder.Services.AddScoped<IModuleService, ModuleService>();
+        builder.Services.AddScoped<IModuleRepository, ModuleRepository>();
+        builder.Services.AddScoped<IPermissionService, PermissionService>();
+        builder.Services.AddScoped<IPermissionRepository, PermissionRepository>();
 
-        builder.Services.AddScoped<TypeRatesData>();
-        builder.Services.AddScoped<TypeRatesBusiness>();  
+        builder.Services.AddScoped<IRolService, RolService>();
+        builder.Services.AddScoped<IRolRepository, RolRepository>();
 
-        builder.Services.AddScoped<CamaraData>();
-        builder.Services.AddScoped<CamaraBusiness>();
+        builder.Services.AddScoped<IRolUserService, RolUserService>();
+        builder.Services.AddScoped<IRolUserRepository, RolUserRepository>();
 
-        builder.Services.AddScoped<MembershipsData>();
-        builder.Services.AddScoped<MembershipsBusiness>();
+        builder.Services.AddScoped<IRatesService, RatesService>();
+        builder.Services.AddScoped<IRatesRepository, RatesRepository>();
+    
 
-        builder.Services.AddScoped<FormRolPermissionBusiness>();
-        builder.Services.AddScoped<FormRolPermissionData>();
+        builder.Services.AddScoped<ITypeRatesService, TypeRatesService>();
+        builder.Services.AddScoped<ITypeRatesRepository, TypeRatesRepository>();
 
-        builder.Services.AddScoped<FormModuleData>();
-        builder.Services.AddScoped<FormModuleBusiness>();
+        builder.Services.AddScoped<ICamaraService, CamaraService>();
+        builder.Services.AddScoped<ICamaraRepository, CamaraRepository>();
 
-        builder.Services.AddScoped<UserData>();
-        builder.Services.AddScoped<UserBusiness>();
-        builder.Services.AddScoped<ClientData>();
-        builder.Services.AddScoped<ClientBusiness>();
+  
+        builder.Services.AddScoped<IMembershipsService, MembershipsService>();
+        builder.Services.AddScoped<IMembershipsRepository, MembershipsRepository>();
+        builder.Services.AddScoped<IFormRolPermissionService, FormRolPermissionService>();
+        builder.Services.AddScoped<IFormRolPermissionRepository, FormRolPermissionRepository>();
 
-        builder.Services.AddScoped<BlackListData>();
-        builder.Services.AddScoped<BlackListBusiness>();
 
-        builder.Services.AddScoped<VehicleData>();
-        builder.Services.AddScoped<VehicleBusiness>();
+        builder.Services.AddScoped<IFormModuleService, FormModuleService>();
+        builder.Services.AddScoped<IFormModuleRepository, FormModuleRepository>();
 
-        builder.Services.AddScoped<RegisteredVehicleData>();
-        builder.Services.AddScoped<RegisteredVehicleBusiness>();
+        builder.Services.AddScoped<IUserService, UserService>();
+        builder.Services.AddScoped<IUserRepository, UserRepository>();
+        builder.Services.AddScoped<IClientService, ClientService>();
+        builder.Services.AddScoped<IClientRepository, ClientRepository>();
 
-        builder.Services.AddScoped<MembershipsVehicleData>();
-        builder.Services.AddScoped<MembershipsVehicleBusiness>();
+        builder.Services.AddScoped<IBlackListService, BlackListService>();
+        builder.Services.AddScoped<IBlacklistRepository, BlacklistRepository>();
 
-        builder.Services.AddScoped<TypeVehicleData>();
-        builder.Services.AddScoped<TypeVehicleBusiness>();
-        builder.Services.AddScoped<VehicleHistoryData>();
-        builder.Services.AddScoped<VehicleHistoryBusiness>();
 
-        builder.Services.AddScoped<VehicleHistoryParkingRatesData>();
-        builder.Services.AddScoped<VehicleHistoryParkingRatesBusiness>();
+        builder.Services.AddScoped<IVehicleService, VehicleService>();
+        builder.Services.AddScoped<IVehicleRepository, VehicleRepository>();
+        builder.Services.AddScoped<IRegisteredVehicleService, RegisteredVehicleService>();
+        builder.Services.AddScoped<IRegisteredVehicleRepository, RegisteredVehicleRepository>();
+        
+        builder.Services.AddScoped<IMembershipsVehicleService, MembershipsVehicleService>();
+        builder.Services.AddScoped<IMembershipsVehicleRepository, MembershipsVehicleRepository>();
+     
+        builder.Services.AddScoped<ITypeVehicleService, TypeVehicleService>();
+        builder.Services.AddScoped<ITypeVehicleRepository, TypeVehicleRepository>();
 
-        builder.Services.AddScoped<InvoiceData>();
-        builder.Services.AddScoped<InvoiceBusiness>();
+        builder.Services.AddScoped<IVehicleHistoryService, VehicleHistoryService>();
+        builder.Services.AddScoped<IVehicleHistoryRepository, VehicleHistoryRepository>();
+
+
+        builder.Services.AddScoped<IVehicleHistoryParkingRatesService, VehicleHistoryParkingRatesService>();
+        builder.Services.AddScoped<IVehicleHistoryParkingRatesRepository, VehicleHistoryParkingRatesRepository>();
+
+
+        builder.Services.AddScoped<IInvoiceService, InvoiceService>();
+        builder.Services.AddScoped<IInvoiceRepository, InvoiceRepository>();
+
         // 🔹 Agregar servicios de controladores y documentación Swagger
-        builder.Services.AddControllers();
+        builder.Services.AddControllers()
+           .AddJsonOptions(options =>
+           {
+               options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.Preserve;
+           });
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
 
@@ -98,7 +112,7 @@ internal class Program
         });
 
         // 🔹 Configurar logging
-        builder.Logging.AddConsole();
+        builder.Logging.AddConsole();   
 
         // 🔹 Construir la aplicación
         var app = builder.Build();

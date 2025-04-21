@@ -1,151 +1,117 @@
-﻿using Business;
-using Entity.DTOs;
-using Dapper;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
+﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Utilities.Exceptions;
+using Microsoft.AspNetCore.Mvc;
+using Business.Interfaces;
+using Entity.Model;
+using Entity.DTOs; // Asegúrate de tener el namespace de tus DTOs
+using System.Linq;
 
-namespace Web.Controllers
+namespace API.Controllers
 {
-    [Route("api/[controller]")]
     [ApiController]
-    [Produces("application/json")]
-    public class RolController : ControllerBase
+    [Route("api/[controller]")]
+    public class RolesController : ControllerBase
     {
-        private readonly RolBusiness _RolBusiness;
-        private readonly ILogger<RolController> _logger;
+        private readonly IRolService _rolService;
 
-        public RolController(RolBusiness RolBusiness, ILogger<RolController> logger)
+        public RolesController(IRolService rolService)
         {
-            _RolBusiness = RolBusiness;
-            _logger = logger;
+            _rolService = rolService ?? throw new ArgumentNullException(nameof(rolService));
         }
 
         [HttpGet]
-        [ProducesResponseType(typeof(IEnumerable<RolDTO>), 200)]
-        [ProducesResponseType(500)]
-        public async Task<IActionResult> GetAllRols()
+        public async Task<ActionResult<IEnumerable<RolDTO>>> GetAllRoles()
         {
-            try
+            var roles = await _rolService.GetAllRolesAsync();
+            var rolDtos = roles.Select(r => new RolDTO
             {
-                var Rols = await _RolBusiness.GetAllRolsAsync();
-                return Ok(Rols);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error al obtener los Rolas");
-                return StatusCode(500, new { message = ex.Message });
-            }
+                id = r.id,
+                Name = r.Name,
+                Description = r.Description,
+                Active = r.Active
+            }).ToList();
+            return Ok(rolDtos);
         }
 
         [HttpGet("{id}")]
-        [ProducesResponseType(typeof(RolDTO), 200)]
-        [ProducesResponseType(400)]
-        [ProducesResponseType(404)]
-        [ProducesResponseType(500)]
-        public async Task<IActionResult> GetRolById(int id)
+        public async Task<ActionResult<RolDTO>> GetRolById(int id)
         {
-            try
+            var rol = await _rolService.GetRolByIdAsync(id);
+            if (rol == null)
             {
-                var Rol = await _RolBusiness.GetRolByIdAsync(id);
-                return Ok(Rol);
+                return NotFound();
             }
-            catch (ValidationException ex)
+
+            var rolDto = new RolDTO
             {
-                _logger.LogWarning(ex, "Validación fallida para usuario con ID: {RolId}", id);
-                return BadRequest(new { message = ex.Message });
-            }
-            catch (EntityNotFoundException ex)
-            {
-                _logger.LogInformation(ex, "Usuario no encontrado con ID: {RolId}", id);
-                return NotFound(new { message = ex.Message });
-            }
-            catch (ExternalServiceException ex)
-            {
-                _logger.LogError(ex, "Error al obtener el usuario con ID: {RolId}", id);
-                return StatusCode(500, new { message = ex.Message });
-            }
+                id = rol.id,
+                Name = rol.Name,
+                Description = rol.Description,
+                Active = rol.Active
+            };
+            return Ok(rolDto);
         }
 
         [HttpPost]
-        [ProducesResponseType(typeof(RolDTO), 201)]
-        [ProducesResponseType(400)]
-        [ProducesResponseType(500)]
-        public async Task<IActionResult> CreateRolAsync([FromBody] RolDTO RolDTO)
+        public async Task<ActionResult<Rol>> CreateRol([FromBody] RolDTO rolDto)
         {
-            try
+            if (!ModelState.IsValid)
             {
-                var createdRol = await _RolBusiness.CreateRolAsync(RolDTO);
-                return CreatedAtAction(nameof(GetRolById), new { id = createdRol.Id }, createdRol);
+                return BadRequest(ModelState);
             }
-            catch (ValidationException ex)
+
+            var rol = new Rol
             {
-                _logger.LogWarning(ex, "Validación fallida al crear el Rolas");
-                return BadRequest(new { message = ex.Message });
-            }
-            catch (ExternalServiceException ex)
-            {
-                _logger.LogError(ex, "Error al crear el Rolas");
-                return StatusCode(500, new { message = ex.Message });
-            }
+                Name = rolDto.Name,
+                Description = rolDto.Description,
+                Active = rolDto.Active
+            };
+
+            var createdRol = await _rolService.CreateRolAsync(rol);
+            return CreatedAtAction(nameof(GetRolById), new { id = createdRol.id }, createdRol);
         }
 
         [HttpPut("{id}")]
-        [ProducesResponseType(typeof(RolDTO), 200)]
-        [ProducesResponseType(400)]
-        [ProducesResponseType(404)]
-        [ProducesResponseType(500)]
-        public async Task<IActionResult> UpdateRolAsync(int id, [FromBody] RolDTO RolDTO)
+        public async Task<IActionResult> UpdateRol(int id, [FromBody] RolDTO rolDto)
         {
-            if (id != RolDTO.Id)
+            if (id != rolDto.id)
             {
-                return BadRequest(new { message = "El ID de la ruta no coincide con el ID del objeto." });
+                return BadRequest("El ID del rol no coincide con el ID de la ruta.");
             }
-            try
-            {
 
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
 
-                var updatedRol = await _RolBusiness.UpdateRolAsync(RolDTO);
-                return Ok(updatedRol);
-            }
-            catch (ValidationException ex)
+            var existingRol = await _rolService.GetRolByIdAsync(id);
+            if (existingRol == null)
             {
-                _logger.LogWarning(ex, "Validación fallida al actualizar el Rolas con ID: {RolId}", id);
-                return BadRequest(new { message = ex.Message });
+                return NotFound();
             }
-            catch (EntityNotFoundException ex)
+
+            existingRol.Name = rolDto.Name;
+            existingRol.Description = rolDto.Description;
+            existingRol.Active = rolDto.Active;
+
+            var result = await _rolService.UpdateRolAsync(existingRol);
+            if (!result)
             {
-                _logger.LogInformation(ex, "Rolas no encontrado con ID: {RolId}", id);
-                return NotFound(new { message = ex.Message });
+                return NotFound();
             }
-            catch (ExternalServiceException ex)
-            {
-                _logger.LogError(ex, "Error al actualizar el usuario con ID: {RolId}", id);
-                return StatusCode(500, new { message = ex.Message });
-            }
+            return NoContent();
         }
 
         [HttpDelete("{id}")]
-        [ProducesResponseType(200)]
-        [ProducesResponseType(404)]
-        [ProducesResponseType(500)]
-        public async Task<IActionResult> DeleteRolAsync(int id)
+        public async Task<IActionResult> DeleteRol(int id)
         {
-            try
+            var result = await _rolService.DeleteRolAsync(id);
+            if (!result)
             {
-                var deleted = await _RolBusiness.DeleteRolAsync(id);
-                if (!deleted)
-                    return NotFound(new { message = "Rolas no encontrado o ya eliminado" });
-
-                return Ok(new { message = "Rolas eliminado exitosamente" });
+                return NotFound();
             }
-            catch (ExternalServiceException ex)
-            {
-                _logger.LogError(ex, "Error al eliminar el Rolas con ID: {UserId}", id);
-                return StatusCode(500, new { message = ex.Message });
-            }
+            return NoContent();
         }
     }
 }

@@ -1,148 +1,83 @@
-﻿using Business;
-using Entity.DTOs;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
+﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Utilities.Exceptions;
+using Microsoft.AspNetCore.Mvc;
+using Business.Interfaces;
+using Entity.Model;
 
-namespace Web.Controllers
+namespace API.Controllers
 {
-    [Route("api/[controller]")]
     [ApiController]
-    [Produces("application/json")]
-    public class TypeVehicleController : ControllerBase
+    [Route("api/[controller]")]
+    public class TypeVehiclesController : ControllerBase
     {
-        private readonly TypeVehicleBusiness _typeVehicleBusiness;
-        private readonly ILogger<TypeVehicleController> _logger;
+        private readonly ITypeVehicleService _typeVehicleService;
 
-        public TypeVehicleController(TypeVehicleBusiness typeVehicleBusiness, ILogger<TypeVehicleController> logger)
+        public TypeVehiclesController(ITypeVehicleService typeVehicleService)
         {
-            _typeVehicleBusiness = typeVehicleBusiness ?? throw new ArgumentNullException(nameof(typeVehicleBusiness));
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _typeVehicleService = typeVehicleService ?? throw new ArgumentNullException(nameof(typeVehicleService));
         }
 
         [HttpGet]
-        [ProducesResponseType(typeof(IEnumerable<TypeVehicleDTO>), 200)]
-        [ProducesResponseType(500)]
-        public async Task<IActionResult> GetAllTypeVehicles()
+        public async Task<ActionResult<IEnumerable<TypeVehicle>>> GetAllTypeVehicles()
         {
-            try
-            {
-                var typeVehicles = await _typeVehicleBusiness.GetAllTypeVehiclesAsync();
-                return Ok(typeVehicles);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error al obtener los TypeVehicles");
-                return StatusCode(500, new { message = ex.Message });
-            }
+            var typeVehicles = await _typeVehicleService.GetAllTypeVehiclesAsync();
+            return Ok(typeVehicles);
         }
 
         [HttpGet("{id}")]
-        [ProducesResponseType(typeof(TypeVehicleDTO), 200)]
-        [ProducesResponseType(400)]
-        [ProducesResponseType(404)]
-        [ProducesResponseType(500)]
-        public async Task<IActionResult> GetTypeVehicleById(int id)
+        public async Task<ActionResult<TypeVehicle>> GetTypeVehicleById(int id)
         {
-            try
+            var typeVehicle = await _typeVehicleService.GetTypeVehicleByIdAsync(id);
+            if (typeVehicle == null)
             {
-                var typeVehicle = await _typeVehicleBusiness.GetTypeVehicleByIdAsync(id);
-                return Ok(typeVehicle);
+                return NotFound();
             }
-            catch (ValidationException ex)
-            {
-                _logger.LogWarning(ex, "Validación fallida para TypeVehicle con ID: {TypeVehicleId}", id);
-                return BadRequest(new { message = ex.Message });
-            }
-            catch (EntityNotFoundException ex)
-            {
-                _logger.LogInformation(ex, "TypeVehicle no encontrado con ID: {TypeVehicleId}", id);
-                return NotFound(new { message = ex.Message });
-            }
-            catch (ExternalServiceException ex)
-            {
-                _logger.LogError(ex, "Error al obtener TypeVehicle con ID: {TypeVehicleId}", id);
-                return StatusCode(500, new { message = ex.Message });
-            }
+            return Ok(typeVehicle);
         }
 
         [HttpPost]
-        [ProducesResponseType(typeof(TypeVehicleDTO), 201)]
-        [ProducesResponseType(400)]
-        [ProducesResponseType(500)]
-        public async Task<IActionResult> CreateTypeVehicleAsync([FromBody] TypeVehicleDTO typeVehicleDTO)
+        public async Task<ActionResult<TypeVehicle>> CreateTypeVehicle([FromBody] TypeVehicle typeVehicle)
         {
-            try
+            if (!ModelState.IsValid)
             {
-                var createdTypeVehicle = await _typeVehicleBusiness.CreateTypeVehicleAsync(typeVehicleDTO);
-                return CreatedAtAction(nameof(GetTypeVehicleById), new { id = createdTypeVehicle.id }, createdTypeVehicle);
+                return BadRequest(ModelState);
             }
-            catch (ValidationException ex)
-            {
-                _logger.LogWarning(ex, "Validación fallida al crear el TypeVehicle");
-                return BadRequest(new { message = ex.Message });
-            }
-            catch (ExternalServiceException ex)
-            {
-                _logger.LogError(ex, "Error al crear el TypeVehicle");
-                return StatusCode(500, new { message = ex.Message });
-            }
+
+            var createdTypeVehicle = await _typeVehicleService.CreateTypeVehicleAsync(typeVehicle);
+            return CreatedAtAction(nameof(GetTypeVehicleById), new { id = createdTypeVehicle.id }, createdTypeVehicle);
         }
 
         [HttpPut("{id}")]
-        [ProducesResponseType(typeof(TypeVehicleDTO), 200)]
-        [ProducesResponseType(400)]
-        [ProducesResponseType(404)]
-        [ProducesResponseType(500)]
-        public async Task<IActionResult> UpdateTypeVehicleAsync(int id, [FromBody] TypeVehicleDTO typeVehicleDTO)
+        public async Task<IActionResult> UpdateTypeVehicle(int id, [FromBody] TypeVehicle typeVehicle)
         {
-            if (id != typeVehicleDTO.id)
+            if (id != typeVehicle.id)
             {
-                return BadRequest(new { message = "El ID de la ruta no coincide con el ID del objeto." });
+                return BadRequest("El ID del tipo de vehículo no coincide con el ID de la ruta.");
             }
-            try
+
+            if (!ModelState.IsValid)
             {
-                var updatedTypeVehicle = await _typeVehicleBusiness.UpdateTypeVehicleAsync(typeVehicleDTO);
-                return Ok(updatedTypeVehicle);
+                return BadRequest(ModelState);
             }
-            catch (ValidationException ex)
+
+            var result = await _typeVehicleService.UpdateTypeVehicleAsync(typeVehicle);
+            if (!result)
             {
-                _logger.LogWarning(ex, "Validación fallida al actualizar el TypeVehicle con ID: {TypeVehicleId}", id);
-                return BadRequest(new { message = ex.Message });
+                return NotFound();
             }
-            catch (EntityNotFoundException ex)
-            {
-                _logger.LogInformation(ex, "TypeVehicle no encontrado con ID: {TypeVehicleId}", id);
-                return NotFound(new { message = ex.Message });
-            }
-            catch (ExternalServiceException ex)
-            {
-                _logger.LogError(ex, "Error al actualizar el TypeVehicle con ID: {TypeVehicleId}", id);
-                return StatusCode(500, new { message = ex.Message });
-            }
+            return NoContent();
         }
 
         [HttpDelete("{id}")]
-        [ProducesResponseType(200)]
-        [ProducesResponseType(404)]
-        [ProducesResponseType(500)]
-        public async Task<IActionResult> DeleteTypeVehicleAsync(int id)
+        public async Task<IActionResult> DeleteTypeVehicle(int id)
         {
-            try
+            var result = await _typeVehicleService.DeleteTypeVehicleAsync(id);
+            if (!result)
             {
-                var deleted = await _typeVehicleBusiness.DeleteTypeVehicleAsync(id);
-                if (!deleted)
-                    return NotFound(new { message = "TypeVehicle no encontrado o ya eliminado" });
-
-                return Ok(new { message = "TypeVehicle eliminado exitosamente" });
+                return NotFound();
             }
-            catch (ExternalServiceException ex)
-            {
-                _logger.LogError(ex, "Error al eliminar el TypeVehicle con ID: {TypeVehicleId}", id);
-                return StatusCode(500, new { message = ex.Message });
-            }
+            return NoContent();
         }
     }
 }

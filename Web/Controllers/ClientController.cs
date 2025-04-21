@@ -1,149 +1,84 @@
-﻿using Business;
-using Entity.DTOs;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
-using System;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
-using Utilities.Exceptions;
+using Microsoft.AspNetCore.Mvc;
+using Business.Interfaces;
+using Entity.Model;
+using Business;
 
-namespace Api.Controllers
+namespace API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class ClientController : ControllerBase
+    public class ClientsController : ControllerBase
     {
-        private readonly ClientBusiness _clientBusiness;
-        private readonly ILogger<ClientController> _logger;
+        private readonly IClientService _clientBusiness;
 
-        public ClientController(ClientBusiness clientBusiness, ILogger<ClientController> logger)
+        public ClientsController(IClientService clientBusiness)
         {
-            _clientBusiness = clientBusiness;
-            _logger = logger;
+            _clientBusiness = clientBusiness ?? throw new ArgumentNullException(nameof(clientBusiness));
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAll()
+        public async Task<ActionResult<IEnumerable<Client>>> GetAllClients()
         {
-            try
-            {
-                var clients = await _clientBusiness.GetAllAsync();
-                return Ok(clients);
-            }
-            catch (InvalidOperationException ex)
-            {
-                _logger.LogError(ex, "Error transitorio al obtener clientes.");
-                return StatusCode(500, "Error de conexión a la base de datos.");
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error inesperado al obtener clientes.");
-                return StatusCode(500, "Ocurrió un error inesperado.");
-            }
+            var clients = await _clientBusiness.GetAllClientsAsync();
+            return Ok(clients);
         }
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetById(int id)
+        public async Task<ActionResult<Client>> GetClientById(int id)
         {
-            try
+            var client = await _clientBusiness.GetClientByIdAsync(id);
+            if (client == null)
             {
-                var client = await _clientBusiness.GetByIdAsync(id);
-                return Ok(client);
+                return NotFound();
             }
-            catch (EntityNotFoundException ex)
-            {
-                _logger.LogWarning(ex.Message);
-                return NotFound(ex.Message);
-            }
-            catch (InvalidOperationException ex)
-            {
-                _logger.LogError(ex, "Error transitorio al obtener cliente por ID.");
-                return StatusCode(500, "Error de conexión a la base de datos.");
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error inesperado al obtener cliente por ID.");
-                return StatusCode(500, "Ocurrió un error inesperado.");
-            }
+            return Ok(client);
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] ClientCreateDTO dto)
+        public async Task<ActionResult<Client>> CreateClient([FromBody] Client client)
         {
-            try
+            if (!ModelState.IsValid)
             {
-                var created = await _clientBusiness.CreateAsync(dto);
-                return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
+                return BadRequest(ModelState);
             }
-            catch (ValidationException ex)
-            {
-                _logger.LogWarning(ex.Message);
-                return BadRequest(ex.Message);
-            }
-            catch (InvalidOperationException ex)
-            {
-                _logger.LogError(ex, "Error transitorio al crear cliente.");
-                return StatusCode(500, "Error de conexión a la base de datos.");
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error inesperado al crear cliente.");
-                return StatusCode(500, "Ocurrió un error inesperado.");
-            }
+
+            var createdClient = await _clientBusiness.CreateClientAsync(client);
+            return CreatedAtAction(nameof(GetClientById), new { id = createdClient.id }, createdClient);
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, [FromBody] ClientCreateDTO dto)
+        public async Task<IActionResult> UpdateClient(int id, [FromBody] Client client)
         {
-            try
+            if (id != client.id)
             {
-                var result = await _clientBusiness.UpdateAsync(id, dto);
-                return result ? NoContent() : StatusCode(500, "No se pudo actualizar el cliente.");
+                return BadRequest("El ID del cliente no coincide con el ID de la ruta.");
             }
-            catch (EntityNotFoundException ex)
+
+            if (!ModelState.IsValid)
             {
-                _logger.LogWarning(ex.Message);
-                return NotFound(ex.Message);
+                return BadRequest(ModelState);
             }
-            catch (ValidationException ex)
+
+            var result = await _clientBusiness.UpdateClientAsync(client);
+            if (!result)
             {
-                _logger.LogWarning(ex.Message);
-                return BadRequest(ex.Message);
+                return NotFound();
             }
-            catch (InvalidOperationException ex)
-            {
-                _logger.LogError(ex, "Error transitorio al actualizar cliente.");
-                return StatusCode(500, "Error de conexión a la base de datos.");
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error inesperado al actualizar cliente.");
-                return StatusCode(500, "Ocurrió un error inesperado.");
-            }
+            return NoContent();
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(int id)
+        public async Task<IActionResult> DeleteClient(int id)
         {
-            try
+            var result = await _clientBusiness.DeleteClientAsync(id);
+            if (!result)
             {
-                var result = await _clientBusiness.DeleteAsync(id);
-                return result ? NoContent() : StatusCode(500, "No se pudo eliminar el cliente.");
+                return NotFound();
             }
-            catch (EntityNotFoundException ex)
-            {
-                _logger.LogWarning(ex.Message);
-                return NotFound(ex.Message);
-            }
-            catch (InvalidOperationException ex)
-            {
-                _logger.LogError(ex, "Error transitorio al eliminar cliente.");
-                return StatusCode(500, "Error de conexión a la base de datos.");
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error inesperado al eliminar cliente.");
-                return StatusCode(500, "Ocurrió un error inesperado.");
-            }
+            return NoContent();
         }
     }
 }

@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 namespace Entity.DTOs
 {
-    internal class RolUserCreateDTO
+    public class RolUserCreateDTO
     {
-        public int RoleId { get; set; }
-        public int UserId { get; set; }
+        public int id_rol { get; set; }
+        public int id_user { get; set; }
     }
 }

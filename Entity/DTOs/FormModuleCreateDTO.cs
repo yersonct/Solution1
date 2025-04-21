@@ -8,7 +8,7 @@ namespace Entity.DTOs
 {
     public class FormModuleCreateDTO
     {
-        public int FormId { get; set; }
-        public int ModuleId { get; set; }
+        public int id_forms { get; set; }
+        public int id_module { get; set; }
     }
 }

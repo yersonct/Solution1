@@ -12,10 +12,10 @@ namespace Entity.DTOs
     public bool nightvisioninfrared { get; set; }
     public bool highresolution { get; set; }
     public bool infraredlighting { get; set; }
-    public string name { get; set; }
+    public string? name { get; set; } = null;
     public bool optimizedangleofvision { get; set; }
     public bool highshutterspeed { get; set; }
-}
+    }
 
 
 }

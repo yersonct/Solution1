@@ -1,4 +1,5 @@
 ﻿using Business;
+using Business.Interfaces;
 using Entity.DTOs;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -9,143 +10,78 @@ using Utilities.Exceptions;
 
 namespace Web.Controllers
 {
-    [Route("api/[controller]")]
     [ApiController]
-    [Produces("application/json")]
+    [Route("api/[controller]")]
     public class BlackListController : ControllerBase
     {
-        private readonly BlackListBusiness _blackListBusiness;
-        private readonly ILogger<BlackListController> _logger;
+        private readonly IBlackListService _service;
 
-        public BlackListController(BlackListBusiness blackListBusiness, ILogger<BlackListController> logger)
+        public BlackListController(IBlackListService service)
         {
-            _blackListBusiness = blackListBusiness;
-            _logger = logger;
+            _service = service;
         }
 
         [HttpGet]
-        [ProducesResponseType(typeof(IEnumerable<BlackListDTO>), 200)]
-        [ProducesResponseType(500)]
-        public async Task<IActionResult> GetAllAsync()
+        public async Task<IActionResult> GetAll()
+        {
+            var result = await _service.GetAllAsync();
+            return Ok(result);
+        }
+
+        //[HttpGet("with-client")]
+        //public async Task<IActionResult> GetAllWithClient()
+        //{
+        //    var result = await _service.GetAllWithClientAsync();
+        //    return Ok(result);
+        //}
+
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetById(int id)
+        {
+            var result = await _service.GetByIdAsync(id);
+            if (result == null) return NotFound();
+            return Ok(result);
+        }
+
+        //[HttpGet("with-client/{id}")]
+        //public async Task<IActionResult> GetByIdWithClient(int id)
+        //{
+        //    var result = await _service.GetByIdWithClientAsync(id);
+        //    if (result == null) return NotFound();
+        //    return Ok(result);
+        //}
+
+        [HttpPost]
+        public async Task<IActionResult> Create([FromBody] BlackListDTO dto)
         {
             try
             {
-                var result = await _blackListBusiness.GetAllAsync();
-                return Ok(result);
+                await _service.CreateAsync(dto);
+                return Ok();
+            }
+            catch (ValidationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error al obtener la lista negra.");
-                return StatusCode(500, new { message = ex.Message });
+                return StatusCode(500, new { message = "Error interno del servidor", detail = ex.Message });
             }
         }
 
-        [HttpGet("{id}")]
-        [ProducesResponseType(typeof(BlackListDTO), 200)]
-        [ProducesResponseType(400)]
-        [ProducesResponseType(404)]
-        [ProducesResponseType(500)]
-        public async Task<IActionResult> GetByIdAsync(int id)
+
+        [HttpPut]
+        public async Task<IActionResult> Update(BlackListDTO dto)
         {
-            try
-            {
-                var result = await _blackListBusiness.GetByIdAsync(id);
-                return Ok(result);
-            }
-            catch (ValidationException ex)
-            {
-                _logger.LogWarning(ex, "Validación fallida para ID: {Id}", id);
-                return BadRequest(new { message = ex.Message });
-            }
-            catch (EntityNotFoundException ex)
-            {
-                _logger.LogInformation(ex, "Elemento no encontrado con ID: {Id}", id);
-                return NotFound(new { message = ex.Message });
-            }
-            catch (ExternalServiceException ex)
-            {
-                _logger.LogError(ex, "Error al obtener el elemento con ID: {Id}", id);
-                return StatusCode(500, new { message = ex.Message });
-            }
-        }
-
-        [HttpPost]
-        [ProducesResponseType(typeof(BlackListDTO), 201)]
-        [ProducesResponseType(400)]
-        [ProducesResponseType(500)]
-        public async Task<IActionResult> CreateAsync([FromBody] BlackListDTO dto)
-        {
-            try
-            {
-                var result = await _blackListBusiness.CreateAsync(dto);
-                return CreatedAtAction(nameof(GetByIdAsync), new { id = result.id }, result);
-            }
-            catch (ValidationException ex)
-            {
-                _logger.LogWarning(ex, "Validación fallida al crear entrada de lista negra.");
-                return BadRequest(new { message = ex.Message });
-            }
-            catch (ExternalServiceException ex)
-            {
-                _logger.LogError(ex, "Error al crear entrada de lista negra.");
-                return StatusCode(500, new { message = ex.Message });
-            }
-        }
-
-        [HttpPut("{id}")]
-        [ProducesResponseType(typeof(BlackListDTO), 200)]
-        [ProducesResponseType(400)]
-        [ProducesResponseType(404)]
-        [ProducesResponseType(500)]
-        public async Task<IActionResult> UpdateAsync(int id, [FromBody] BlackListDTO dto)
-        {
-            if (id != dto.id)
-                return BadRequest(new { message = "El ID de la ruta no coincide con el objeto." });
-
-            try
-            {
-                var updated = await _blackListBusiness.UpdateAsync(dto);
-                if (!updated)
-                    return NotFound(new { message = "Elemento no encontrado o no se pudo actualizar." });
-
-                return Ok(new { message = "Elemento actualizado correctamente." });
-            }
-            catch (ValidationException ex)
-            {
-                _logger.LogWarning(ex, "Validación fallida al actualizar entrada de lista negra.");
-                return BadRequest(new { message = ex.Message });
-            }
-            catch (EntityNotFoundException ex)
-            {
-                _logger.LogInformation(ex, "Elemento no encontrado con ID: {Id}", id);
-                return NotFound(new { message = ex.Message });
-            }
-            catch (ExternalServiceException ex)
-            {
-                _logger.LogError(ex, "Error al actualizar entrada de lista negra.");
-                return StatusCode(500, new { message = ex.Message });
-            }
+            await _service.UpdateAsync(dto);
+            return Ok();
         }
 
         [HttpDelete("{id}")]
-        [ProducesResponseType(200)]
-        [ProducesResponseType(404)]
-        [ProducesResponseType(500)]
-        public async Task<IActionResult> DeleteAsync(int id)
+        public async Task<IActionResult> Delete(int id)
         {
-            try
-            {
-                var deleted = await _blackListBusiness.DeleteAsync(id);
-                if (!deleted)
-                    return NotFound(new { message = "Elemento no encontrado o ya eliminado." });
-
-                return Ok(new { message = "Elemento eliminado exitosamente." });
-            }
-            catch (ExternalServiceException ex)
-            {
-                _logger.LogError(ex, "Error al eliminar entrada de lista negra.");
-                return StatusCode(500, new { message = ex.Message });
-            }
+            await _service.DeleteAsync(id);
+            return Ok();
         }
     }
 }

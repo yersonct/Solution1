@@ -1,192 +1,83 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
-using Business;
-using Entity.DTOs;
-using Entity.Model;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
+using Business.Interfaces;
+using Entity.Model;
 
-namespace WebAPI.Controllers
+namespace API.Controllers
 {
-    [Route("api/[controller]")]
     [ApiController]
-    public class ParkingController : ControllerBase
+    [Route("api/[controller]")]
+    public class ParkingsController : ControllerBase
     {
-        private readonly ParkingBusiness _parkingBusiness;
-        private readonly ILogger<ParkingController> _logger;
+        private readonly IParkingService _parkingService;
 
-        public ParkingController(ParkingBusiness parkingBusiness, ILogger<ParkingController> logger)
+        public ParkingsController(IParkingService parkingService)
         {
-            _parkingBusiness = parkingBusiness ?? throw new ArgumentNullException(nameof(parkingBusiness));
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _parkingService = parkingService ?? throw new ArgumentNullException(nameof(parkingService));
         }
 
-        // Obtener todos los parkings
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<ParkingDTO>>> GetAll()
+        public async Task<ActionResult<IEnumerable<Parking>>> GetAllParkings()
         {
-            try
-            {
-                var parkings = await _parkingBusiness.GetAllAsync();
-
-                // Mapear Parking a ParkingDTO
-                var parkingDtos = parkings.Select(parking => new ParkingDTO
-                {
-                    id = parking.id,
-                    name = parking.name,
-                    location = parking.location,
-                    id_camara = parking.id_camara // Asegurarse de mapear id_camara
-                }).ToList();
-
-                return Ok(parkingDtos);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error al obtener todos los parkings.");
-                return StatusCode(500, "Error interno del servidor.");
-            }
+            var parkings = await _parkingService.GetAllParkingsAsync();
+            return Ok(parkings);
         }
 
-        // Obtener un parking por ID
         [HttpGet("{id}")]
-        public async Task<ActionResult<ParkingDTO>> GetById(int id)
+        public async Task<ActionResult<Parking>> GetParkingById(int id)
         {
-            try
+            var parking = await _parkingService.GetParkingByIdAsync(id);
+            if (parking == null)
             {
-                var parking = await _parkingBusiness.GetByIdAsync(id);
-                if (parking == null)
-                {
-                    return NotFound();
-                }
-
-                // Mapear Parking a ParkingDTO
-                var parkingDto = new ParkingDTO
-                {
-                    id = parking.id,
-                    name = parking.name,
-                    location = parking.location,
-                    id_camara = parking.id_camara // Incluir id_camara en el DTO
-                };
-
-                return Ok(parkingDto);
+                return NotFound();
             }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error al obtener el parking con ID {ParkingId}.", id);
-                return StatusCode(500, "Error interno del servidor.");
-            }
+            return Ok(parking);
         }
 
-        // Crear un nuevo parking
         [HttpPost]
-        public async Task<ActionResult<ParkingDTO>> Create(ParkingDTO parkingDto)
+        public async Task<ActionResult<Parking>> CreateParking([FromBody] Parking parking)
         {
-            try
+            if (!ModelState.IsValid)
             {
-                if (parkingDto == null)
-                {
-                    return BadRequest("El objeto parking no puede ser nulo.");
-                }
-
-                // Mapear ParkingDTO a Parking
-                var parking = new Parking
-                {
-                    name = parkingDto.name,
-                    location = parkingDto.location,
-                    id_camara = parkingDto.id_camara,
-                    hability = parkingDto.hability // Incluir el campo 'hability'
-                };
-
-                // Validación: Verificar que el campo hability no esté vacío
-                if (string.IsNullOrEmpty(parking.hability))
-                {
-                    return BadRequest("El campo 'hability' no puede estar vacío.");
-                }
-
-                var createdParking = await _parkingBusiness.CreateAsync(parking);
-
-                // Mapear Parking a ParkingDTO
-                var createdParkingDto = new ParkingDTO
-                {
-                    id = createdParking.id,
-                    name = createdParking.name,
-                    location = createdParking.location,
-                    id_camara = createdParking.id_camara,
-                    hability = createdParking.hability // Asegúrate de incluir hability en el DTO
-                };
-
-                return CreatedAtAction(nameof(GetById), new { id = createdParkingDto.id }, createdParkingDto);
+                return BadRequest(ModelState);
             }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error al crear el parking.");
-                return StatusCode(500, "Error interno del servidor.");
-            }
+
+            var createdParking = await _parkingService.CreateParkingAsync(parking);
+            return CreatedAtAction(nameof(GetParkingById), new { id = createdParking.id }, createdParking);
         }
 
-        // Actualizar un parking existente
         [HttpPut("{id}")]
-        public async Task<ActionResult> Update(int id, ParkingDTO parkingDto)
+        public async Task<IActionResult> UpdateParking(int id, [FromBody] Parking parking)
         {
-            try
+            if (id != parking.id)
             {
-                if (parkingDto == null || id != parkingDto.id)
-                {
-                    return BadRequest("Los datos del parking no son válidos.");
-                }
-
-                // Validación de que el campo 'hability' no esté vacío
-                if (string.IsNullOrEmpty(parkingDto.hability))
-                {
-                    return BadRequest("El campo 'hability' no puede estar vacío.");
-                }
-
-                // Mapear ParkingDTO a Parking
-                var parking = new Parking
-                {
-                    id = parkingDto.id,
-                    name = parkingDto.name,
-                    location = parkingDto.location,
-                    id_camara = parkingDto.id_camara,
-                    hability = parkingDto.hability // Asegurarse de incluir hability en la entidad
-                };
-
-                var success = await _parkingBusiness.UpdateAsync(parking);
-                if (!success)
-                {
-                    return NotFound();
-                }
-
-                return NoContent(); // Respuesta 204 No Content
+                return BadRequest("El ID del parking no coincide con el ID de la ruta.");
             }
-            catch (Exception ex)
+
+            if (!ModelState.IsValid)
             {
-                _logger.LogError(ex, "Error al actualizar el parking con ID {ParkingId}.", id);
-                return StatusCode(500, "Error interno del servidor.");
+                return BadRequest(ModelState);
             }
+
+            var result = await _parkingService.UpdateParkingAsync(parking);
+            if (!result)
+            {
+                return NotFound();
+            }
+            return NoContent();
         }
 
-        // Eliminar un parking por ID
         [HttpDelete("{id}")]
-        public async Task<ActionResult> Delete(int id)
+        public async Task<IActionResult> DeleteParking(int id)
         {
-            try
+            var result = await _parkingService.DeleteParkingAsync(id);
+            if (!result)
             {
-                var success = await _parkingBusiness.DeleteAsync(id);
-                if (!success)
-                {
-                    return NotFound();
-                }
-
-                return NoContent(); // Respuesta 204 No Content
+                return NotFound();
             }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error al eliminar el parking con ID {ParkingId}.", id);
-                return StatusCode(500, "Error interno del servidor.");
-            }
+            return NoContent();
         }
     }
 }

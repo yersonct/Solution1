@@ -1,13 +1,9 @@
-﻿// API/Controllers/VehicleHistoryParkingRatesController.cs
-using Business;
-using Entity.DTOs;
-using Entity.Model;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
+using Business.Interfaces;
+using Entity.Model;
 
 namespace API.Controllers
 {
@@ -15,171 +11,73 @@ namespace API.Controllers
     [Route("api/[controller]")]
     public class VehicleHistoryParkingRatesController : ControllerBase
     {
-        private readonly VehicleHistoryParkingRatesBusiness _business;
-        private readonly ILogger<VehicleHistoryParkingRatesController> _logger;
+        private readonly IVehicleHistoryParkingRatesService _vhprService;
 
-        public VehicleHistoryParkingRatesController(VehicleHistoryParkingRatesBusiness business, ILogger<VehicleHistoryParkingRatesController> logger)
+        public VehicleHistoryParkingRatesController(IVehicleHistoryParkingRatesService vhprService)
         {
-            _business = business ?? throw new ArgumentNullException(nameof(business));
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _vhprService = vhprService ?? throw new ArgumentNullException(nameof(vhprService));
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<VehicleHistoryParkingRatesDTO>>> GetAll()
+        public async Task<ActionResult<IEnumerable<VehicleHistoryParkingRates>>> GetAllVehicleHistoryParkingRates()
         {
-            try
-            {
-                var vhpr = await _business.GetAllAsync();
-                var dtos = vhpr.Select(v => new VehicleHistoryParkingRatesDTO
-                {
-                    Id = v.id,
-                    VehicleHistoryId = v.id_vehiclehistory,
-                    RatesId = v.id_rates,
-                    ParkingId = v.id_parking,
-                    HoursUsed = v.hourused,
-                    SubTotal = v.subtotal
-                });
-                return Ok(dtos);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error al obtener todos los registros de VehicleHistoryParkingRates en el controlador.");
-                return StatusCode(500, "Error interno del servidor.");
-            }
+            var result = await _vhprService.GetAllVehicleHistoryParkingRatesAsync();
+            return Ok(result);
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<VehicleHistoryParkingRatesDTO>> GetById(int id)
+        public async Task<ActionResult<VehicleHistoryParkingRates>> GetVehicleHistoryParkingRatesById(int id)
         {
-            try
+            var result = await _vhprService.GetVehicleHistoryParkingRatesByIdAsync(id);
+            if (result == null)
             {
-                var vhpr = await _business.GetByIdAsync(id);
-                if (vhpr == null)
-                {
-                    return NotFound();
-                }
-                var dto = new VehicleHistoryParkingRatesDTO
-                {
-                    Id = vhpr.id,
-                    VehicleHistoryId = vhpr.id_vehiclehistory,
-                    RatesId = vhpr.id_rates,
-                    ParkingId = vhpr.id_parking,
-                    HoursUsed = vhpr.hourused,
-                    SubTotal = vhpr.subtotal
-                };
-                return Ok(dto);
+                return NotFound();
             }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error al obtener VehicleHistoryParkingRates con ID {Id} en el controlador.", id);
-                return StatusCode(500, "Error interno del servidor.");
-            }
+            return Ok(result);
         }
 
         [HttpPost]
-        public async Task<ActionResult<VehicleHistoryParkingRatesDTO>> Create([FromBody] VehicleHistoryParkingRatesDTO createDto)
+        public async Task<ActionResult<VehicleHistoryParkingRates>> CreateVehicleHistoryParkingRates([FromBody] VehicleHistoryParkingRates vhpr)
         {
-            try
+            if (!ModelState.IsValid)
             {
-                if (createDto == null || !ModelState.IsValid)
-                {
-                    return BadRequest(ModelState);
-                }
-
-                var vhprToCreate = new VehicleHistoryParkingRates
-                {
-                    id_vehiclehistory = createDto.VehicleHistoryId,
-                    id_rates = createDto.RatesId,
-                    id_parking = createDto.ParkingId,
-                    hourused = createDto.HoursUsed,
-                    subtotal = createDto.SubTotal
-                };
-
-                var createdVhpr = await _business.CreateAsync(vhprToCreate);
-
-                var dto = new VehicleHistoryParkingRatesDTO
-                {
-                    Id = createdVhpr.id,
-                    VehicleHistoryId = createdVhpr.id_vehiclehistory,
-                    RatesId = createdVhpr.id_rates,
-                    ParkingId = createdVhpr.id_parking,
-                    HoursUsed = createdVhpr.hourused,
-                    SubTotal = createdVhpr.subtotal
-                };
-
-                return CreatedAtAction(nameof(GetById), new { id = dto.Id }, dto);
+                return BadRequest(ModelState);
             }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error al crear un nuevo registro de VehicleHistoryParkingRates en el controlador.");
-                return StatusCode(500, "Error interno del servidor.");
-            }
+
+            var created = await _vhprService.CreateVehicleHistoryParkingRatesAsync(vhpr);
+            return CreatedAtAction(nameof(GetVehicleHistoryParkingRatesById), new { id = created.id }, created);
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, [FromBody] VehicleHistoryParkingRatesDTO updateDto)
+        public async Task<IActionResult> UpdateVehicleHistoryParkingRates(int id, [FromBody] VehicleHistoryParkingRates vhpr)
         {
-            try
+            if (id != vhpr.id)
             {
-                if (updateDto == null || id != updateDto.Id || !ModelState.IsValid)
-                {
-                    return BadRequest(ModelState);
-                }
-
-                var existingVhpr = await _business.GetByIdAsync(id);
-                if (existingVhpr == null)
-                {
-                    return NotFound();
-                }
-
-                existingVhpr.id_vehiclehistory = updateDto.VehicleHistoryId;
-                existingVhpr.id_rates = updateDto.RatesId;
-                existingVhpr.id_parking = updateDto.ParkingId;
-                existingVhpr.hourused = updateDto.HoursUsed;
-                existingVhpr.subtotal = updateDto.SubTotal;
-
-                var updated = await _business.UpdateAsync(existingVhpr);
-                if (updated)
-                {
-                    return NoContent();
-                }
-                else
-                {
-                    return StatusCode(500, "Error al actualizar el registro.");
-                }
+                return BadRequest("El ID de VehicleHistoryParkingRates no coincide con el ID de la ruta.");
             }
-            catch (Exception ex)
+
+            if (!ModelState.IsValid)
             {
-                _logger.LogError(ex, "Error al actualizar el registro de VehicleHistoryParkingRates con ID {Id} en el controlador.", id);
-                return StatusCode(500, "Error interno del servidor.");
+                return BadRequest(ModelState);
             }
+
+            var result = await _vhprService.UpdateVehicleHistoryParkingRatesAsync(vhpr);
+            if (!result)
+            {
+                return NotFound();
+            }
+            return NoContent();
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(int id)
+        public async Task<IActionResult> DeleteVehicleHistoryParkingRates(int id)
         {
-            try
+            var result = await _vhprService.DeleteVehicleHistoryParkingRatesAsync(id);
+            if (!result)
             {
-                var deleted = await _business.DeleteAsync(id);
-                if (deleted)
-                {
-                    return NoContent();
-                }
-                else
-                {
-                    return NotFound();
-                }
+                return NotFound();
             }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error al eliminar el registro de VehicleHistoryParkingRates con ID {Id} en el controlador.", id);
-                return StatusCode(500, "Error interno del servidor.");
-            }
+            return NoContent();
         }
-
-      
-
-       
-
     }
 }

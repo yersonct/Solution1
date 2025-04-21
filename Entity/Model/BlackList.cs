@@ -14,6 +14,6 @@ namespace Entity.Model
 
         // Esta propiedad actúa como clave foránea para la relación 1:1
         public int id_client { get; set; }
-        public  Client Client { get; set; }
+        public  Client client { get; set; }
     }
 }

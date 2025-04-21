@@ -1,151 +1,110 @@
-﻿using Business;
-using Entity.DTOs;
-using Dapper;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
+﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Utilities.Exceptions;
+using Microsoft.AspNetCore.Mvc;
+using Business.Interfaces;
+using Entity.Model;
+using Entity.DTOs; // Asegúrate de tener el namespace de tus DTOs
+using System.Linq;
 
-namespace Web.Controllers
+namespace API.Controllers
 {
-    [Route("api/[controller]")]
     [ApiController]
-    [Produces("application/json")]
-    public class ModuleController : ControllerBase
+    [Route("api/[controller]")]
+    public class ModulesController : ControllerBase
     {
-        private readonly ModuleBusiness _moduleBusiness;
-        private readonly ILogger<ModuleController> _logger;
+        private readonly IModuleService _moduleService;
 
-        public ModuleController(ModuleBusiness moduleBusiness, ILogger<ModuleController> logger)
+        public ModulesController(IModuleService moduleService)
         {
-            _moduleBusiness = moduleBusiness;
-            _logger = logger;
+            _moduleService = moduleService ?? throw new ArgumentNullException(nameof(moduleService));
         }
 
         [HttpGet]
-        [ProducesResponseType(typeof(IEnumerable<ModuleDTO>), 200)]
-        [ProducesResponseType(500)]
-        public async Task<IActionResult> GetAllPersons()
+        public async Task<ActionResult<IEnumerable<ModuleDTO>>> GetAllModules()
         {
-            try
+            var modules = await _moduleService.GetAllModulesAsync();
+            var moduleDtos = modules.Select(m => new ModuleDTO
             {
-                var module = await _moduleBusiness.GetAllModuleAsync();
-                return Ok(module);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error al obtener los module");
-                return StatusCode(500, new { message = ex.Message });
-            }
+                id = m.id,
+                name = m.name,
+            }).ToList();
+            return Ok(moduleDtos);
         }
 
         [HttpGet("{id}")]
-        [ProducesResponseType(typeof(ModuleDTO), 200)]
-        [ProducesResponseType(400)]
-        [ProducesResponseType(404)]
-        [ProducesResponseType(500)]
-        public async Task<IActionResult> GetModuleById(int id)
+        public async Task<ActionResult<ModuleDTO>> GetModuleById(int id)
         {
-            try
+            var module = await _moduleService.GetModuleByIdAsync(id);
+            if (module == null)
             {
-                var module = await _moduleBusiness.GetModuleByIdAsync(id);
-                return Ok(module);
+                return NotFound();
             }
-            catch (ValidationException ex)
+
+            var moduleDto = new ModuleDTO
             {
-                _logger.LogWarning(ex, "Validación fallida para Module con ID: {ModuleId}", id);
-                return BadRequest(new { message = ex.Message });
-            }
-            catch (EntityNotFoundException ex)
-            {
-                _logger.LogInformation(ex, "Module no encontrado con ID: {ModuleId}", id);
-                return NotFound(new { message = ex.Message });
-            }
-            catch (ExternalServiceException ex)
-            {
-                _logger.LogError(ex, "Error al obtener el modulos con ID: {ModuleId}", id);
-                return StatusCode(500, new { message = ex.Message });
-            }
+                id = module.id,
+                name = module.name,
+            };
+            return Ok(moduleDto);
         }
 
         [HttpPost]
-        [ProducesResponseType(typeof(ModuleDTO), 201)]
-        [ProducesResponseType(400)]
-        [ProducesResponseType(500)]
-        public async Task<IActionResult> CreateModuleAsync([FromBody] ModuleDTO moduleDTO)
+        public async Task<ActionResult<Modules>> CreateModule([FromBody] ModuleDTO moduleDto)
         {
-            try
+            if (!ModelState.IsValid)
             {
-                var createdModule = await _moduleBusiness.CreateModuleAsync(moduleDTO);
-                return CreatedAtAction(nameof(GetModuleById), new { id = createdModule.Id }, createdModule);
+                return BadRequest(ModelState);
             }
-            catch (ValidationException ex)
+
+            var module = new Modules
             {
-                _logger.LogWarning(ex, "Validación fallida al crear el Personas");
-                return BadRequest(new { message = ex.Message });
-            }
-            catch (ExternalServiceException ex)
-            {
-                _logger.LogError(ex, "Error al crear el Personas");
-                return StatusCode(500, new { message = ex.Message });
-            }
+                name = moduleDto.name,
+            };
+
+            var createdModule = await _moduleService.CreateModuleAsync(module);
+            return CreatedAtAction(nameof(GetModuleById), new { id = createdModule.id }, createdModule);
         }
 
         [HttpPut("{id}")]
-        [ProducesResponseType(typeof(ModuleDTO), 200)]
-        [ProducesResponseType(400)]
-        [ProducesResponseType(404)]
-        [ProducesResponseType(500)]
-        public async Task<IActionResult> UpdateModuleAsync(int id, [FromBody] ModuleDTO moduleDTO)
+        public async Task<IActionResult> UpdateModule(int id, [FromBody] ModuleDTO moduleDto)
         {
-            if (id != moduleDTO.Id)
+            if (id != moduleDto.id)
             {
-                return BadRequest(new { message = "El ID de la ruta no coincide con el ID del objeto." });
+                return BadRequest("El ID del módulo no coincide con el ID de la ruta.");
             }
-            try
+
+            if (!ModelState.IsValid)
             {
+                return BadRequest(ModelState);
+            }
+
+            var existingModule = await _moduleService.GetModuleByIdAsync(id);
+            if (existingModule == null)
+            {
+                return NotFound();
+            }
+
+            existingModule.name = moduleDto.name;
 
 
-                var updatedModule = await _moduleBusiness.UpdateModuleAsync(moduleDTO);
-                return Ok(updatedModule);
-            }
-            catch (ValidationException ex)
+            var result = await _moduleService.UpdateModuleAsync(existingModule);
+            if (!result)
             {
-                _logger.LogWarning(ex, "Validación fallida al actualizar el Module con ID: {ModuleId}", id);
-                return BadRequest(new { message = ex.Message });
+                return NotFound();
             }
-            catch (EntityNotFoundException ex)
-            {
-                _logger.LogInformation(ex, "Personas no encontrado con ID: {ModuleId}", id);
-                return NotFound(new { message = ex.Message });
-            }
-            catch (ExternalServiceException ex)
-            {
-                _logger.LogError(ex, "Error al actualizar el usuario con ID: {ModuleId}", id);
-                return StatusCode(500, new { message = ex.Message });
-            }
+            return NoContent();
         }
 
         [HttpDelete("{id}")]
-        [ProducesResponseType(200)]
-        [ProducesResponseType(404)]
-        [ProducesResponseType(500)]
-        public async Task<IActionResult> DeleteModuleAsync(int id)
+        public async Task<IActionResult> DeleteModule(int id)
         {
-            try
+            var result = await _moduleService.DeleteModuleAsync(id);
+            if (!result)
             {
-                var deleted = await _moduleBusiness.DeleteModuleAsync(id);
-                if (!deleted)
-                    return NotFound(new { message = "Personas no encontrado o ya eliminado" });
-
-                return Ok(new { message = "Personas eliminado exitosamente" });
+                return NotFound();
             }
-            catch (ExternalServiceException ex)
-            {
-                _logger.LogError(ex, "Error al eliminar el Personas con ID: {UserId}", id);
-                return StatusCode(500, new { message = ex.Message });
-            }
+            return NoContent();
         }
     }
 }

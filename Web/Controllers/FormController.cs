@@ -1,151 +1,114 @@
-﻿using Business;
-using Entity.DTOs;
-using Dapper;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
+﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Utilities.Exceptions;
+using Microsoft.AspNetCore.Mvc;
+using Business.Interfaces;
+using Entity.Model;
+using Entity.DTOs; // Asegúrate de tener el namespace de tus DTOs
+using System.Linq;
 
-namespace Web.Controllers
+namespace API.Controllers
 {
-    [Route("api/[controller]")]
     [ApiController]
-    [Produces("application/json")]
+    [Route("api/[controller]")]
     public class FormsController : ControllerBase
     {
-        private readonly FormBusiness _formsBusiness;
-        private readonly ILogger<FormsController> _logger;
+        private readonly IFormService _formService;
 
-        public FormsController(FormBusiness formsBusiness, ILogger<FormsController> logger)
+        public FormsController(IFormService formService)
         {
-            _formsBusiness = formsBusiness;
-            _logger = logger;
+            _formService = formService ?? throw new ArgumentNullException(nameof(formService));
         }
 
         [HttpGet]
-        [ProducesResponseType(typeof(IEnumerable<FormDTO>), 200)]
-        [ProducesResponseType(500)]
-        public async Task<IActionResult> GetAllForm()
+        public async Task<ActionResult<IEnumerable<FormDTO>>> GetAllForms()
         {
-            try
+            var forms = await _formService.GetAllFormsAsync();
+            var formDtos = forms.Select(f => new FormDTO
             {
-                var forms = await _formsBusiness.GetAllFormsAsync();
-                return Ok(forms);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error al obtener los forms");
-                return StatusCode(500, new { message = ex.Message });
-            }
+                id = f.id,
+                name = f.name,
+                url = f.url
+            }).ToList();
+            return Ok(formDtos);
         }
 
         [HttpGet("{id}")]
-        [ProducesResponseType(typeof(FormDTO), 200)]
-        [ProducesResponseType(400)]
-        [ProducesResponseType(404)]
-        [ProducesResponseType(500)]
-        public async Task<IActionResult> GetFormById(int id)
+        public async Task<ActionResult<FormDTO>> GetFormById(int id)
         {
-            try
+            var form = await _formService.GetFormByIdAsync(id);
+            if (form == null)
             {
-                var forms = await _formsBusiness.GetFormsByIdAsync(id);
-                return Ok(forms);
+                return NotFound();
             }
-            catch (ValidationException ex)
+
+            var formDto = new FormDTO
             {
-                _logger.LogWarning(ex, "Validación fallida para Module con ID: {ModuleId}", id);
-                return BadRequest(new { message = ex.Message });
-            }
-            catch (EntityNotFoundException ex)
-            {
-                _logger.LogInformation(ex, "Module no encontrado con ID: {ModuleId}", id);
-                return NotFound(new { message = ex.Message });
-            }
-            catch (ExternalServiceException ex)
-            {
-                _logger.LogError(ex, "Error al obtener el modulos con ID: {ModuleId}", id);
-                return StatusCode(500, new { message = ex.Message });
-            }
+                id = form.id,
+                name = form.name,
+                url = form.url
+            };
+            return Ok(formDto);
         }
 
         [HttpPost]
-        [ProducesResponseType(typeof(FormDTO), 201)]
-        [ProducesResponseType(400)]
-        [ProducesResponseType(500)]
-        public async Task<IActionResult> CreateModuleAsync([FromBody] FormDTO formDTO)
+        public async Task<ActionResult<Forms>> CreateForm([FromBody] FormDTO formDto)
         {
-            try
+            if (!ModelState.IsValid)
             {
-                var createdForm = await _formsBusiness.CreateFormsAsync(formDTO);
-                return CreatedAtAction(nameof(GetFormById), new { id = createdForm.Id }, createdForm);
+                return BadRequest(ModelState);
             }
-            catch (ValidationException ex)
+
+            var form = new Forms
             {
-                _logger.LogWarning(ex, "Validación fallida al crear el Personas");
-                return BadRequest(new { message = ex.Message });
-            }
-            catch (ExternalServiceException ex)
-            {
-                _logger.LogError(ex, "Error al crear el Personas");
-                return StatusCode(500, new { message = ex.Message });
-            }
+                name = formDto.name,
+                url = formDto.url
+            };
+
+            var createdForm = await _formService.CreateFormAsync(form);
+            return CreatedAtAction(nameof(GetFormById), new { id = createdForm.id }, createdForm);
         }
 
         [HttpPut("{id}")]
-        [ProducesResponseType(typeof(FormDTO), 200)]
-        [ProducesResponseType(400)]
-        [ProducesResponseType(404)]
-        [ProducesResponseType(500)]
-        public async Task<IActionResult> UpdateFormAsync(int id, [FromBody] FormDTO formDTO)
+        public async Task<IActionResult> UpdateForm(int id, [FromBody] FormDTO formDto)
         {
-            if (id != formDTO.Id)
+            if (id != formDto.id)
             {
-                return BadRequest(new { message = "El ID de la ruta no coincide con el ID del objeto." });
+                return BadRequest("El ID del formulario no coincide con el ID de la ruta.");
             }
-            try
+
+            if (!ModelState.IsValid)
             {
+                return BadRequest(ModelState);
+            }
+
+            var existingForm = await _formService.GetFormByIdAsync(id);
+            if (existingForm == null)
+            {
+                return NotFound();
+            }
+
+            existingForm.name = formDto.name;
+            existingForm.url = formDto.url;
 
 
-                var updatedForm = await _formsBusiness.UpdateFormAsync(formDTO);
-                return Ok(updatedForm);
-            }
-            catch (ValidationException ex)
+            var result = await _formService.UpdateFormAsync(existingForm);
+            if (!result)
             {
-                _logger.LogWarning(ex, "Validación fallida al actualizar el Module con ID: {ModuleId}", id);
-                return BadRequest(new { message = ex.Message });
+                return NotFound();
             }
-            catch (EntityNotFoundException ex)
-            {
-                _logger.LogInformation(ex, "Personas no encontrado con ID: {ModuleId}", id);
-                return NotFound(new { message = ex.Message });
-            }
-            catch (ExternalServiceException ex)
-            {
-                _logger.LogError(ex, "Error al actualizar el usuario con ID: {ModuleId}", id);
-                return StatusCode(500, new { message = ex.Message });
-            }
+            return NoContent();
         }
 
         [HttpDelete("{id}")]
-        [ProducesResponseType(200)]
-        [ProducesResponseType(404)]
-        [ProducesResponseType(500)]
-        public async Task<IActionResult> DeleteFormAsync(int id)
+        public async Task<IActionResult> DeleteForm(int id)
         {
-            try
+            var result = await _formService.DeleteFormAsync(id);
+            if (!result)
             {
-                var deleted = await _formsBusiness.DeleteFormsAsync(id);
-                if (!deleted)
-                    return NotFound(new { message = "Personas no encontrado o ya eliminado" });
-
-                return Ok(new { message = "Personas eliminado exitosamente" });
+                return NotFound();
             }
-            catch (ExternalServiceException ex)
-            {
-                _logger.LogError(ex, "Error al eliminar el Personas con ID: {UserId}", id);
-                return StatusCode(500, new { message = ex.Message });
-            }
+            return NoContent();
         }
     }
 }

@@ -11,7 +11,7 @@ namespace Entity.DTOs
         public int Id { get; set; }
         public string Name { get; set; }
         public int id_user { get; set; }
-        public int BlackListId { get; set; }
-        public List<int> VehicleIds { get; set; }
+        //public int BlackListId { get; set; }
+        //public List<int> VehicleId { get; set; }
     }
 }

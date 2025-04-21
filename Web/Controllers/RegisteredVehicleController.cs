@@ -1,149 +1,90 @@
-﻿using Business;
-using Entity.DTOs;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
-using System;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
-using Utilities.Exceptions;
+using Microsoft.AspNetCore.Mvc;
+using Business.Interfaces;
+using Entity.Model;
 
-namespace Api.Controllers
+namespace API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class RegisteredVehicleController : ControllerBase
+    public class RegisteredVehiclesController : ControllerBase
     {
-        private readonly RegisteredVehicleBusiness _registeredVehicleBusiness;
-        private readonly ILogger<RegisteredVehicleController> _logger;
+        private readonly IRegisteredVehicleService _registeredVehicleService;
 
-        public RegisteredVehicleController(RegisteredVehicleBusiness registeredVehicleBusiness, ILogger<RegisteredVehicleController> logger)
+        public RegisteredVehiclesController(IRegisteredVehicleService registeredVehicleService)
         {
-            _registeredVehicleBusiness = registeredVehicleBusiness;
-            _logger = logger;
+            _registeredVehicleService = registeredVehicleService ?? throw new ArgumentNullException(nameof(registeredVehicleService));
+        }
+
+        [HttpGet("CanConnect")]
+        public async Task<ActionResult<bool>> CanConnect()
+        {
+            var canConnect = await _registeredVehicleService.CanConnectAsync();
+            return Ok(canConnect);
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAll()
+        public async Task<ActionResult<IEnumerable<RegisteredVehicle>>> GetAllRegisteredVehicles()
         {
-            try
-            {
-                var list = await _registeredVehicleBusiness.GetAllAsync();
-                return Ok(list);
-            }
-            catch (InvalidOperationException ex)
-            {
-                _logger.LogError(ex, "Error transitorio al obtener registros de vehículos.");
-                return StatusCode(500, "Error de conexión a la base de datos.");
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error inesperado al obtener registros de vehículos.");
-                return StatusCode(500, "Ocurrió un error inesperado.");
-            }
+            var registeredVehicles = await _registeredVehicleService.GetAllRegisteredVehiclesAsync();
+            return Ok(registeredVehicles);
         }
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetById(int id)
+        public async Task<ActionResult<RegisteredVehicle>> GetRegisteredVehicleById(int id)
         {
-            try
+            var registeredVehicle = await _registeredVehicleService.GetRegisteredVehicleByIdAsync(id);
+            if (registeredVehicle == null)
             {
-                var result = await _registeredVehicleBusiness.GetByIdAsync(id);
-                return Ok(result);
+                return NotFound();
             }
-            catch (EntityNotFoundException ex)
-            {
-                _logger.LogWarning(ex.Message);
-                return NotFound(ex.Message);
-            }
-            catch (InvalidOperationException ex)
-            {
-                _logger.LogError(ex, "Error transitorio al obtener registro de vehículo por ID.");
-                return StatusCode(500, "Error de conexión a la base de datos.");
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error inesperado al obtener registro de vehículo por ID.");
-                return StatusCode(500, "Ocurrió un error inesperado.");
-            }
+            return Ok(registeredVehicle);
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] RegisteredVehicleCreateDTO dto)
+        public async Task<ActionResult<RegisteredVehicle>> CreateRegisteredVehicle([FromBody] RegisteredVehicle registeredVehicle)
         {
-            try
+            if (!ModelState.IsValid)
             {
-                var created = await _registeredVehicleBusiness.CreateAsync(dto);
-                return CreatedAtAction(nameof(GetById), new { id = created.id }, created);
+                return BadRequest(ModelState);
             }
-            catch (ValidationException ex)
-            {
-                _logger.LogWarning(ex.Message);
-                return BadRequest(ex.Message);
-            }
-            catch (InvalidOperationException ex)
-            {
-                _logger.LogError(ex, "Error transitorio al crear registro de vehículo.");
-                return StatusCode(500, "Error de conexión a la base de datos.");
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error inesperado al crear registro de vehículo.");
-                return StatusCode(500, "Ocurrió un error inesperado.");
-            }
+
+            var createdRegisteredVehicle = await _registeredVehicleService.CreateRegisteredVehicleAsync(registeredVehicle);
+            return CreatedAtAction(nameof(GetRegisteredVehicleById), new { id = createdRegisteredVehicle.id }, createdRegisteredVehicle);
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, [FromBody] RegisteredVehicleCreateDTO dto)
+        public async Task<IActionResult> UpdateRegisteredVehicle(int id, [FromBody] RegisteredVehicle registeredVehicle)
         {
-            try
+            if (id != registeredVehicle.id)
             {
-                var result = await _registeredVehicleBusiness.UpdateAsync(id, dto);
-                return result ? NoContent() : StatusCode(500, "No se pudo actualizar el registro de vehículo.");
+                return BadRequest("El ID del vehículo registrado no coincide con el ID de la ruta.");
             }
-            catch (EntityNotFoundException ex)
+
+            if (!ModelState.IsValid)
             {
-                _logger.LogWarning(ex.Message);
-                return NotFound(ex.Message);
+                return BadRequest(ModelState);
             }
-            catch (ValidationException ex)
+
+            var result = await _registeredVehicleService.UpdateRegisteredVehicleAsync(registeredVehicle);
+            if (!result)
             {
-                _logger.LogWarning(ex.Message);
-                return BadRequest(ex.Message);
+                return NotFound();
             }
-            catch (InvalidOperationException ex)
-            {
-                _logger.LogError(ex, "Error transitorio al actualizar registro de vehículo.");
-                return StatusCode(500, "Error de conexión a la base de datos.");
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error inesperado al actualizar registro de vehículo.");
-                return StatusCode(500, "Ocurrió un error inesperado.");
-            }
+            return NoContent();
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(int id)
+        public async Task<IActionResult> DeleteRegisteredVehicle(int id)
         {
-            try
+            var result = await _registeredVehicleService.DeleteRegisteredVehicleAsync(id);
+            if (!result)
             {
-                var result = await _registeredVehicleBusiness.DeleteAsync(id);
-                return result ? NoContent() : StatusCode(500, "No se pudo eliminar el registro de vehículo.");
+                return NotFound();
             }
-            catch (EntityNotFoundException ex)
-            {
-                _logger.LogWarning(ex.Message);
-                return NotFound(ex.Message);
-            }
-            catch (InvalidOperationException ex)
-            {
-                _logger.LogError(ex, "Error transitorio al eliminar registro de vehículo.");
-                return StatusCode(500, "Error de conexión a la base de datos.");
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error inesperado al eliminar registro de vehículo.");
-                return StatusCode(500, "Ocurrió un error inesperado.");
-            }
+            return NoContent();
         }
     }
 }

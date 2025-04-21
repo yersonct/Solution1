@@ -14,8 +14,8 @@ namespace Entity.Model
         public string location { get; set; }
 
         // Relación uno a muchos con Camara
-        public int id_camara { get; set; }
-        public List<Camara> Camaras { get; set; } = new List<Camara>();
+        public int id_camara { get; set; }            // FK
+        public Camara camara { get; set; }
 
         // Relación con VehicleHistoryParkingRates
         public List<VehicleHistoryParkingRates> VehicleHistoryParkingRates { get; set; } = new List<VehicleHistoryParkingRates>();

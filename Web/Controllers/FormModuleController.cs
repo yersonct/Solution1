@@ -1,145 +1,78 @@
-﻿using Business;
-using Entity.DTOs;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
+﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Utilities.Exceptions;
+using Microsoft.AspNetCore.Mvc;
+using Business.Interfaces;
+using Entity.DTOs;
 
-namespace Web.Controllers
+namespace API.Controllers
 {
-    [Route("api/[controller]")]
     [ApiController]
-    [Produces("application/json")]
-    public class FormModuleController : ControllerBase
+    [Route("api/[controller]")]
+    public class FormModulesController : ControllerBase
     {
-        private readonly FormModuleBusiness _formModuleBusiness;
-        private readonly ILogger<FormModuleController> _logger;
+        private readonly IFormModuleService _formModuleService;
 
-        public FormModuleController(FormModuleBusiness formModuleBusiness, ILogger<FormModuleController> logger)
+        public FormModulesController(IFormModuleService formModuleService)
         {
-            _formModuleBusiness = formModuleBusiness;
-            _logger = logger;
+            _formModuleService = formModuleService ?? throw new ArgumentNullException(nameof(formModuleService));
         }
 
         [HttpGet]
-        [ProducesResponseType(typeof(IEnumerable<FormModuleDTO>), 200)]
-        [ProducesResponseType(500)]
-        public async Task<IActionResult> GetAllFormModules()
+        public async Task<ActionResult<IEnumerable<FormModuleDTO>>> GetAllFormModules()
         {
-            try
-            {
-                var result = await _formModuleBusiness.GetAllFormModulesAsync();
-                return Ok(result);
-            }
-            catch (ExternalServiceException ex)
-            {
-                _logger.LogError(ex, "Error al obtener los FormModules");
-                return StatusCode(500, new { message = ex.Message });
-            }
+            var formModules = await _formModuleService.GetAllFormModulesAsync();
+            return Ok(formModules);
         }
 
         [HttpGet("{id}")]
-        [ProducesResponseType(typeof(FormModuleDTO), 200)]
-        [ProducesResponseType(400)]
-        [ProducesResponseType(404)]
-        [ProducesResponseType(500)]
-        public async Task<IActionResult> GetFormModuleById(int id)
+        public async Task<ActionResult<FormModuleDTO>> GetFormModuleById(int id)
         {
-            try
+            var formModule = await _formModuleService.GetFormModuleByIdAsync(id);
+            if (formModule == null)
             {
-                var result = await _formModuleBusiness.GetFormModuleByIdAsync(id);
-                return Ok(result);
+                return NotFound();
             }
-            catch (ValidationException ex)
-            {
-                _logger.LogWarning(ex, "Validación fallida para FormModule con ID: {FormModuleId}", id);
-                return BadRequest(new { message = ex.Message });
-            }
-            catch (EntityNotFoundException ex)
-            {
-                _logger.LogInformation(ex, "FormModule no encontrado con ID: {FormModuleId}", id);
-                return NotFound(new { message = ex.Message });
-            }
-            catch (ExternalServiceException ex)
-            {
-                _logger.LogError(ex, "Error al obtener FormModule con ID: {FormModuleId}", id);
-                return StatusCode(500, new { message = ex.Message });
-            }
+            return Ok(formModule);
         }
 
         [HttpPost]
-        [ProducesResponseType(typeof(FormModuleDTO), 201)]
-        [ProducesResponseType(400)]
-        [ProducesResponseType(500)]
-        public async Task<IActionResult> CreateFormModuleAsync([FromBody] FormModuleCreateDTO dto)
+        public async Task<ActionResult<FormModuleDTO>> CreateFormModule([FromBody] FormModuleCreateDTO formModule)
         {
-            try
+            if (!ModelState.IsValid)
             {
-                var created = await _formModuleBusiness.CreateFormModuleAsync(dto);
-                return CreatedAtAction(nameof(GetFormModuleById), new { id = created.Id }, created);
+                return BadRequest(ModelState);
             }
-            catch (ValidationException ex)
-            {
-                _logger.LogWarning(ex, "Validación fallida al crear FormModule");
-                return BadRequest(new { message = ex.Message });
-            }
-            catch (ExternalServiceException ex)
-            {
-                _logger.LogError(ex, "Error al crear FormModule");
-                return StatusCode(500, new { message = ex.Message });
-            }
+
+            var createdFormModule = await _formModuleService.CreateFormModuleAsync(formModule);
+            return CreatedAtAction(nameof(GetFormModuleById), new { id = createdFormModule.Id }, createdFormModule);
         }
 
         [HttpPut("{id}")]
-        [ProducesResponseType(typeof(FormModuleDTO), 200)]
-        [ProducesResponseType(400)]
-        [ProducesResponseType(404)]
-        [ProducesResponseType(500)]
-        public async Task<IActionResult> UpdateFormModuleAsync(int id, [FromBody] FormModuleCreateDTO dto)
+        public async Task<IActionResult> UpdateFormModule(int id, [FromBody] FormModuleCreateDTO formModule)
         {
-            try
+            if (!ModelState.IsValid)
             {
-                var updated = await _formModuleBusiness.UpdateFormModuleAsync(id, dto);
-                return Ok(new { message = "FormModule actualizado correctamente", updated });
+                return BadRequest(ModelState);
             }
-            catch (ValidationException ex)
+
+            var result = await _formModuleService.UpdateFormModuleAsync(id, formModule);
+            if (!result)
             {
-                _logger.LogWarning(ex, "Validación fallida al actualizar FormModule con ID: {FormModuleId}", id);
-                return BadRequest(new { message = ex.Message });
+                return NotFound();
             }
-            catch (EntityNotFoundException ex)
-            {
-                _logger.LogInformation(ex, "FormModule no encontrado con ID: {FormModuleId}", id);
-                return NotFound(new { message = ex.Message });
-            }
-            catch (ExternalServiceException ex)
-            {
-                _logger.LogError(ex, "Error al actualizar FormModule con ID: {FormModuleId}", id);
-                return StatusCode(500, new { message = ex.Message });
-            }
+            return NoContent();
         }
 
-
         [HttpDelete("{id}")]
-        [ProducesResponseType(200)]
-        [ProducesResponseType(404)]
-        [ProducesResponseType(500)]
-        public async Task<IActionResult> DeleteFormModuleAsync(int id)
+        public async Task<IActionResult> DeleteFormModule(int id)
         {
-            try
+            var result = await _formModuleService.DeleteFormModuleAsync(id);
+            if (!result)
             {
-                var deleted = await _formModuleBusiness.DeleteFormModuleAsync(id);
-                if (!deleted)
-                    return NotFound(new { message = "FormModule no encontrado o ya eliminado" });
-
-                return Ok(new { message = "FormModule eliminado exitosamente" });
+                return NotFound();
             }
-            catch (ExternalServiceException ex)
-            {
-                _logger.LogError(ex, "Error al eliminar FormModule con ID: {FormModuleId}", id);
-                return StatusCode(500, new { message = ex.Message });
-            }
+            return NoContent();
         }
     }
 }

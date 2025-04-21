@@ -1,158 +1,138 @@
-﻿using Business;
-using Entity.DTOs;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
+﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Utilities.Exceptions;
+using Microsoft.AspNetCore.Mvc;
+using Business.Interfaces;
+using Entity.DTOs;
+using System.Linq;
+using Entity.Model;
 
-namespace Web.Controllers
+namespace API.Controllers
 {
-    [Route("api/[controller]")]
     [ApiController]
-    [Produces("application/json")]
-    public class FormRolPermissionController : ControllerBase
+    [Route("api/[controller]")]
+    public class FormRolPermissionsController : ControllerBase
     {
-        private readonly FormRolPermissionBusiness _business;
-        private readonly ILogger<FormRolPermissionController> _logger;
+        private readonly IFormRolPermissionService _formRolPermissionService;
 
-        public FormRolPermissionController(FormRolPermissionBusiness business, ILogger<FormRolPermissionController> logger)
+        public FormRolPermissionsController(IFormRolPermissionService formRolPermissionService)
         {
-            _business = business;
-            _logger = logger;
+            _formRolPermissionService = formRolPermissionService ?? throw new ArgumentNullException(nameof(formRolPermissionService));
         }
 
         [HttpGet]
-        [ProducesResponseType(typeof(IEnumerable<FormRolPermissionDTO>), 200)]
-        [ProducesResponseType(500)]
-        public async Task<IActionResult> GetAllAsync()
+        public async Task<ActionResult<IEnumerable<FormRolPermissionDTO>>> GetAllFormRolPermissions()
         {
-            try
+            var formRolPermissions = await _formRolPermissionService.GetAllFormRolPermissionsAsync();
+            var formRolPermissionDtos = formRolPermissions.Select(frp => new FormRolPermissionDTO
             {
-                var result = await _business.GetAllAsync();
-                return Ok(result);
-            }
-            catch (ExternalServiceException ex)
-            {
-                _logger.LogError(ex, "Error al obtener las relaciones FormRolPermission.");
-                return StatusCode(500, new { message = ex.Message });
-            }
+                id = frp.id,
+                id_forms = frp.id_forms,
+                FormName = frp.FormName, // Asumiendo que Forms tiene una propiedad Name
+                id_rol = frp.id_rol,
+                RolName = frp.RolName,     // Asumiendo que Rol tiene una propiedad Name
+                id_permission= frp.id_permission,
+                PermissionName = frp.PermissionName // Asumiendo que Permission tiene una propiedad Name
+            }).ToList();
+            return Ok(formRolPermissionDtos);
         }
 
         [HttpGet("{id}")]
-        [ProducesResponseType(typeof(FormRolPermissionDTO), 200)]
-        [ProducesResponseType(400)]
-        [ProducesResponseType(404)]
-        [ProducesResponseType(500)]
-        public async Task<IActionResult> GetByIdAsync(int id)
+        public async Task<ActionResult<FormRolPermissionDTO>> GetFormRolPermissionById(int id)
         {
-            try
+            var formRolPermission = await _formRolPermissionService.GetFormRolPermissionByIdAsync(id);
+            if (formRolPermission == null)
             {
-                var result = await _business.GetByIdAsync(id);
-                return Ok(result);
+                return NotFound();
             }
-            catch (ValidationException ex)
+
+            var formRolPermissionDto = new FormRolPermissionDTO
             {
-                _logger.LogWarning(ex, "ID inválido: {Id}", id);
-                return BadRequest(new { message = ex.Message });
-            }
-            catch (EntityNotFoundException ex)
-            {
-                _logger.LogInformation(ex, "Relación no encontrada: {Id}", id);
-                return NotFound(new { message = ex.Message });
-            }
-            catch (ExternalServiceException ex)
-            {
-                _logger.LogError(ex, "Error interno al obtener el ID {Id}", id);
-                return StatusCode(500, new { message = ex.Message });
-            }
+                id = formRolPermission.id,
+                id_forms = formRolPermission.id_forms,
+                FormName = formRolPermission.FormName,
+                id_rol = formRolPermission.id_rol,
+                RolName = formRolPermission.RolName,
+                id_permission = formRolPermission.id_permission,
+                PermissionName = formRolPermission.PermissionName
+            };
+            return Ok(formRolPermissionDto);
         }
 
         [HttpPost]
-        [ProducesResponseType(typeof(FormRolPermissionDTO), 201)]
-        [ProducesResponseType(400)]
-        [ProducesResponseType(500)]
-        public async Task<IActionResult> CreateAsync([FromBody] FormRolPermissionCreateDTO dto)
+        public async Task<ActionResult<FormRolPermissionDTO>> CreateFormRolPermission([FromBody] FormRolPermissionCreateDTO formRolPermissionCreateDto)
         {
-            try
+            if (!ModelState.IsValid)
             {
-                var created = await _business.CreateAsync(dto);
+                return BadRequest(ModelState);
+            }
 
-                if (created == null || created.Id == 0)
-                {
-                    _logger.LogError("El objeto creado es nulo o tiene un Id inválido.");
-                    return StatusCode(500, new { message = "Error al crear la relación." });
-                }
+            var formRolPermission = new FormRolPermission
+            {
+                id_forms = formRolPermissionCreateDto.id_forms,
+                id_rol = formRolPermissionCreateDto.id_rol,
+                id_permission = formRolPermissionCreateDto.id_permission
+            };
 
-                return CreatedAtAction(
-                    nameof(GetByIdAsync),
-                    new { id = created.Id },
-                    created
-                );
-            }
-            catch (ValidationException ex)
+            var createdFormRolPermission = await _formRolPermissionService.CreateFormRolPermissionAsync(formRolPermission);
+
+            var formRolPermissionDto = new FormRolPermissionDTO
             {
-                _logger.LogWarning(ex, "Validación fallida al crear la relación.");
-                return BadRequest(new { message = ex.Message });
-            }
-            catch (ExternalServiceException ex)
-            {
-                _logger.LogError(ex, "Error interno al crear la relación.");
-                return StatusCode(500, new { message = $"Error en el servicio externo 'Base de datos': {ex.Message}" });
-            }
+                id = createdFormRolPermission.id,
+                id_forms = createdFormRolPermission.id_forms,
+                FormName = createdFormRolPermission.FormName,
+                id_rol = createdFormRolPermission.id_rol,
+                RolName = createdFormRolPermission.RolName,
+                id_permission = createdFormRolPermission.id_permission,
+                PermissionName = createdFormRolPermission.PermissionName
+            };
+
+
+            return CreatedAtAction(nameof(GetFormRolPermissionById), new { id = formRolPermissionDto.id }, formRolPermissionDto);
         }
 
-        [HttpPut]
-        [ProducesResponseType(typeof(FormRolPermissionDTO), 200)]
-        [ProducesResponseType(400)]
-        [ProducesResponseType(404)]
-        [ProducesResponseType(500)]
-        public async Task<IActionResult> UpdateAsync([FromBody] FormRolPermissionDTO dto)
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateFormRolPermission(int id, [FromBody] FormRolPermissionDTO formRolPermissionDto)
         {
-            try
+            if (id != formRolPermissionDto.id)
             {
-                var updated = await _business.UpdateAsync(dto);
-                if (!updated)
-                    return NotFound(new { message = "Relación no encontrada o no se pudo actualizar." });
+                return BadRequest("El ID del FormRolPermission no coincide con el ID de la ruta.");
+            }
 
-                return Ok(dto);
-            }
-            catch (ValidationException ex)
+            if (!ModelState.IsValid)
             {
-                _logger.LogWarning(ex, "Validación fallida al actualizar la relación con ID: {Id}", dto.Id);
-                return BadRequest(new { message = ex.Message });
+                return BadRequest(ModelState);
             }
-            catch (EntityNotFoundException ex)
+
+            var existingFormRolPermission = await _formRolPermissionService.GetFormRolPermissionByIdAsync(id);
+            if (existingFormRolPermission == null)
             {
-                _logger.LogInformation(ex, "Relación no encontrada para actualizar: {Id}", dto.Id);
-                return NotFound(new { message = ex.Message });
+                return NotFound();
             }
-            catch (ExternalServiceException ex)
+
+            existingFormRolPermission.id_forms = formRolPermissionDto.id_forms;
+            existingFormRolPermission.id_rol = formRolPermissionDto.id_rol;
+            existingFormRolPermission.id_permission = formRolPermissionDto.id_permission;
+
+
+            var result = await _formRolPermissionService.UpdateFormRolPermissionAsync(existingFormRolPermission);
+            if (!result)
             {
-                _logger.LogError(ex, "Error interno al actualizar la relación con ID: {Id}", dto.Id);
-                return StatusCode(500, new { message = ex.Message });
+                return NotFound();
             }
+            return NoContent();
         }
 
         [HttpDelete("{id}")]
-        [ProducesResponseType(200)]
-        [ProducesResponseType(404)]
-        [ProducesResponseType(500)]
-        public async Task<IActionResult> DeleteAsync(int id)
+        public async Task<IActionResult> DeleteFormRolPermission(int id)
         {
-            try
+            var result = await _formRolPermissionService.DeleteFormRolPermissionAsync(id);
+            if (!result)
             {
-                var deleted = await _business.DeleteAsync(id);
-                if (!deleted)
-                    return NotFound(new { message = "Relación no encontrada o ya eliminada." });
-
-                return Ok(new { message = "Relación eliminada correctamente." });
+                return NotFound();
             }
-            catch (ExternalServiceException ex)
-            {
-                _logger.LogError(ex, "Error interno al eliminar la relación con ID: {Id}", id);
-                return StatusCode(500, new { message = ex.Message });
-            }
+            return NoContent();
         }
     }
 }
+

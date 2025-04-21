@@ -1,150 +1,125 @@
-﻿using Business;
-using Entity.DTOs;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
+﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
-using Utilities.Exceptions;
+using Microsoft.AspNetCore.Mvc;
+using Business.Interfaces;
+using Entity.Model;
+using Entity.DTOs; // Asegúrate de tener el namespace de tus DTOs
 
-namespace Web.Controllers
+namespace API.Controllers
 {
-    [Route("api/[controller]")]
     [ApiController]
-    [Produces("application/json")]
-    public class UserController : ControllerBase
+    [Route("api/[controller]")]
+    public class UsersController : ControllerBase
     {
-        private readonly UserBusiness _userBusiness;
-        private readonly ILogger<UserController> _logger;
+        private readonly IUserService _userService;
+        private readonly IPersonService _personService; // Necesitas el servicio de Person para obtener el nombre
 
-        public UserController(UserBusiness userBusiness, ILogger<UserController> logger)
+        public UsersController(IUserService userService, IPersonService personService)
         {
-            _userBusiness = userBusiness;
-            _logger = logger;
+            _userService = userService ?? throw new ArgumentNullException(nameof(userService));
+            _personService = personService ?? throw new ArgumentNullException(nameof(personService));
         }
 
         [HttpGet]
-        [ProducesResponseType(typeof(IEnumerable<UserDTO>), 200)]
-        [ProducesResponseType(500)]
-        public async Task<IActionResult> GetAllUsers()
+        public async Task<ActionResult<IEnumerable<UserDTO>>> GetAllUsers()
         {
-            try
+            var users = await _userService.GetAllUsersAsync();
+            var userDtos = users.Select(async u =>
             {
-                var users = await _userBusiness.GetAllUsersAsync();
-                return Ok(users);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error al obtener los usuarios");
-                return StatusCode(500, new { message = ex.Message });
-            }
+                var person = await _personService.GetPersonByIdAsync(u.id_person);
+                return new UserDTO
+                {
+                    Id = u.id,
+                    UserName = u.username,
+                    PersonId = u.id_person,
+                    Password = u.password,
+                    PersonName = person?.name // Obtén el nombre de la persona
+                };
+            }).Select(t => t.Result).ToList(); // Ejecuta las tareas asíncronas y convierte a lista
+            return Ok(userDtos);
         }
 
         [HttpGet("{id}")]
-        [ProducesResponseType(typeof(UserDTO), 200)]
-        [ProducesResponseType(400)]
-        [ProducesResponseType(404)]
-        [ProducesResponseType(500)]
-        public async Task<IActionResult> GetUserById(int id)
+        public async Task<ActionResult<UserDTO>> GetUserById(int id)
         {
-            try
+            var user = await _userService.GetUserByIdAsync(id);
+            if (user == null)
             {
-                var user = await _userBusiness.GetUserByIdAsync(id);
-                return Ok(user);
+                return NotFound();
             }
-            catch (ValidationException ex)
+
+            var person = await _personService.GetPersonByIdAsync(user.id_person);
+            var userDto = new UserDTO
             {
-                _logger.LogWarning(ex, "Validación fallida para usuario con ID: {UserId}", id);
-                return BadRequest(new { message = ex.Message });
-            }
-            catch (EntityNotFoundException ex)
-            {
-                _logger.LogInformation(ex, "Usuario no encontrado con ID: {UserId}", id);
-                return NotFound(new { message = ex.Message });
-            }
-            catch (ExternalServiceException ex)
-            {
-                _logger.LogError(ex, "Error al obtener el usuario con ID: {UserId}", id);
-                return StatusCode(500, new { message = ex.Message });
-            }
+                Id = user.id,
+                UserName = user.username,
+                PersonId = user.id_person,
+                PersonName = person?.name // Obtén el nombre de la persona
+            };
+            return Ok(userDto);
         }
 
         [HttpPost]
-        [ProducesResponseType(typeof(UserDTO), 201)]
-        [ProducesResponseType(400)]
-        [ProducesResponseType(500)]
-        public async Task<IActionResult> CreateUserAsync([FromBody] UserCreateDTO userCreateDTO)
+        public async Task<ActionResult<User>> CreateUser([FromBody] UserCreateDTO userCreateDTO)
         {
-            try
+            if (!ModelState.IsValid)
             {
-                var createdUser = await _userBusiness.CreateUserAsync(userCreateDTO);
-                return CreatedAtAction(nameof(GetUserById), new { id = createdUser.Id }, createdUser);
+                return BadRequest(ModelState);
             }
-            catch (ValidationException ex)
+
+            var user = new User
             {
-                _logger.LogWarning(ex, "Validación fallida al crear el usuario");
-                return BadRequest(new { message = ex.Message });
-            }
-            catch (ExternalServiceException ex)
-            {
-                _logger.LogError(ex, "Error al crear el usuario");
-                return StatusCode(500, new { message = ex.Message });
-            }
+                username = userCreateDTO.UserName,
+                password = userCreateDTO.Password,
+                id_person = userCreateDTO.PersonId
+            };
+
+            var createdUser = await _userService.CreateUserAsync(user);
+            return CreatedAtAction(nameof(GetUserById), new { id = createdUser.id }, createdUser);
         }
 
         [HttpPut("{id}")]
-        [ProducesResponseType(200)]
-        [ProducesResponseType(400)]
-        [ProducesResponseType(404)]
-        [ProducesResponseType(500)]
-        public async Task<IActionResult> UpdateUserAsync(int id, [FromBody] UserDTO userDTO)
+        public async Task<IActionResult> UpdateUser(int id, [FromBody] UserCreateDTO userUpdateDTO)
         {
-            try
+            if (id != userUpdateDTO.id) // Ahora comparamos el id de la ruta con el id del usuario en el DTO
             {
-                if (id != userDTO.Id)
-                    return BadRequest(new { message = "El ID de la ruta no coincide con el ID del objeto." });
+                return BadRequest("El ID del usuario en la ruta no coincide con el ID del usuario en el cuerpo de la petición.");
+            }
 
-                var updated = await _userBusiness.UpdateUserAsync(userDTO);
-                if (!updated)
-                    return NotFound(new { message = "No se pudo actualizar el usuario." });
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
 
-                return Ok(new { message = "Usuario actualizado exitosamente" });
-            }
-            catch (ValidationException ex)
+            var existingUser = await _userService.GetUserByIdAsync(id);
+            if (existingUser == null)
             {
-                _logger.LogWarning(ex, "Validación fallida al actualizar el usuario con ID: {UserId}", id);
-                return BadRequest(new { message = ex.Message });
+                return NotFound();
             }
-            catch (EntityNotFoundException ex)
+
+            existingUser.username = userUpdateDTO.UserName;
+            existingUser.password = userUpdateDTO.Password;
+            existingUser.id_person = userUpdateDTO.PersonId;
+
+            var result = await _userService.UpdateUserAsync(existingUser);
+            if (!result)
             {
-                _logger.LogInformation(ex, "Usuario no encontrado con ID: {UserId}", id);
-                return NotFound(new { message = ex.Message });
+                return StatusCode(500, "Ocurrió un error al actualizar el usuario.");
             }
-            catch (ExternalServiceException ex)
-            {
-                _logger.LogError(ex, "Error al actualizar el usuario con ID: {UserId}", id);
-                return StatusCode(500, new { message = ex.Message });
-            }
+            return NoContent();
         }
 
         [HttpDelete("{id}")]
-        [ProducesResponseType(200)]
-        [ProducesResponseType(404)]
-        [ProducesResponseType(500)]
-        public async Task<IActionResult> DeleteUserAsync(int id)
+        public async Task<IActionResult> DeleteUser(int id)
         {
-            try
+            var result = await _userService.DeleteUserAsync(id);
+            if (!result)
             {
-                var deleted = await _userBusiness.DeleteUserAsync(id);
-                if (!deleted)
-                    return NotFound(new { message = "Usuario no encontrado o ya eliminado" });
-
-                return Ok(new { message = "Usuario eliminado exitosamente" });
+                return NotFound();
             }
-            catch (ExternalServiceException ex)
-            {
-                _logger.LogError(ex, "Error al eliminar el usuario con ID: {UserId}", id);
-                return StatusCode(500, new { message = ex.Message });
-            }
+            return NoContent();
         }
     }
 }

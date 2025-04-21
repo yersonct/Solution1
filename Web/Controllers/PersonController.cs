@@ -1,151 +1,129 @@
-﻿using Business;
-using Entity.DTOs;
-using Dapper;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
+﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
-using Utilities.Exceptions;
+using Microsoft.AspNetCore.Mvc;
+using Business.Interfaces;
+using Entity.Model;
+using Entity.DTOs; // Asegúrate de tener el namespace de tus DTOs
 
-namespace Web.Controllers
+namespace API.Controllers
 {
-    [Route("api/[controller]")]
     [ApiController]
-    [Produces("application/json")]
-    public class PersonController : ControllerBase
+    [Route("api/[controller]")]
+    public class PersonsController : ControllerBase
     {
-        private readonly PersonBusiness _personBusiness;
-        private readonly ILogger<PersonController> _logger;
+        private readonly IPersonService _personService;
 
-        public PersonController(PersonBusiness personBusiness, ILogger<PersonController> logger)
+        public PersonsController(IPersonService personService)
         {
-            _personBusiness = personBusiness;
-            _logger = logger;
+            _personService = personService ?? throw new ArgumentNullException(nameof(personService));
         }
 
         [HttpGet]
-        [ProducesResponseType(typeof(IEnumerable<PersonDTO>), 200)]
-        [ProducesResponseType(500)]
-        public async Task<IActionResult> GetAllPersons()
+        public async Task<ActionResult<IEnumerable<PersonDTO>>> GetAllPersons()
         {
-            try
+            var persons = await _personService.GetAllPersonsAsync();
+            var personDtos = persons.Select(p => new PersonDTO
             {
-                var persons = await _personBusiness.GetAllPersonsAsync();
-                return Ok(persons);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error al obtener los personas");
-                return StatusCode(500, new { message = ex.Message });
-            }
+                Id = p.id,
+                Name = p.name,
+                LastName = p.lastname,
+                Document = p.document,
+                Phone = p.phone,
+                Email = p.email,
+                Active = p.active
+            }).ToList();
+            return Ok(personDtos);
         }
 
         [HttpGet("{id}")]
-        [ProducesResponseType(typeof(PersonDTO), 200)]
-        [ProducesResponseType(400)]
-        [ProducesResponseType(404)]
-        [ProducesResponseType(500)]
-        public async Task<IActionResult> GetPersonById(int id)
+        public async Task<ActionResult<PersonDTO>> GetPersonById(int id)
         {
-            try
+            var person = await _personService.GetPersonByIdAsync(id);
+            if (person == null)
             {
-                var person = await _personBusiness.GetPersonByIdAsync(id);
-                return Ok(person);
+                return NotFound();
             }
-            catch (ValidationException ex)
+
+            var personDto = new PersonDTO
             {
-                _logger.LogWarning(ex, "Validación fallida para usuario con ID: {PersonId}", id);
-                return BadRequest(new { message = ex.Message });
-            }
-            catch (EntityNotFoundException ex)
-            {
-                _logger.LogInformation(ex, "Usuario no encontrado con ID: {PersonId}", id);
-                return NotFound(new { message = ex.Message });
-            }
-            catch (ExternalServiceException ex)
-            {
-                _logger.LogError(ex, "Error al obtener el usuario con ID: {PersonId}", id);
-                return StatusCode(500, new { message = ex.Message });
-            }
+                Id = person.id,
+                Name = person.name,
+                LastName = person.lastname,
+                Document = person.document,
+                Phone = person.phone,
+                Email = person.email,
+                Active = person.active
+            };
+            return Ok(personDto);
         }
 
         [HttpPost]
-        [ProducesResponseType(typeof(PersonDTO), 201)]
-        [ProducesResponseType(400)]
-        [ProducesResponseType(500)]
-        public async Task<IActionResult> CreatePersonAsync([FromBody] PersonDTO personDTO)
+        public async Task<ActionResult<Person>> CreatePerson([FromBody] PersonDTO createPersonDTO)
         {
-            try
+            if (!ModelState.IsValid)
             {
-                var createdPerson = await _personBusiness.CreatePersonAsync(personDTO);
-                return CreatedAtAction(nameof(GetPersonById), new { id = createdPerson.Id }, createdPerson);
+                return BadRequest(ModelState);
             }
-            catch (ValidationException ex)
+
+            var person = new Person
             {
-                _logger.LogWarning(ex, "Validación fallida al crear el Personas");
-                return BadRequest(new { message = ex.Message });
-            }
-            catch (ExternalServiceException ex)
-            {
-                _logger.LogError(ex, "Error al crear el Personas");
-                return StatusCode(500, new { message = ex.Message });
-            }
+                name = createPersonDTO.Name,
+                lastname = createPersonDTO.LastName,
+                document = createPersonDTO.Document,
+                phone = createPersonDTO.Phone,
+                email = createPersonDTO.Email,
+                active = createPersonDTO.Active
+            };
+
+            var createdPerson = await _personService.CreatePersonAsync(person);
+            return CreatedAtAction(nameof(GetPersonById), new { id = createdPerson.id }, createdPerson);
         }
 
         [HttpPut("{id}")]
-        [ProducesResponseType(typeof(PersonDTO), 200)]
-        [ProducesResponseType(400)]
-        [ProducesResponseType(404)]
-        [ProducesResponseType(500)]
-        public async Task<IActionResult> UpdatePersonAsync(int id, [FromBody] PersonDTO personDTO)
+        public async Task<IActionResult> UpdatePerson(int id, [FromBody] PersonDTO updatePersonDTO)
         {
-            if (id != personDTO.Id)
+            if (id != updatePersonDTO.Id)
             {
-                return BadRequest(new { message = "El ID de la ruta no coincide con el ID del objeto." });
+                return BadRequest("El ID de la persona no coincide con el ID de la ruta.");
             }
-            try
-            {
-                
 
-                var updatedPerson = await _personBusiness.UpdatePersonAsync(personDTO);
-                return Ok(updatedPerson);
-            }
-            catch (ValidationException ex)
+            if (!ModelState.IsValid)
             {
-                _logger.LogWarning(ex, "Validación fallida al actualizar el Personas con ID: {PersonId}", id);
-                return BadRequest(new { message = ex.Message });
+                return BadRequest(ModelState);
             }
-            catch (EntityNotFoundException ex)
+
+            var existingPerson = await _personService.GetPersonByIdAsync(id);
+            if (existingPerson == null)
             {
-                _logger.LogInformation(ex, "Personas no encontrado con ID: {PersonId}", id);
-                return NotFound(new { message = ex.Message });
+                return NotFound();
             }
-            catch (ExternalServiceException ex)
+
+            existingPerson.name = updatePersonDTO.Name;
+            existingPerson.lastname = updatePersonDTO.LastName;
+            existingPerson.document = updatePersonDTO.Document;
+            existingPerson.phone = updatePersonDTO.Phone;
+            existingPerson.email = updatePersonDTO.Email;
+            existingPerson.active = updatePersonDTO.Active;
+
+            var result = await _personService.UpdatePersonAsync(existingPerson);
+            if (!result)
             {
-                _logger.LogError(ex, "Error al actualizar el usuario con ID: {PersonId}", id);
-                return StatusCode(500, new { message = ex.Message });
+                return StatusCode(500, "Ocurrió un error al actualizar la persona.");
             }
+            return NoContent();
         }
 
         [HttpDelete("{id}")]
-        [ProducesResponseType(200)]
-        [ProducesResponseType(404)]
-        [ProducesResponseType(500)]
-        public async Task<IActionResult> DeletePersonAsync(int id)
+        public async Task<IActionResult> DeletePerson(int id)
         {
-            try
+            var result = await _personService.DeletePersonAsync(id);
+            if (!result)
             {
-                var deleted = await _personBusiness.DeletePersonAsync(id);
-                if (!deleted)
-                    return NotFound(new { message = "Personas no encontrado o ya eliminado" });
-
-                return Ok(new { message = "Personas eliminado exitosamente" });
+                return NotFound();
             }
-            catch (ExternalServiceException ex)
-            {
-                _logger.LogError(ex, "Error al eliminar el Personas con ID: {UserId}", id);
-                return StatusCode(500, new { message = ex.Message });
-            }
+            return NoContent();
         }
     }
 }

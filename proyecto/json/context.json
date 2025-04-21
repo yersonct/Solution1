@@ -1,0 +1,232 @@
+[
+    {
+        "id":"button-1",
+        "title":"Lista negra",
+        "contenedor":"<table><thead><tr><th>Id</th><th>Razón</th><th>Fecha de restricción</th><th>Id del cliente</th><th>Acción</th> </tr></thead><tbody id='cuerpo-1'>",
+        "ruta":"https://localhost:7035/api/BlackList",
+        "campos":["id","reason","restrictiondate","id_client"],
+        "formulario": "<form id='blacklistForm'><label>Motivo:</label><input type='text' name='reason' required> <label>Fecha:</label><input type='date' name='restrictiondate' required> <label>ID Cliente:</label><input type='number' name='id_client' required> <button type='submit'>Guardar</button></form>",
+        "Eliminar":"Eliminar-1",
+        "Actulizar":"Actualizar-1",
+        "EndPoint":["https://localhost:7035/api/BlackList"]
+    },
+    {
+        "id":"button-2",
+        "title":"Camara",
+        "contenedor":"<table><thead><tr><th>Id</th><th>Visión nocturna infrarroja</th><th>Alta resolución</th><th>Iluminación infrarroja</th><th>Nombre</th><th>Ángulo de visión optimizado</th><th>Alta velocidad de obturación</th><th>Acción</th></tr></thead><tbody id='cuerpo-1'>",
+        "ruta":"https://localhost:7035/api/Camara",
+        "campos":["id","nightvisioninfrared","highresolution","infraredlighting","name","optimizedangleofvision","highshutterspeed"],
+        "formulario":"<form action='/tu-endpoint' method='post'><label for='nightvisioninfrared'>Visión Nocturna:</label><select name='nightvisioninfrared' id='nightvisioninfrared'><option value='true'>Sí</option><option value='false'>No</option></select><label for='highresolution'>Alta Resolución:</label><select name='highresolution' id='highresolution'><option value='true'>Sí</option><option value='false'>No</option></select><label for='infraredlighting'>Iluminación IR:</label><select name='infraredlighting' id='infraredlighting'><option value='true'>Sí</option><option value='false'>No</option></select><label for='name'>Nombre:</label><input type='text' name='name' id='name' required><label for='optimizedangleofvision'>Ángulo Optimizado:</label><select name='optimizedangleofvision' id='optimizedangleofvision'><option value='true'>Sí</option><option value='false'>No</option></select><label for='highshutterspeed'>Velocidad Obturación:</label><select name='highshutterspeed' id='highshutterspeed'><option value='true'>Sí</option><option value='false'>No</option></select><label for='id_parking'>ID Parking:</label><input type='number' name='id_parking' id='id_parking' required><button type='submit'>Guardar</button></form>",
+        "Eliminar":"Eliminar-2",
+        "Actulizar":"Actualizar-2"
+    },
+    {
+        "id":"button-3",
+        "title":"Cliente",
+        "contenedor":"<table><thead><tr><th>Id</th><th>Nombre</th><th>Id de usuario</th><th>Acción</th></tr></thead><tbody id='cuerpo-1'>",
+        "ruta":"https://localhost:7035/api/Client",
+        "campos":["id", "name", "id_user"],
+        "formulario":"<form action='/tu-endpoint' method='post'><label for='id_user'>ID Usuario:</label><input type='number' name='id_user' id='id_user' required><br><br><label for='name'>Nombre:</label><input type='text' name='name' id='name' required><br><br><button type='submit'>Guardar</button></form>",
+        "Eliminar":"Eliminar-3",
+        "Actulizar":"Actualizar-3"
+    },
+    {
+        "id":"button-4",
+        "title":"Formulario de modulos",
+        "contenedor":"<table><thead><tr><th>Id</th><th>Id de formulario</th><th>Nombre del formulario</th><th>Id de módulo</th><th>Nombre del módulo</th><th>Acción</th></tr></thead><tbody id='cuerpo-1'>",
+        "ruta":"https://localhost:7035/api/FormModule",
+        "campos":["id", "formId", "formName", "moduleId", "moduleName"],
+        "formulario":"<form action='/tu-endpoint' method='post'><label for='id_module'>ID Módulo:</label><input type='number' name='id_module' id='id_module' required><label for='id_forms'>ID Formulario:</label><input type='number' name='id_forms' id='id_forms' required><button type='submit'>Guardar</button></form>",
+        "Eliminar":"Eliminar-4",
+        "Actulizar":"Actualizar-4"
+    },
+    {
+        "id":"button-5",
+        "title":"Formularios con roles y permisos",
+        "contenedor":"<table><thead><tr><th>Id</th><th>Id de formulario</th><th>Nombre del formulario</th><th>Id de rol</th><th>Nombre del rol</th><th>Id de permiso</th><th>Acción</th></tr> </thead><tbody id='cuerpo-1'>",
+        "ruta":"https://localhost:7035/api/FormRolPermission",
+        "campos":["id","formId","formName","rolId","rolName","permissionId","permissionName"],
+        "formulario":"<form action='/tu-endpoint' method='post'><label for='id_forms'>ID Formulario:</label><input type='number' name='id_forms' id='id_forms' required><label for='id_role'>ID Rol:</label><input type='number' name='id_role' id='id_role' required><label for='id_permission'>ID Permiso:</label><input type='number' name='id_permission' id='id_permission' required><button type='submit'>Guardar</button></form>",
+        "Eliminar":"Eliminar-5",
+        "Actulizar":"Actualizar-5"
+    },
+    {
+        "id":"button-6",
+        "title":"Formularios",
+        "contenedor":"<table><thead><tr><th>Id</th><th>Nombre</th><th>URL</th><th>Acción</th></tr></thead><tbody id='cuerpo-1'>",
+        "ruta":"https://localhost:7035/api/Forms",
+        "campos":["id", "name", "url"],
+        "formulario":"",
+        "Eliminar":"Eliminar-6",
+        "Actulizar":"Actualizar-6"
+    },
+    {
+        "id":"button-7",
+        "title":"Factura",
+        "contenedor":"<table><thead><tr><th>Id</th><th>Monto total</th><th>Estado de pago</th><th>Fecha de pago</th><th>Id de historial de vehículo</th><th>Acción</th></tr></thead><tbody id='cuerpo-1'>",
+        "ruta":"https://localhost:7035/api/Invoices",
+        "campos":["id", "totalamount", "paymentstatus", "paymentdate", "vehiclehistoryid"],
+        "formulario":"",
+        "Eliminar":"Eliminar-7",
+        "Actulizar":"Actualizar-7"
+    },
+    {
+        "id":"button-8",
+        "title":"Membresia",
+        "contenedor":"<table><thead><tr><th>Id</th><th>Tipo de membresía</th><th>Fecha de inicio</th><th>Fecha de fin</th><th>Activo</th><th>Acción</th></tr></thead><tbody id='cuerpo-1'>",
+        "ruta":"https://localhost:7035/api/MemberShips",
+        "campos":["id", "membershiptype", "startdate", "enddate", "active"],
+        "formulario":"",
+        "Eliminar":"Eliminar-8",
+        "Actulizar":"Actualizar-8"
+    },
+    {
+        "id":"button-9",
+        "title":"Membresia de vehiculos",
+        "contenedor":"<table><thead><tr><th>Id</th><th>Id de vehículo</th><th>Id de membresía</th></tr><th>Acción</th></thead><tbody id='cuerpo-1'>",
+        "ruta":"https://localhost:7035/api/MembershipsVehicle",
+        "campos":["id", "id_vehicle", "id_memberships"],
+        "formulario":"",
+        "Eliminar":"Eliminar-9",
+        "Actulizar":"Actualizar-9"
+    },
+    {
+        "id":"button-10",
+        "title":"Module",
+        "contenedor":"<table><thead><tr><th>Id</th><th>Nombre</th><th>Acción</th></tr></thead><tbody id='cuerpo-1'>",
+        "ruta":"https://localhost:7035/api/Module",
+        "campos":["id", "name", "id_user", "id_camara"],
+        "formulario":"",
+        "Eliminar":"Eliminar-10",
+        "Actulizar":"Actualizar-10"
+    },
+    {
+        "id":"button-11",
+        "title": "Parqueadero",
+        "contenedor":"<table><thead><tr><th>Id</th><th>Nombre</th><th>Ubicación</th><th>Habilidad</th><th>Id de cámara</th><th>Acción</th></tr></thead><tbody id='cuerpo-1'>",
+        "ruta":"https://localhost:7035/api/Parking",
+        "campos":["id", "amount", "startduration", "endduration", "id_typerates", "typerates"],
+        "formulario":"",
+        "Eliminar":"Eliminar-11",
+        "Actulizar":"Actualizar-11"
+    },
+    {
+        "id":"button-12",
+        "title":"Permisos",
+        "contenedor":"<table><thead><tr><th>Id</th><th>Nombre</th><th>Acción</th></tr></thead><tbody id='cuerpo-1'>",
+        "ruta":"https://localhost:7035/api/Permission",
+        "campos":["id", "entrydatetime", "exitdatetime", "id_vehicle", "vehicleId", "vehiclehistory"],
+        "formulario":"",
+        "Eliminar":"Eliminar-12",
+        "Actulizar":"Actualizar-12"
+    },
+    {
+        "id":13,
+        "title":"Personas",
+        "contenedor":"<table><thead><tr><th>Id</th><th>Nombre</th><th>Apellido</th><th>Documento</th><th>Teléfono</th><th>Correo electrónico</th><th>Activo</th><th>Acción</th></tr></thead><tbody id='cuerpo-1'>",
+        "ruta":"https://localhost:7035/api/Person",
+        "campos":["id", "name", "description", "active"],
+        "formulario":"",
+        "Eliminar":"Eliminar-13",
+        "Actulizar":"Actualizar-13"
+    },
+    {
+        "id":"button-14",
+        "title":"Tarifas",
+        "contenedor":"<table><thead><tr><th>Id</th><th>Monto</th><th>Duración de inicio</th><th>Duración de fin</th><th>Id de tipo de tarifa</th><th>Tipo de tarifa</th><th>Acción</th></tr></thead><tbody id='cuerpo-1'>",
+        "ruta":"https://localhost:7035/api/Rates",
+        "campos":["id", "rolId", "userId", "rolName", "userName"],
+        "Eliminar":"Eliminar-14",
+        "Actulizar":"Actualizar-14"
+    },
+    {
+        "id":"button-15",
+        "title":"Registro de vehiculos",
+        "contenedor":"<table><thead><tr><th>Id</th><th>Fecha y hora de entrada</th><th>Fecha y hora de salida</th><th>Id de vehículo</th><th>Id de vehículo (historial)</th><th>Historial de vehículo</th><th>Acción</th></tr></thead><tbody id='cuerpo-1'>",
+        "ruta":"https://localhost:7035/api/RegisteredVehicle",
+        "campos":["id", "name", "price", "ratesId"],
+        "formulario":"",
+        "Eliminar":"Eliminar-15",
+        "Actulizar":"Actualizar-15"
+    },
+    {
+        "id":"button-16",
+        "title":"Roles",
+        "contenedor":"<table><thead><tr><th>Id</th><th>Nombre</th><th>Descripción</th><th>Activo</th><th>Acción</th></tr></thead><tbody id='cuerpo-1'>",
+        "ruta":"https://localhost:7035/api/Rol",
+        "campos":["id", "name", "price", "ratesId"],
+        "formulario":"",
+        "Eliminar":"Eliminar-16",
+        "Actulizar":"Actualizar-16"
+    },
+    {
+        "id":"button-17",
+        "title":"Roles de usuarios",
+        "contenedor":"<table><thead><tr><th>Id</th><th>Id de rol</th><th>Id de usuario</th><th>Nombre de rol</th><th>Nombre de usuario</th><th>Acción</th></tr></thead><tbody id='cuerpo-1'>",
+        "ruta":"https://localhost:7035/api/RolUser",
+        "campos":["id", "totalTime", "registeredVehicleId", "typeVehicleId"],
+        "formulario":"",
+        "Eliminar":"Eliminar-17",
+        "Actulizar":"Actualizar-17"
+    },
+    {
+        "id":"button-18",
+        "title":"Tipos de Tarifas",
+        "contenedor":"<table><thead><tr><th>Id</th><th>Nombre</th><th>Precio</th><th>Id de tarifa</th><th>Acción</th></tr></thead><tbody id='cuerpo-1'>",
+        "ruta":"https://localhost:7035/api/TypeRates",
+        "campos":["id", "vehicleHistoryId", "ratesId", "parkingId", "hoursUsed", "subTotal"],
+        "formulario":"",
+        "Eliminar":"Eliminar-18",
+        "Actulizar":"Actualizar-18"
+    },
+    {
+        "id":"button-19",
+        "title":"Tipos de vehiculos",
+        "contenedor":"<table><thead><tr><th>Id</th><th>Nombre</th><th>Acción</th></tr></thead><tbody id='cuerpo-1'>",
+        "ruta":"https://localhost:7035/api/TypeVehicle",
+        "campos":["id", "plate", "color", "id_Client", "client", "registeredVehicle", "membershipsVehicle"],
+        "formulario":"",
+        "Eliminar":"Eliminar-19",
+        "Actulizar":"Actualizar-19"
+    },
+    {
+        "id":"button-20",
+        "title":"Usuarios",
+        "contenedor":"<table><thead><tr><th>Id</th><th>Nombre de usuario</th><th>Id de persona</th><th>Nombre de persona</th><th>Acción</th></tr></thead><tbody id='cuerpo-1'>",
+        "ruta":"https://localhost:7035/api/User",
+        "campos":["id", "totalTime", "registeredVehicleId", "typeVehicleId"],
+        "formulario":"",
+        "Eliminar":"Eliminar-20",
+        "Actulizar":"Actualizar-20"
+    },
+    {
+        "id":"button-21",
+        "title":"Vehiculos",
+        "contenedor":"<table><thead><tr><th>Id</th><th>Placa</th><th>Color</th><th>Id de cliente</th><th>Cliente</th><th>Vehículo registrado</th><th>Membresías del vehículo</th><th>Acción</th></tr></thead><tbody id='cuerpo-1'>",
+        "ruta":"https://localhost:7035/api/Vehicle",
+        "campos":["id", "vehicleHistoryId", "ratesId", "parkingId", "hoursUsed", "subTotal"],
+        "Eliminar":"Eliminar-21",
+        "Actulizar":"Actualizar-21"
+    },
+    {
+        "id":"button-22",
+        "title":"Historial de vehiculos",
+        "contenedor":"<table><thead><tr><th>Id</th><th>Tiempo total</th><th>Id de vehículo registrado</th><th>Id de tipo de vehículo</th><th>Acción</th></tr></thead><tbody id='cuerpo-1'>",
+        "ruta":"https://localhost:7035/api/VehicleHistory",
+        "campos":["id", "plate", "color", "id_Client", "client", "registeredVehicle", "membershipsVehicle"],
+        "formulario":"",
+        "Eliminar":"Eliminar-22",
+        "Actulizar":"Actualizar-22"
+    },
+    {
+        "id":"button-23",
+        "title":"Historial de vehiculos,parqueadero y tarifas",
+        "contenedor":"<table><thead><tr><th>Id</th><th>Id de historial de vehículo</th><th>Id de tarifa</th><th>Id de estacionamiento</th><th>Horas usadas</th><th>Subtotal</th><th>Acción</th></tr></thead><tbody id='cuerpo-1'>",
+        "ruta":"https://localhost:7035/api/VehicleHistoryParkingRates",
+        "campos":["id", "totalTime", "registeredVehicleId", "typeVehicleId"],
+        "formulario":"",
+        "Eliminar":"Eliminar-23",
+        "Actulizar":"Actualizar-23"
+    }
+]
+

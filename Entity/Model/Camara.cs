@@ -10,7 +10,7 @@ namespace Entity.Model
    public class Camara
     {
         public int id { get; set; }
-        public string name { get; set; }
+        public string? name { get; set; }= null;
         public bool nightvisioninfrared { get; set; }
         public bool highresolution { get; set; }
         public bool infraredlighting { get; set; }
@@ -18,8 +18,7 @@ namespace Entity.Model
         public bool highshutterspeed { get; set; }
 
         // Relación con Parking (uno a muchos)
-        public int id_parking { get; set; }  // Añadir una clave foránea explícita
-        public Parking parking { get; set; } // Relación de navegación
+        public Parking parking { get; set; }
     }
 
 

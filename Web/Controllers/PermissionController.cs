@@ -1,151 +1,110 @@
-﻿using Business;
-using Entity.DTOs;
-using Dapper;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
+﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Utilities.Exceptions;
+using Microsoft.AspNetCore.Mvc;
+using Business.Interfaces;
+using Entity.Model;
+using Entity.DTOs; // Asegúrate de tener el namespace de tus DTOs
+using System.Linq;
 
-namespace Web.Controllers
+namespace API.Controllers
 {
-    [Route("api/[controller]")]
     [ApiController]
-    [Produces("application/json")]
-    public class PermissionController : ControllerBase
+    [Route("api/[controller]")]
+    public class PermissionsController : ControllerBase
     {
-        private readonly PermissionBusiness _PermissionBusiness;
-        private readonly ILogger<PermissionController> _logger;
+        private readonly IPermissionService _permissionService;
 
-        public PermissionController(PermissionBusiness PermissionBusiness, ILogger<PermissionController> logger)
+        public PermissionsController(IPermissionService permissionService)
         {
-            _PermissionBusiness = PermissionBusiness;
-            _logger = logger;
+            _permissionService = permissionService ?? throw new ArgumentNullException(nameof(permissionService));
         }
 
         [HttpGet]
-        [ProducesResponseType(typeof(IEnumerable<PermissionDTO>), 200)]
-        [ProducesResponseType(500)]
-        public async Task<IActionResult> GetAllPermissions()
+        public async Task<ActionResult<IEnumerable<PermissionDTO>>> GetAllPermissions()
         {
-            try
+            var permissions = await _permissionService.GetAllPermissionsAsync();
+            var permissionDtos = permissions.Select(p => new PermissionDTO
             {
-                var Permissions = await _PermissionBusiness.GetAllPermissionsAsync();
-                return Ok(Permissions);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error al obtener los Permissionas");
-                return StatusCode(500, new { message = ex.Message });
-            }
+                id = p.id,
+                name = p.name,
+            }).ToList();
+            return Ok(permissionDtos);
         }
 
         [HttpGet("{id}")]
-        [ProducesResponseType(typeof(PermissionDTO), 200)]
-        [ProducesResponseType(400)]
-        [ProducesResponseType(404)]
-        [ProducesResponseType(500)]
-        public async Task<IActionResult> GetPermissionById(int id)
+        public async Task<ActionResult<PermissionDTO>> GetPermissionById(int id)
         {
-            try
+            var permission = await _permissionService.GetPermissionByIdAsync(id);
+            if (permission == null)
             {
-                var Permission = await _PermissionBusiness.GetPermissionByIdAsync(id);
-                return Ok(Permission);
+                return NotFound();
             }
-            catch (ValidationException ex)
+
+            var permissionDto = new PermissionDTO
             {
-                _logger.LogWarning(ex, "Validación fallida para usuario con ID: {PermissionId}", id);
-                return BadRequest(new { message = ex.Message });
-            }
-            catch (EntityNotFoundException ex)
-            {
-                _logger.LogInformation(ex, "Usuario no encontrado con ID: {PermissionId}", id);
-                return NotFound(new { message = ex.Message });
-            }
-            catch (ExternalServiceException ex)
-            {
-                _logger.LogError(ex, "Error al obtener el usuario con ID: {PermissionId}", id);
-                return StatusCode(500, new { message = ex.Message });
-            }
+                id = permission.id,
+                name = permission.name,
+            };
+            return Ok(permissionDto);
         }
 
         [HttpPost]
-        [ProducesResponseType(typeof(PermissionDTO), 201)]
-        [ProducesResponseType(400)]
-        [ProducesResponseType(500)]
-        public async Task<IActionResult> CreatePermissionAsync([FromBody] PermissionDTO PermissionDTO)
+        public async Task<ActionResult<Permission>> CreatePermission([FromBody] PermissionDTO permissionDto)
         {
-            try
+            if (!ModelState.IsValid)
             {
-                var createdPermission = await _PermissionBusiness.CreatePermissionAsync(PermissionDTO);
-                return CreatedAtAction(nameof(GetPermissionById), new { id = createdPermission.Id }, createdPermission);
+                return BadRequest(ModelState);
             }
-            catch (ValidationException ex)
+
+            var permission = new Permission
             {
-                _logger.LogWarning(ex, "Validación fallida al crear el Permissionas");
-                return BadRequest(new { message = ex.Message });
-            }
-            catch (ExternalServiceException ex)
-            {
-                _logger.LogError(ex, "Error al crear el Permissionas");
-                return StatusCode(500, new { message = ex.Message });
-            }
+                name = permissionDto.name,
+            };
+
+            var createdPermission = await _permissionService.CreatePermissionAsync(permission);
+            return CreatedAtAction(nameof(GetPermissionById), new { id = createdPermission.id }, createdPermission);
         }
 
         [HttpPut("{id}")]
-        [ProducesResponseType(typeof(PermissionDTO), 200)]
-        [ProducesResponseType(400)]
-        [ProducesResponseType(404)]
-        [ProducesResponseType(500)]
-        public async Task<IActionResult> UpdatePermissionAsync(int id, [FromBody] PermissionDTO PermissionDTO)
+        public async Task<IActionResult> UpdatePermission(int id, [FromBody] PermissionDTO permissionDto)
         {
-            if (id != PermissionDTO.Id)
+            if (id != permissionDto.id)
             {
-                return BadRequest(new { message = "El ID de la ruta no coincide con el ID del objeto." });
+                return BadRequest("El ID del permiso no coincide con el ID de la ruta.");
             }
-            try
+
+            if (!ModelState.IsValid)
             {
+                return BadRequest(ModelState);
+            }
+
+            var existingPermission = await _permissionService.GetPermissionByIdAsync(id);
+            if (existingPermission == null)
+            {
+                return NotFound();
+            }
+
+            existingPermission.name = permissionDto.name;
 
 
-                var updatedPermission = await _PermissionBusiness.UpdatePermissionAsync(PermissionDTO);
-                return Ok(updatedPermission);
-            }
-            catch (ValidationException ex)
+            var result = await _permissionService.UpdatePermissionAsync(existingPermission);
+            if (!result)
             {
-                _logger.LogWarning(ex, "Validación fallida al actualizar el Permissionas con ID: {PermissionId}", id);
-                return BadRequest(new { message = ex.Message });
+                return NotFound();
             }
-            catch (EntityNotFoundException ex)
-            {
-                _logger.LogInformation(ex, "Permissionas no encontrado con ID: {PermissionId}", id);
-                return NotFound(new { message = ex.Message });
-            }
-            catch (ExternalServiceException ex)
-            {
-                _logger.LogError(ex, "Error al actualizar el usuario con ID: {PermissionId}", id);
-                return StatusCode(500, new { message = ex.Message });
-            }
+            return NoContent();
         }
 
         [HttpDelete("{id}")]
-        [ProducesResponseType(200)]
-        [ProducesResponseType(404)]
-        [ProducesResponseType(500)]
-        public async Task<IActionResult> DeletePermissionAsync(int id)
+        public async Task<IActionResult> DeletePermission(int id)
         {
-            try
+            var result = await _permissionService.DeletePermissionAsync(id);
+            if (!result)
             {
-                var deleted = await _PermissionBusiness.DeletePermissionAsync(id);
-                if (!deleted)
-                    return NotFound(new { message = "Permissionas no encontrado o ya eliminado" });
-
-                return Ok(new { message = "Permissionas eliminado exitosamente" });
+                return NotFound();
             }
-            catch (ExternalServiceException ex)
-            {
-                _logger.LogError(ex, "Error al eliminar el Permissionas con ID: {UserId}", id);
-                return StatusCode(500, new { message = ex.Message });
-            }
+            return NoContent();
         }
     }
 }

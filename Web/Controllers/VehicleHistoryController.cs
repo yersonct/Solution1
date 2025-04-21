@@ -1,159 +1,83 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Business;
-using Entity.DTOs;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
+using Business.Interfaces;
+using Entity.DTOs;
 
 namespace API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class VehicleHistoryController : ControllerBase
+    public class VehicleHistoriesController : ControllerBase
     {
-        private readonly VehicleHistoryBusiness _vehicleHistoryBusiness;
-        private readonly ILogger<VehicleHistoryController> _logger;
+        private readonly IVehicleHistoryService _vehicleHistoryService;
 
-        public VehicleHistoryController(VehicleHistoryBusiness vehicleHistoryBusiness, ILogger<VehicleHistoryController> logger)
+        public VehicleHistoriesController(IVehicleHistoryService vehicleHistoryService)
         {
-            _vehicleHistoryBusiness = vehicleHistoryBusiness ?? throw new ArgumentNullException(nameof(vehicleHistoryBusiness));
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _vehicleHistoryService = vehicleHistoryService ?? throw new ArgumentNullException(nameof(vehicleHistoryService));
         }
 
         [HttpGet]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<Entity.DTOs.VehicleHistoryDTO>))]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> GetAll()
+        public async Task<ActionResult<IEnumerable<VehicleHistoryDTO>>> GetAllVehicleHistories()
         {
-            try
-            {
-                var vehicleHistories = await _vehicleHistoryBusiness.GetAllAsync();
-                return Ok(vehicleHistories);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error al obtener todos los registros de VehicleHistory en el controlador.");
-                return StatusCode(StatusCodes.Status500InternalServerError, "Error interno del servidor.");
-            }
+            var vehicleHistories = await _vehicleHistoryService.GetAllVehicleHistoriesAsync();
+            return Ok(vehicleHistories);
         }
 
         [HttpGet("{id}")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Entity.DTOs.VehicleHistoryDTO))]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> GetById(int id)
+        public async Task<ActionResult<VehicleHistoryDTO>> GetVehicleHistoryById(int id)
         {
-            try
-            {
-                var vehicleHistory = await _vehicleHistoryBusiness.GetByIdAsync(id);
-                if (vehicleHistory == null)
-                {
-                    return NotFound();
-                }
-                return Ok(vehicleHistory);
-            }
-            catch (Utilities.Exceptions.EntityNotFoundException)
+            var vehicleHistory = await _vehicleHistoryService.GetVehicleHistoryByIdAsync(id);
+            if (vehicleHistory == null)
             {
                 return NotFound();
             }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error al obtener el registro de VehicleHistory con ID {Id} en el controlador.", id);
-                return StatusCode(StatusCodes.Status500InternalServerError, "Error interno del servidor.");
-            }
+            return Ok(vehicleHistory);
         }
 
         [HttpPost]
-        [ProducesResponseType(StatusCodes.Status201Created, Type = typeof(Entity.DTOs.VehicleHistoryDTO))]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> Create([FromBody] VehicleHistoryCreateDTO dto)
+        public async Task<ActionResult<int>> CreateVehicleHistory([FromBody] VehicleHistoryCreateDTO vehicleHistory)
         {
-            try
+            if (!ModelState.IsValid)
             {
-                if (dto == null || !ModelState.IsValid)
-                {
-                    return BadRequest(ModelState);
-                }
-
-                var createdVehicleHistory = await _vehicleHistoryBusiness.CreateAsync(dto);
-                return CreatedAtAction(nameof(GetById), new { id = createdVehicleHistory.id }, createdVehicleHistory);
-            }
-            catch (Utilities.Exceptions.ValidationException ex)
-            {
-                ModelState.AddModelError(ex.PropertyName ?? "", ex.Message);
                 return BadRequest(ModelState);
             }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error al crear un nuevo registro de VehicleHistory en el controlador.", dto);
-                return StatusCode(StatusCodes.Status500InternalServerError, "Error interno del servidor.");
-            }
+
+            var createdVehicleHistoryId = await _vehicleHistoryService.CreateVehicleHistoryAsync(vehicleHistory);
+            return CreatedAtAction(nameof(GetVehicleHistoryById), new { id = createdVehicleHistoryId }, createdVehicleHistoryId);
         }
 
         [HttpPut("{id}")]
-        [ProducesResponseType(StatusCodes.Status204NoContent)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> Update(int id, [FromBody] VehicleHistoryCreateDTO dto)
+        public async Task<IActionResult> UpdateVehicleHistory(int id, [FromBody] VehicleHistoryCreateDTO vehicleHistory)
         {
-            try
+            if (id != vehicleHistory.id)
             {
-                if (dto == null || !ModelState.IsValid)
-                {
-                    return BadRequest(ModelState);
-                }
-
-                var updated = await _vehicleHistoryBusiness.UpdateAsync(id, dto);
-                if (!updated)
-                {
-                    return NotFound();
-                }
-                return NoContent();
+                return BadRequest("El ID del historial del vehículo no coincide con el ID de la ruta.");
             }
-            catch (Utilities.Exceptions.EntityNotFoundException)
+
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var result = await _vehicleHistoryService.UpdateVehicleHistoryAsync(id, vehicleHistory);
+            if (!result)
             {
                 return NotFound();
             }
-            catch (Utilities.Exceptions.ValidationException ex)
-            {
-                ModelState.AddModelError(ex.PropertyName ?? "", ex.Message);
-                return BadRequest(ModelState);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error al actualizar el registro de VehicleHistory con ID {Id} en el controlador.", id, dto);
-                return StatusCode(StatusCodes.Status500InternalServerError, "Error interno del servidor.");
-            }
+            return NoContent();
         }
 
         [HttpDelete("{id}")]
-        [ProducesResponseType(StatusCodes.Status204NoContent)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> Delete(int id)
+        public async Task<IActionResult> DeleteVehicleHistory(int id)
         {
-            try
-            {
-                var deleted = await _vehicleHistoryBusiness.DeleteAsync(id);
-                if (!deleted)
-                {
-                    return NotFound();
-                }
-                return NoContent();
-            }
-            catch (Utilities.Exceptions.EntityNotFoundException)
+            var result = await _vehicleHistoryService.DeleteVehicleHistoryAsync(id);
+            if (!result)
             {
                 return NotFound();
             }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error al eliminar el registro de VehicleHistory con ID {Id} en el controlador.", id);
-                return StatusCode(StatusCodes.Status500InternalServerError, "Error interno del servidor.");
-            }
+            return NoContent();
         }
     }
 }

@@ -1,149 +1,118 @@
-﻿using Business;
-using Entity.DTOs;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
+﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Utilities.Exceptions;
+using Microsoft.AspNetCore.Mvc;
+using Business.Interfaces;
+using Entity.Model;
+using Entity.DTOs; // Add this using statement
+using System.Linq; // Add this using
 
-namespace Web.Controllers
+namespace API.Controllers
 {
-    [Route("api/[controller]")]
     [ApiController]
-    [Produces("application/json")]
-    public class RolUserController : ControllerBase
+    [Route("api/[controller]")]
+    public class RolUsersController : ControllerBase
     {
-        private readonly RolUserBusiness _rolUserBusiness;
-        private readonly ILogger<RolUserController> _logger;
+        private readonly IRolUserService _rolUserService;
 
-        public RolUserController(RolUserBusiness rolUserBusiness, ILogger<RolUserController> logger)
+        public RolUsersController(IRolUserService rolUserService)
         {
-            _rolUserBusiness = rolUserBusiness;
-            _logger = logger;
+            _rolUserService = rolUserService ?? throw new ArgumentNullException(nameof(rolUserService));
         }
 
         [HttpGet]
-        [ProducesResponseType(typeof(IEnumerable<RolUserDTO>), 200)]
-        [ProducesResponseType(500)]
-        public async Task<IActionResult> GetAllRolUsers()
+        public async Task<ActionResult<IEnumerable<RolUserDTO>>> GetAllRolUsers() // Change to RolUserDTO
         {
-            try
+            var rolUsers = await _rolUserService.GetAllRolUsersAsync();
+            var rolUserDtos = rolUsers.Select(ru => new RolUserDTO // Project to DTO
             {
-                var rolUsers = await _rolUserBusiness.GetAllRolUsersAsync();
-                return Ok(rolUsers);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error al obtener los RolUsers.");
-                return StatusCode(500, new { message = ex.Message });
-            }
+                id = ru.id,
+                id_rol = ru.id_rol,
+                id_user = ru.id_user,
+                RolName = ru.Rol?.Name, // Access Name property
+                UserName = ru.User?.username // Access Name property
+            }).ToList();
+            return Ok(rolUserDtos);
         }
 
         [HttpGet("{id}")]
-        [ProducesResponseType(typeof(RolUserDTO), 200)]
-        [ProducesResponseType(400)]
-        [ProducesResponseType(404)]
-        [ProducesResponseType(500)]
-        public async Task<IActionResult> GetRolUserById(int id)
+        public async Task<ActionResult<RolUserDTO>> GetRolUserById(int id) // Change to RolUserDTO
         {
-            try
+            var rolUser = await _rolUserService.GetRolUserByIdAsync(id);
+            if (rolUser == null)
             {
-                var rolUser = await _rolUserBusiness.GetRolUserByIdAsync(id);
-                return Ok(rolUser);
+                return NotFound();
             }
-            catch (ValidationException ex)
+
+            var rolUserDto = new RolUserDTO // Project to DTO
             {
-                _logger.LogWarning(ex, "Validación fallida para RolUser con ID: {RolUserId}", id);
-                return BadRequest(new { message = ex.Message });
-            }
-            catch (EntityNotFoundException ex)
-            {
-                _logger.LogInformation(ex, "RolUser no encontrado con ID: {RolUserId}", id);
-                return NotFound(new { message = ex.Message });
-            }
-            catch (ExternalServiceException ex)
-            {
-                _logger.LogError(ex, "Error al obtener el RolUser con ID: {RolUserId}", id);
-                return StatusCode(500, new { message = ex.Message });
-            }
+                id = rolUser.id,
+                id_rol = rolUser.id_rol,
+                id_user = rolUser.id_user,
+                RolName = rolUser.Rol?.Name, // Access Name property
+                UserName = rolUser.User?.username // Access Name property
+            };
+            return Ok(rolUserDto);
         }
 
         [HttpPost]
-        [ProducesResponseType(typeof(RolUserDTO), 201)]
-        [ProducesResponseType(400)]
-        [ProducesResponseType(500)]
-        public async Task<IActionResult> CreateRolUserAsync([FromBody] RolUserDTO rolUserDTO)
+        public async Task<ActionResult<RolUser>> CreateRolUser([FromBody] RolUserCreateDTO rolUserCreateDto) // Use CreateDTO
         {
-            try
+            if (!ModelState.IsValid)
             {
-                var createdRolUser = await _rolUserBusiness.CreateRolUserAsync(rolUserDTO);
-                return CreatedAtAction(nameof(GetRolUserById), new { id = createdRolUser.Id }, createdRolUser);
+                return BadRequest(ModelState);
             }
-            catch (ValidationException ex)
+
+            var rolUser = new RolUser
             {
-                _logger.LogWarning(ex, "Validación fallida al crear el RolUser");
-                return BadRequest(new { message = ex.Message });
-            }
-            catch (ExternalServiceException ex)
-            {
-                _logger.LogError(ex, "Error al crear el RolUser");
-                return StatusCode(500, new { message = ex.Message });
-            }
+                id_rol = rolUserCreateDto.id_rol,
+                id_user = rolUserCreateDto.id_user,
+            };
+
+            var createdRolUser = await _rolUserService.CreateRolUserAsync(rolUser);
+            return CreatedAtAction(nameof(GetRolUserById), new { id = createdRolUser.id }, createdRolUser);
         }
 
         [HttpPut("{id}")]
-        [ProducesResponseType(typeof(RolUserDTO), 200)]
-        [ProducesResponseType(400)]
-        [ProducesResponseType(404)]
-        [ProducesResponseType(500)]
-        public async Task<IActionResult> UpdateRolUserAsync(int id, [FromBody] RolUserDTO rolUserDTO)
+        public async Task<IActionResult> UpdateRolUser(int id, [FromBody] RolUserDTO rolUserDto) // Use RolUserDTO
         {
-            if (id != rolUserDTO.Id)
+            if (id != rolUserDto.id)
             {
-                return BadRequest(new { message = "El ID de la ruta no coincide con el ID del objeto." });
+                return BadRequest("El ID de la relación Rol-Usuario no coincide con el ID de la ruta.");
             }
 
-            try
+            if (!ModelState.IsValid)
             {
-                var updated = await _rolUserBusiness.UpdateRolUserAsync(rolUserDTO);
-                return Ok(new { message = "RolUser actualizado correctamente", success = updated });
+                return BadRequest(ModelState);
             }
-            catch (ValidationException ex)
+
+            var existingRolUser = await _rolUserService.GetRolUserByIdAsync(id);
+            if (existingRolUser == null)
             {
-                _logger.LogWarning(ex, "Validación fallida al actualizar el RolUser con ID: {RolUserId}", id);
-                return BadRequest(new { message = ex.Message });
+                return NotFound();
             }
-            catch (EntityNotFoundException ex)
+
+            existingRolUser.id_rol = rolUserDto.id_rol;
+            existingRolUser.id_user = rolUserDto.id_user;
+
+
+            var result = await _rolUserService.UpdateRolUserAsync(existingRolUser);
+            if (!result)
             {
-                _logger.LogInformation(ex, "RolUser no encontrado con ID: {RolUserId}", id);
-                return NotFound(new { message = ex.Message });
+                return NotFound();
             }
-            catch (ExternalServiceException ex)
-            {
-                _logger.LogError(ex, "Error al actualizar el RolUser con ID: {RolUserId}", id);
-                return StatusCode(500, new { message = ex.Message });
-            }
+            return NoContent();
         }
 
         [HttpDelete("{id}")]
-        [ProducesResponseType(200)]
-        [ProducesResponseType(404)]
-        [ProducesResponseType(500)]
-        public async Task<IActionResult> DeleteRolUserAsync(int id)
+        public async Task<IActionResult> DeleteRolUser(int id)
         {
-            try
+            var result = await _rolUserService.DeleteRolUserAsync(id);
+            if (!result)
             {
-                var deleted = await _rolUserBusiness.DeleteRolUserAsync(id);
-                if (!deleted)
-                    return NotFound(new { message = "RolUser no encontrado o ya eliminado" });
-
-                return Ok(new { message = "RolUser eliminado exitosamente" });
+                return NotFound();
             }
-            catch (ExternalServiceException ex)
-            {
-                _logger.LogError(ex, "Error al eliminar el RolUser con ID: {RolUserId}", id);
-                return StatusCode(500, new { message = ex.Message });
-            }
+            return NoContent();
         }
     }
 }

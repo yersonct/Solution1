@@ -1,149 +1,83 @@
-﻿using Business;
-using Entity.DTOs;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
-using System;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
-using Utilities.Exceptions;
+using Microsoft.AspNetCore.Mvc;
+using Business.Interfaces;
+using Entity.Model;
 
-namespace Api.Controllers
+namespace API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class MembershipsVehicleController : ControllerBase
+    public class MembershipsVehiclesController : ControllerBase
     {
-        private readonly MembershipsVehicleBusiness _business;
-        private readonly ILogger<MembershipsVehicleController> _logger;
+        private readonly IMembershipsVehicleService _membershipsVehicleService;
 
-        public MembershipsVehicleController(MembershipsVehicleBusiness business, ILogger<MembershipsVehicleController> logger)
+        public MembershipsVehiclesController(IMembershipsVehicleService membershipsVehicleService)
         {
-            _business = business;
-            _logger = logger;
+            _membershipsVehicleService = membershipsVehicleService ?? throw new ArgumentNullException(nameof(membershipsVehicleService));
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAll()
+        public async Task<ActionResult<IEnumerable<MembershipsVehicle>>> GetAllMembershipsVehicles()
         {
-            try
-            {
-                var list = await _business.GetAllAsync();
-                return Ok(list);
-            }
-            catch (InvalidOperationException ex)
-            {
-                _logger.LogError(ex, "Error transitorio al obtener membresías-vehículos.");
-                return StatusCode(500, "Error de conexión a la base de datos.");
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error inesperado al obtener membresías-vehículos.");
-                return StatusCode(500, "Ocurrió un error inesperado.");
-            }
+            var membershipsVehicles = await _membershipsVehicleService.GetAllMembershipsVehiclesAsync();
+            return Ok(membershipsVehicles);
         }
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetById(int id)
+        public async Task<ActionResult<MembershipsVehicle>> GetMembershipsVehicleById(int id)
         {
-            try
+            var membershipsVehicle = await _membershipsVehicleService.GetMembershipsVehicleByIdAsync(id);
+            if (membershipsVehicle == null)
             {
-                var item = await _business.GetByIdAsync(id);
-                return Ok(item);
+                return NotFound();
             }
-            catch (EntityNotFoundException ex)
-            {
-                _logger.LogWarning(ex.Message);
-                return NotFound(ex.Message);
-            }
-            catch (InvalidOperationException ex)
-            {
-                _logger.LogError(ex, "Error transitorio al obtener membresía-vehículo.");
-                return StatusCode(500, "Error de conexión a la base de datos.");
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error inesperado al obtener membresía-vehículo.");
-                return StatusCode(500, "Ocurrió un error inesperado.");
-            }
+            return Ok(membershipsVehicle);
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] MemberShipsVehicleCreateDTO dto)
+        public async Task<ActionResult<MembershipsVehicle>> CreateMembershipsVehicle([FromBody] MembershipsVehicle membershipsVehicle)
         {
-            try
+            if (!ModelState.IsValid)
             {
-                var created = await _business.CreateAsync(dto);
-                return CreatedAtAction(nameof(GetById), new { id = created.id }, created);
+                return BadRequest(ModelState);
             }
-            catch (ValidationException ex)
-            {
-                _logger.LogWarning(ex.Message);
-                return BadRequest(ex.Message);
-            }
-            catch (InvalidOperationException ex)
-            {
-                _logger.LogError(ex, "Error transitorio al crear membresía-vehículo.");
-                return StatusCode(500, "Error de conexión a la base de datos.");
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error inesperado al crear membresía-vehículo.");
-                return StatusCode(500, "Ocurrió un error inesperado.");
-            }
+
+            var createdMembershipsVehicle = await _membershipsVehicleService.CreateMembershipsVehicleAsync(membershipsVehicle);
+            return CreatedAtAction(nameof(GetMembershipsVehicleById), new { id = createdMembershipsVehicle.id }, createdMembershipsVehicle);
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, [FromBody] MemberShipsVehicleCreateDTO dto)
+        public async Task<IActionResult> UpdateMembershipsVehicle(int id, [FromBody] MembershipsVehicle membershipsVehicle)
         {
-            try
+            if (id != membershipsVehicle.id)
             {
-                var result = await _business.UpdateAsync(id, dto);
-                return result ? NoContent() : StatusCode(500, "No se pudo actualizar la membresía-vehículo.");
+                return BadRequest("El ID de la relación no coincide con el ID de la ruta.");
             }
-            catch (EntityNotFoundException ex)
+
+            if (!ModelState.IsValid)
             {
-                _logger.LogWarning(ex.Message);
-                return NotFound(ex.Message);
+                return BadRequest(ModelState);
             }
-            catch (ValidationException ex)
+
+            var result = await _membershipsVehicleService.UpdateMembershipsVehicleAsync(membershipsVehicle);
+            if (!result)
             {
-                _logger.LogWarning(ex.Message);
-                return BadRequest(ex.Message);
+                return NotFound();
             }
-            catch (InvalidOperationException ex)
-            {
-                _logger.LogError(ex, "Error transitorio al actualizar membresía-vehículo.");
-                return StatusCode(500, "Error de conexión a la base de datos.");
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error inesperado al actualizar membresía-vehículo.");
-                return StatusCode(500, "Ocurrió un error inesperado.");
-            }
+            return NoContent();
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(int id)
+        public async Task<IActionResult> DeleteMembershipsVehicle(int id)
         {
-            try
+            var result = await _membershipsVehicleService.DeleteMembershipsVehicleAsync(id);
+            if (!result)
             {
-                var result = await _business.DeleteAsync(id);
-                return result ? NoContent() : StatusCode(500, "No se pudo eliminar la membresía-vehículo.");
+                return NotFound();
             }
-            catch (EntityNotFoundException ex)
-            {
-                _logger.LogWarning(ex.Message);
-                return NotFound(ex.Message);
-            }
-            catch (InvalidOperationException ex)
-            {
-                _logger.LogError(ex, "Error transitorio al eliminar membresía-vehículo.");
-                return StatusCode(500, "Error de conexión a la base de datos.");
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error inesperado al eliminar membresía-vehículo.");
-                return StatusCode(500, "Ocurrió un error inesperado.");
-            }
+            return NoContent();
         }
     }
 }

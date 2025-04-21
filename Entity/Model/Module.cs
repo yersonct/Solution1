@@ -8,8 +8,8 @@ namespace Entity.Model
 {
     public class Modules
     {
-        public int Id { get; set; }
-        public string Name { get; set; }
+        public int id { get; set; }
+        public string name { get; set; }
         public List<FormModule> FormModules { get; set; } = new List<FormModule>();
     }
 

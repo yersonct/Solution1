@@ -1,8 +1,9 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Business;
-using Entity.DTOs;
-using Microsoft.Extensions.Logging;
-using Utilities.Exceptions;
+﻿using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
+using Business.Interfaces;
+using Entity.Model;
 
 namespace API.Controllers
 {
@@ -10,142 +11,73 @@ namespace API.Controllers
     [Route("api/[controller]")]
     public class InvoicesController : ControllerBase
     {
-        private readonly InvoiceBusiness _invoiceBusiness; // Asumiendo que InvoiceBusiness usa LINQ internamente ahora
-        private readonly ILogger<InvoicesController> _logger;
+        private readonly IInvoiceService _invoiceService;
 
-        public InvoicesController(InvoiceBusiness invoiceBusiness, ILogger<InvoicesController> logger)
+        public InvoicesController(IInvoiceService invoiceService)
         {
-            _invoiceBusiness = invoiceBusiness ?? throw new ArgumentNullException(nameof(invoiceBusiness));
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _invoiceService = invoiceService ?? throw new ArgumentNullException(nameof(invoiceService));
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAllInvoices()
+        public async Task<ActionResult<IEnumerable<Invoice>>> GetAllInvoices()
         {
-            try
-            {
-                var invoicesDTO = await _invoiceBusiness.GetAllInvoicesLinqAsync(); // O un método similar sin el sufijo "Linq"
-                return Ok(invoicesDTO);
-            }
-            catch (ExternalServiceException ex)
-            {
-                _logger.LogError(ex, "Error al obtener todas las facturas de la base de datos.");
-                return StatusCode(500, ex.Message);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error inesperado al obtener todas las facturas.");
-                return StatusCode(500, "Error interno del servidor.");
-            }
+            var invoices = await _invoiceService.GetAllInvoicesAsync();
+            return Ok(invoices);
         }
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetInvoice(int id)
+        public async Task<ActionResult<Invoice>> GetInvoiceById(int id)
         {
-            try
+            var invoice = await _invoiceService.GetInvoiceByIdAsync(id);
+            if (invoice == null)
             {
-                var invoiceDTO = await _invoiceBusiness.GetInvoiceLinqAsync(id); // O un método similar sin el sufijo "Linq"
-                return Ok(invoiceDTO);
+                return NotFound();
             }
-            catch (ValidationException ex)
-            {
-                return BadRequest(new { Message = ex.Message, Property = ex.PropertyName });
-            }
-            catch (EntityNotFoundException ex)
-            {
-                return NotFound(new { Message = ex.Message });
-            }
-            catch (ExternalServiceException ex)
-            {
-                _logger.LogError(ex, "Error al obtener la factura con ID: {InvoiceId} de la base de datos.", id);
-                return StatusCode(500, ex.Message);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error inesperado al obtener la factura con ID: {InvoiceId}.", id);
-                return StatusCode(500, "Error interno del servidor.");
-            }
+            return Ok(invoice);
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateInvoice([FromBody] InvoiceDTO createDTO)
+        public async Task<ActionResult<Invoice>> CreateInvoice([FromBody] Invoice invoice)
         {
-            try
+            if (!ModelState.IsValid)
             {
-                var createdInvoiceDTO = await _invoiceBusiness.CreateInvoiceLinqAsync(createDTO); // O un método similar sin el sufijo "Linq"
-                return CreatedAtAction(nameof(GetInvoice), new { id = createdInvoiceDTO.id }, createdInvoiceDTO);
+                return BadRequest(ModelState);
             }
-            catch (ValidationException ex)
-            {
-                return BadRequest(new { Message = ex.Message, Property = ex.PropertyName });
-            }
-            catch (ExternalServiceException ex)
-            {
-                _logger.LogError(ex, "Error al crear la factura en la base de datos. Total: {TotalAmount}", createDTO?.totalamount);
-                return StatusCode(500, ex.Message);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error inesperado al crear la factura. Total: {TotalAmount}", createDTO?.totalamount);
-                return StatusCode(500, "Error interno del servidor.");
-            }
+
+            var createdInvoice = await _invoiceService.CreateInvoiceAsync(invoice);
+            return CreatedAtAction(nameof(GetInvoiceById), new { id = createdInvoice.id }, createdInvoice);
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateInvoice(int id, [FromBody] InvoiceDTO updateDTO)
+        public async Task<IActionResult> UpdateInvoice(int id, [FromBody] Invoice invoice)
         {
-            try
+            if (id != invoice.id)
             {
-                var updatedInvoiceDTO = await _invoiceBusiness.UpdateInvoiceLinqAsync(id, updateDTO);
-                return Ok(updatedInvoiceDTO);
+                return BadRequest("El ID de la factura no coincide con el ID de la ruta.");
             }
-            catch (ValidationException ex)
-            {
-                return BadRequest(new { Message = ex.Message, Property = ex.PropertyName });
-            }
-            catch (EntityNotFoundException ex)
-            {
-                return NotFound(new { Message = ex.Message });
-            }
-            catch (ExternalServiceException ex)
-            {
-                _logger.LogError(ex, "Error al actualizar la factura con ID: {InvoiceId} en la base de datos.", id);
-                return StatusCode(500, ex.Message);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error inesperado al actualizar la factura con ID: {InvoiceId}.", id);
-                return StatusCode(500, "Error interno del servidor.");
-            }
-        }
 
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var result = await _invoiceService.UpdateInvoiceAsync(invoice);
+            if (!result)
+            {
+                return NotFound();
+            }
+            return NoContent();
+        }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteInvoice(int id)
         {
-            try
+            var result = await _invoiceService.DeleteInvoiceAsync(id);
+            if (!result)
             {
-                await _invoiceBusiness.DeleteInvoiceLinqAsync(id); // O un método similar sin el sufijo "Linq"
-                return NoContent();
+                return NotFound();
             }
-            catch (ValidationException ex)
-            {
-                return BadRequest(new { Message = ex.Message, Property = ex.PropertyName });
-            }
-            catch (EntityNotFoundException ex)
-            {
-                return NotFound(new { Message = ex.Message });
-            }
-            catch (ExternalServiceException ex)
-            {
-                _logger.LogError(ex, "Error al eliminar la factura con ID: {InvoiceId} de la base de datos.", id);
-                return StatusCode(500, ex.Message);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error inesperado al eliminar la factura con ID: {InvoiceId}.", id);
-                return StatusCode(500, "Error interno del servidor.");
-            }
+            return NoContent();
         }
     }
 }

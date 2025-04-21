@@ -1,151 +1,83 @@
-﻿using Business;
-using Entity.DTOs;
-using Dapper;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
+﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Utilities.Exceptions;
+using Microsoft.AspNetCore.Mvc;
+using Business.Interfaces;
+using Entity.Model;
 
-namespace Web.Controllers
+namespace API.Controllers
 {
-    [Route("api/[controller]")]
     [ApiController]
-    [Produces("application/json")]
+    [Route("api/[controller]")]
     public class TypeRatesController : ControllerBase
     {
-        private readonly TypeRatesBusiness _TypeRatesBusiness;
-        private readonly ILogger<TypeRatesController> _logger;
+        private readonly ITypeRatesService _typeRatesService;
 
-        public TypeRatesController(TypeRatesBusiness TypeRatesBusiness, ILogger<TypeRatesController> logger)
+        public TypeRatesController(ITypeRatesService typeRatesService)
         {
-            _TypeRatesBusiness = TypeRatesBusiness;
-            _logger = logger;
+            _typeRatesService = typeRatesService ?? throw new ArgumentNullException(nameof(typeRatesService));
         }
 
         [HttpGet]
-        [ProducesResponseType(typeof(IEnumerable<TypeRatesDTO>), 200)]
-        [ProducesResponseType(500)]
-        public async Task<IActionResult> GetAllTypeRatess()
+        public async Task<ActionResult<IEnumerable<TypeRates>>> GetAllTypeRates()
         {
-            try
-            {
-                var TypeRatess = await _TypeRatesBusiness.GetAllTypeRatessAsync();
-                return Ok(TypeRatess);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error al obtener los TypeRatesas");
-                return StatusCode(500, new { message = ex.Message });
-            }
+            var typeRates = await _typeRatesService.GetAllTypeRatesAsync();
+            return Ok(typeRates);
         }
 
         [HttpGet("{id}")]
-        [ProducesResponseType(typeof(TypeRatesDTO), 200)]
-        [ProducesResponseType(400)]
-        [ProducesResponseType(404)]
-        [ProducesResponseType(500)]
-        public async Task<IActionResult> GetTypeRatesById(int id)
+        public async Task<ActionResult<TypeRates>> GetTypeRatesById(int id)
         {
-            try
+            var typeRates = await _typeRatesService.GetTypeRatesByIdAsync(id);
+            if (typeRates == null)
             {
-                var TypeRates = await _TypeRatesBusiness.GetTypeRatesByIdAsync(id);
-                return Ok(TypeRates);
+                return NotFound();
             }
-            catch (ValidationException ex)
-            {
-                _logger.LogWarning(ex, "Validación fallida para usuario con ID: {TypeRatesId}", id);
-                return BadRequest(new { message = ex.Message });
-            }
-            catch (EntityNotFoundException ex)
-            {
-                _logger.LogInformation(ex, "Usuario no encontrado con ID: {TypeRatesId}", id);
-                return NotFound(new { message = ex.Message });
-            }
-            catch (ExternalServiceException ex)
-            {
-                _logger.LogError(ex, "Error al obtener el usuario con ID: {TypeRatesId}", id);
-                return StatusCode(500, new { message = ex.Message });
-            }
+            return Ok(typeRates);
         }
 
         [HttpPost]
-        [ProducesResponseType(typeof(TypeRatesDTO), 201)]
-        [ProducesResponseType(400)]
-        [ProducesResponseType(500)]
-        public async Task<IActionResult> CreateTypeRatesAsync([FromBody] TypeRatesDTO TypeRatesDTO)
+        public async Task<ActionResult<TypeRates>> CreateTypeRates([FromBody] TypeRates typeRates)
         {
-            try
+            if (!ModelState.IsValid)
             {
-                var createdTypeRates = await _TypeRatesBusiness.CreateTypeRatesAsync(TypeRatesDTO);
-                return CreatedAtAction(nameof(GetTypeRatesById), new { id = createdTypeRates.Id }, createdTypeRates);
+                return BadRequest(ModelState);
             }
-            catch (ValidationException ex)
-            {
-                _logger.LogWarning(ex, "Validación fallida al crear el TypeRatesas");
-                return BadRequest(new { message = ex.Message });
-            }
-            catch (ExternalServiceException ex)
-            {
-                _logger.LogError(ex, "Error al crear el TypeRatesas");
-                return StatusCode(500, new { message = ex.Message });
-            }
+
+            var createdTypeRates = await _typeRatesService.CreateTypeRatesAsync(typeRates);
+            return CreatedAtAction(nameof(GetTypeRatesById), new { id = createdTypeRates.Id }, createdTypeRates);
         }
 
         [HttpPut("{id}")]
-        [ProducesResponseType(typeof(TypeRatesDTO), 200)]
-        [ProducesResponseType(400)]
-        [ProducesResponseType(404)]
-        [ProducesResponseType(500)]
-        public async Task<IActionResult> UpdateTypeRatesAsync(int id, [FromBody] TypeRatesDTO TypeRatesDTO)
+        public async Task<IActionResult> UpdateTypeRates(int id, [FromBody] TypeRates typeRates)
         {
-            if (id != TypeRatesDTO.Id)
+            if (id != typeRates.Id)
             {
-                return BadRequest(new { message = "El ID de la ruta no coincide con el ID del objeto." });
+                return BadRequest("El ID del tipo de tarifa no coincide con el ID de la ruta.");
             }
-            try
-            {
 
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
 
-                var updatedTypeRates = await _TypeRatesBusiness.UpdateTypeRatesAsync(TypeRatesDTO);
-                return Ok(updatedTypeRates);
-            }
-            catch (ValidationException ex)
+            var result = await _typeRatesService.UpdateTypeRatesAsync(typeRates);
+            if (!result)
             {
-                _logger.LogWarning(ex, "Validación fallida al actualizar el TypeRatesas con ID: {TypeRatesId}", id);
-                return BadRequest(new { message = ex.Message });
+                return NotFound();
             }
-            catch (EntityNotFoundException ex)
-            {
-                _logger.LogInformation(ex, "TypeRatesas no encontrado con ID: {TypeRatesId}", id);
-                return NotFound(new { message = ex.Message });
-            }
-            catch (ExternalServiceException ex)
-            {
-                _logger.LogError(ex, "Error al actualizar el usuario con ID: {TypeRatesId}", id);
-                return StatusCode(500, new { message = ex.Message });
-            }
+            return NoContent();
         }
 
         [HttpDelete("{id}")]
-        [ProducesResponseType(200)]
-        [ProducesResponseType(404)]
-        [ProducesResponseType(500)]
-        public async Task<IActionResult> DeleteTypeRatesAsync(int id)
+        public async Task<IActionResult> DeleteTypeRates(int id)
         {
-            try
+            var result = await _typeRatesService.DeleteTypeRatesAsync(id);
+            if (!result)
             {
-                var deleted = await _TypeRatesBusiness.DeleteTypeRatesAsync(id);
-                if (!deleted)
-                    return NotFound(new { message = "TypeRatesas no encontrado o ya eliminado" });
-
-                return Ok(new { message = "TypeRatesas eliminado exitosamente" });
+                return NotFound();
             }
-            catch (ExternalServiceException ex)
-            {
-                _logger.LogError(ex, "Error al eliminar el TypeRatesas con ID: {UserId}", id);
-                return StatusCode(500, new { message = ex.Message });
-            }
+            return NoContent();
         }
     }
 }

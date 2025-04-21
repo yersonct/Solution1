@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Business.Interfaces;
-using Entity.DTOs;
+using Business.Interfaces; // Asegúrate de que esta interfaz exista
+using Entity.DTOs; // Asegúrate de que estos DTOs existan
+using Microsoft.Extensions.Logging;
+using Entity.Model; // Asegúrate de que este namespace exista
 
 namespace API.Controllers
 {
@@ -12,28 +14,47 @@ namespace API.Controllers
     public class FormModulesController : ControllerBase
     {
         private readonly IFormModuleService _formModuleService;
+        private readonly ILogger<FormModulesController> _logger;
 
-        public FormModulesController(IFormModuleService formModuleService)
+        public FormModulesController(IFormModuleService formModuleService, ILogger<FormModulesController> logger)
         {
             _formModuleService = formModuleService ?? throw new ArgumentNullException(nameof(formModuleService));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<FormModuleDTO>>> GetAllFormModules()
         {
-            var formModules = await _formModuleService.GetAllFormModulesAsync();
-            return Ok(formModules);
+            try
+            {
+                var formModules = await _formModuleService.GetAllFormModulesAsync();
+                return Ok(formModules);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al obtener todos los FormModules");
+                return StatusCode(500, "Internal Server Error"); // Mejor manejo de errores
+            }
         }
 
         [HttpGet("{id}")]
         public async Task<ActionResult<FormModuleDTO>> GetFormModuleById(int id)
         {
-            var formModule = await _formModuleService.GetFormModuleByIdAsync(id);
-            if (formModule == null)
+            try
             {
-                return NotFound();
+                var formModule = await _formModuleService.GetFormModuleByIdAsync(id);
+                if (formModule == null)
+                {
+                    _logger.LogWarning($"FormModule con ID {id} no encontrado");
+                    return NotFound();
+                }
+                return Ok(formModule);
             }
-            return Ok(formModule);
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error al obtener FormModule con ID {id}");
+                return StatusCode(500, "Internal Server Error");
+            }
         }
 
         [HttpPost]
@@ -41,11 +62,20 @@ namespace API.Controllers
         {
             if (!ModelState.IsValid)
             {
+                _logger.LogWarning("Modelo inválido al crear FormModule");
                 return BadRequest(ModelState);
             }
 
-            var createdFormModule = await _formModuleService.CreateFormModuleAsync(formModule);
-            return CreatedAtAction(nameof(GetFormModuleById), new { id = createdFormModule.Id }, createdFormModule);
+            try
+            {
+                var createdFormModule = await _formModuleService.CreateFormModuleAsync(formModule);
+                return CreatedAtAction(nameof(GetFormModuleById), new { id = createdFormModule.Id }, createdFormModule);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al crear FormModule");
+                return StatusCode(500, "Internal Server Error");
+            }
         }
 
         [HttpPut("{id}")]
@@ -53,26 +83,46 @@ namespace API.Controllers
         {
             if (!ModelState.IsValid)
             {
+                _logger.LogWarning($"Modelo inválido al actualizar FormModule con ID {id}");
                 return BadRequest(ModelState);
             }
 
-            var result = await _formModuleService.UpdateFormModuleAsync(id, formModule);
-            if (!result)
+            try
             {
-                return NotFound();
+                var result = await _formModuleService.UpdateFormModuleAsync(id, formModule);
+                if (!result)
+                {
+                    _logger.LogWarning($"FormModule con ID {id} no encontrado para actualizar");
+                    return NotFound();
+                }
+                return NoContent();
             }
-            return NoContent();
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error al actualizar FormModule con ID {id}");
+                return StatusCode(500, "Internal Server Error");
+            }
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteFormModule(int id)
         {
-            var result = await _formModuleService.DeleteFormModuleAsync(id);
-            if (!result)
+            try
             {
-                return NotFound();
+                var result = await _formModuleService.DeleteFormModuleAsync(id);
+                if (!result)
+                {
+                    _logger.LogWarning($"FormModule con ID {id} no encontrado para eliminar");
+                    return NotFound();
+                }
+                return NoContent();
             }
-            return NoContent();
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error al eliminar FormModule con ID {id}");
+                return StatusCode(500, "Internal Server Error");
+            }
         }
     }
 }
+

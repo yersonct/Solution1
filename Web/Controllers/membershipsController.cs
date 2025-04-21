@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Business.Interfaces;
+using Business.Interfaces; // Asegúrate de que esta interfaz exista
 using Entity.Model;
+using Entity.DTOs; // Asegúrate de que este namespace exista
+using System.Linq;
 
 namespace API.Controllers
 {
@@ -19,39 +21,64 @@ namespace API.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<MemberShips>>> GetAllMemberships()
+        public async Task<ActionResult<IEnumerable<MembershipDTO>>> GetAllMemberships()
         {
             var memberships = await _membershipsService.GetAllMembershipsAsync();
-            return Ok(memberships);
+            var membershipDtos = memberships.Select(m => new MembershipDTO
+            {
+                id = m.id,
+                membershiptype = m.membershiptype,
+                startdate = m.startdate,
+                enddate = m.enddate,
+                active = m.active
+            }).ToList();
+            return Ok(membershipDtos);
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<MemberShips>> GetMembershipById(int id)
+        public async Task<ActionResult<MembershipDTO>> GetMembershipById(int id)
         {
             var membership = await _membershipsService.GetMembershipByIdAsync(id);
             if (membership == null)
             {
                 return NotFound();
             }
-            return Ok(membership);
+
+            var membershipDto = new MembershipDTO
+            {
+                id = membership.id,
+                membershiptype = membership.membershiptype,
+                startdate = membership.startdate,
+                enddate = membership.enddate,
+                active = membership.active
+            };
+            return Ok(membershipDto);
         }
 
         [HttpPost]
-        public async Task<ActionResult<MemberShips>> CreateMembership([FromBody] MemberShips membership)
+        public async Task<ActionResult<MemberShips>> CreateMembership([FromBody] MembershipDTO membershipDto)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
+            var membership = new MemberShips
+            {
+                membershiptype = membershipDto.membershiptype,
+                startdate = membershipDto.startdate,
+                enddate = membershipDto.enddate,
+                active = membershipDto.active
+            };
+
             var createdMembership = await _membershipsService.CreateMembershipAsync(membership);
             return CreatedAtAction(nameof(GetMembershipById), new { id = createdMembership.id }, createdMembership);
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateMembership(int id, [FromBody] MemberShips membership)
+        public async Task<IActionResult> UpdateMembership(int id, [FromBody] MembershipDTO membershipDto)
         {
-            if (id != membership.id)
+            if (id != membershipDto.id)
             {
                 return BadRequest("El ID de la membresía no coincide con el ID de la ruta.");
             }
@@ -61,7 +88,19 @@ namespace API.Controllers
                 return BadRequest(ModelState);
             }
 
-            var result = await _membershipsService.UpdateMembershipAsync(membership);
+            var existingMembership = await _membershipsService.GetMembershipByIdAsync(id);
+            if (existingMembership == null)
+            {
+                return NotFound();
+            }
+
+            existingMembership.membershiptype = membershipDto.membershiptype;
+            existingMembership.startdate = membershipDto.startdate;
+            existingMembership.enddate = membershipDto.enddate;
+            existingMembership.active = membershipDto.active;
+
+
+            var result = await _membershipsService.UpdateMembershipAsync(existingMembership);
             if (!result)
             {
                 return NotFound();
@@ -81,3 +120,4 @@ namespace API.Controllers
         }
     }
 }
+

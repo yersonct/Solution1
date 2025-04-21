@@ -1,62 +1,69 @@
-﻿using Business;
-using Business.Interfaces;
+﻿using Business.Interfaces;
 using Entity.DTOs;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using Utilities.Exceptions;
+using System.Net;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Web.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/blacklist")]
     public class BlackListController : ControllerBase
     {
-        private readonly IBlackListService _service;
+        private readonly IBlackListService _blackListService;
 
-        public BlackListController(IBlackListService service)
+        public BlackListController(IBlackListService blackListService)
         {
-            _service = service;
+            _blackListService = blackListService ?? throw new ArgumentNullException(nameof(blackListService));
         }
 
         [HttpGet]
+        [ProducesResponseType(typeof(IEnumerable<BlackListDTO>), (int)HttpStatusCode.OK)]
         public async Task<IActionResult> GetAll()
         {
-            var result = await _service.GetAllAsync();
-            return Ok(result);
+            var result = await _blackListService.GetAllAsync();
+            var blackListDtos = result.Select(b => new BlackListDTO
+            {
+                id = b.id,
+                reason = b.reason,
+                restrictiondate = b.restrictiondate,
+                id_client = b.id_client
+            }).ToList();
+            return Ok(blackListDtos);
         }
-
-        //[HttpGet("with-client")]
-        //public async Task<IActionResult> GetAllWithClient()
-        //{
-        //    var result = await _service.GetAllWithClientAsync();
-        //    return Ok(result);
-        //}
 
         [HttpGet("{id}")]
+        [ProducesResponseType(typeof(BlackListDTO), (int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.NotFound)]
         public async Task<IActionResult> GetById(int id)
         {
-            var result = await _service.GetByIdAsync(id);
-            if (result == null) return NotFound();
-            return Ok(result);
+            var result = await _blackListService.GetByIdAsync(id);
+            if (result == null)
+            {
+                return NotFound();
+            }
+            var blackListDto = new BlackListDTO
+            {
+                id = result.id,
+                reason = result.reason,
+                restrictiondate = result.restrictiondate,
+                id_client = result.id_client
+            };
+            return Ok(blackListDto);
         }
 
-        //[HttpGet("with-client/{id}")]
-        //public async Task<IActionResult> GetByIdWithClient(int id)
-        //{
-        //    var result = await _service.GetByIdWithClientAsync(id);
-        //    if (result == null) return NotFound();
-        //    return Ok(result);
-        //}
-
         [HttpPost]
+        [ProducesResponseType((int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> Create([FromBody] BlackListDTO dto)
         {
             try
             {
-                await _service.CreateAsync(dto);
+                await _blackListService.CreateAsync(dto);
                 return Ok();
             }
             catch (ValidationException ex)
@@ -65,23 +72,45 @@ namespace Web.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "Error interno del servidor", detail = ex.Message });
+                return StatusCode((int)HttpStatusCode.InternalServerError, new { message = "Error interno del servidor", detail = ex.Message });
             }
         }
 
-
         [HttpPut]
-        public async Task<IActionResult> Update(BlackListDTO dto)
+        [ProducesResponseType((int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType((int)HttpStatusCode.NotFound)]
+        public async Task<IActionResult> Update([FromBody] BlackListDTO dto)
         {
-            await _service.UpdateAsync(dto);
-            return Ok();
+            try
+            {
+                await _blackListService.UpdateAsync(dto);
+                return Ok();
+            }
+            catch (FileNotFoundException)
+            {
+                return NotFound();
+            }
+            catch (ValidationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
         [HttpDelete("{id}")]
+        [ProducesResponseType((int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.NotFound)]
         public async Task<IActionResult> Delete(int id)
         {
-            await _service.DeleteAsync(id);
-            return Ok();
+            try
+            {
+                await _blackListService.DeleteAsync(id);
+                return Ok();
+            }
+            catch (FileNotFoundException)
+            {
+                return NotFound();
+            }
         }
     }
 }

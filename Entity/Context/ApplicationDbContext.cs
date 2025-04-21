@@ -69,7 +69,7 @@ namespace Entity.Context
                     .HasForeignKey(fm => fm.id_forms)
                     .HasConstraintName("FK_Forms_FormModule");
             });
-            modelBuilder.Entity<Modules>().ToTable("modules");
+            modelBuilder.Entity<Modules>().ToTable("module");
             modelBuilder.Entity<Permission>(entity => // ¡Configuración de Permission con ThenInclude!
             {
                 entity.ToTable("permission");

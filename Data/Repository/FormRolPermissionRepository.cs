@@ -35,7 +35,7 @@ namespace Data.Repository
                     {
                         id = x.id,
                         id_forms = x.id_forms,
-                        FormName = x.Forms.name,
+                        FormsName = x.Forms.name,
                         id_rol = x.id_rol,
                         RolName = x.Rol.Name,
                         id_permission = x.id_permission,
@@ -63,7 +63,7 @@ namespace Data.Repository
                     {
                         id = x.id,
                         id_forms  = x.id_forms,
-                        FormName = x.Forms.name,
+                        FormsName = x.Forms.name,
                         id_rol = x.id_rol,
                         RolName = x.Rol.Name,
                         id_permission = x.id_permission,

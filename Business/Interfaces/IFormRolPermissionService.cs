@@ -11,10 +11,10 @@ namespace Business.Interfaces
     public interface IFormRolPermissionService
     {
         Task<IEnumerable<FormRolPermissionDTO>> GetAllFormRolPermissionsAsync();
-        Task<FormRolPermissionDTO?> GetFormRolPermissionByIdAsync(int id);
-        Task<FormRolPermissionDTO> CreateFormRolPermissionAsync(FormRolPermission formRolPermission);
-        Task<bool> UpdateFormRolPermissionAsync(FormRolPermissionDTO formRolPermission);
+        Task<FormRolPermissionDTO> GetFormRolPermissionByIdAsync(int id);
+        Task<FormRolPermission> CreateFormRolPermissionAsync(FormRolPermission formRolPermission);
+        Task<bool> UpdateFormRolPermissionAsync(FormRolPermission formRolPermission);
         Task<bool> DeleteFormRolPermissionAsync(int id);
-        
+
     }
 }

@@ -4,6 +4,10 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Business.Interfaces;
 using Entity.Model;
+using Entity.DTOs;
+using System.Linq;
+using Newtonsoft.Json;
+using System.Xml;
 
 namespace API.Controllers
 {
@@ -19,39 +23,76 @@ namespace API.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Vehicle>>> GetAllVehicles()
+        public async Task<ActionResult<string>> GetAllVehicles()
         {
             var vehicles = await _vehicleService.GetAllVehiclesAsync();
-            return Ok(vehicles);
+            var vehicleDtos = vehicles.Select(v => new
+            {
+                id = v.id,
+                plate = v.plate,
+                color = v.color,
+                id_Client = v.id_client,
+                clientName = v.client?.name
+            }).ToList();
+
+            var json = JsonConvert.SerializeObject(vehicleDtos, Newtonsoft.Json.Formatting.Indented, new JsonSerializerSettings
+            {
+                ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
+                NullValueHandling = NullValueHandling.Ignore
+            });
+            return Ok(json);
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<Vehicle>> GetVehicleById(int id)
+        public async Task<ActionResult<string>> GetVehicleById(int id)
         {
             var vehicle = await _vehicleService.GetVehicleByIdAsync(id);
             if (vehicle == null)
             {
                 return NotFound();
             }
-            return Ok(vehicle);
+
+            var vehicleDto = new
+            {
+                id = vehicle.id,
+                plate = vehicle.plate,
+                color = vehicle.color,
+                id_Client = vehicle.id_client,
+                clientName = vehicle.client?.name
+            };
+
+
+            var json = JsonConvert.SerializeObject(vehicleDto, Newtonsoft.Json.Formatting.Indented, new JsonSerializerSettings
+            {
+                ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
+                NullValueHandling = NullValueHandling.Ignore
+            });
+            return Ok(json);
         }
 
         [HttpPost]
-        public async Task<ActionResult<Vehicle>> CreateVehicle([FromBody] Vehicle vehicle)
+        public async Task<ActionResult<Vehicle>> CreateVehicle([FromBody] VehicleCreateDTO vehicleDto)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
+            var vehicle = new Vehicle
+            {
+                plate = vehicleDto.plate,
+                color = vehicleDto.color,
+                id_client = vehicleDto.id_client,
+            };
+
             var createdVehicle = await _vehicleService.CreateVehicleAsync(vehicle);
             return CreatedAtAction(nameof(GetVehicleById), new { id = createdVehicle.id }, createdVehicle);
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateVehicle(int id, [FromBody] Vehicle vehicle)
+        public async Task<IActionResult> UpdateVehicle(int id, [FromBody] VehicleDTO vehicleDto)
         {
-            if (id != vehicle.id)
+            if (id != vehicleDto.Id)
             {
                 return BadRequest("El ID del vehículo no coincide con el ID de la ruta.");
             }
@@ -61,7 +102,18 @@ namespace API.Controllers
                 return BadRequest(ModelState);
             }
 
-            var result = await _vehicleService.UpdateVehicleAsync(vehicle);
+            var existingVehicle = await _vehicleService.GetVehicleByIdAsync(id);
+            if (existingVehicle == null)
+            {
+                return NotFound();
+            }
+
+            existingVehicle.plate = vehicleDto.Plate;
+            existingVehicle.color = vehicleDto.Color;
+            existingVehicle.id_client = vehicleDto.Id_Client;
+
+
+            var result = await _vehicleService.UpdateVehicleAsync(existingVehicle);
             if (!result)
             {
                 return NotFound();

@@ -78,7 +78,7 @@ namespace Data.Repository
             {
                 return await _context.Set<TypeRates>()
                     .Include(tr => tr.rates)
-                    .FirstOrDefaultAsync(tr => tr.Id == id);
+                    .FirstOrDefaultAsync(tr => tr.id == id);
             }
             catch (Exception ex)
             {
@@ -97,12 +97,12 @@ namespace Data.Repository
             }
             catch (DbUpdateConcurrencyException ex)
             {
-                _logger.LogError(ex, "Error de concurrencia al actualizar el tipo de tarifa con ID: {TypeRatesId}", entity.Id);
+                _logger.LogError(ex, "Error de concurrencia al actualizar el tipo de tarifa con ID: {TypeRatesId}", entity.id);
                 return false;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error al actualizar el tipo de tarifa con ID: {TypeRatesId}", entity.Id);
+                _logger.LogError(ex, "Error al actualizar el tipo de tarifa con ID: {TypeRatesId}", entity.id);
                 return false;
             }
         }

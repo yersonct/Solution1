@@ -8,6 +8,8 @@ namespace Entity.Model
 {
     public class MemberShips
     {
+        public object name;
+
         public int id { get; set; }
         public string membershiptype { get; set; }
         public DateTime startdate { get; set; }

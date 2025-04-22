@@ -1,8 +1,9 @@
+async function mostrar() {}
 document.addEventListener("DOMContentLoaded", function () {
     const botones = document.querySelectorAll(".menu-button");
     const contenedor = document.querySelector(".content");
     const titulo = document.querySelector(".titulo");
-
+    const ElementoBusqueda = document.querySelector(".contenedor-busqueda");
     botones.forEach(boton => {
         boton.addEventListener("click", async function () {
             const botonId = boton.id;
@@ -19,8 +20,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
                 titulo.innerHTML = config.title;
                 contenedor.innerHTML = config.contenedor;
-
                 const campos = config.campos || [];
+                ElementoBusqueda.innerHTML = config.busqueda; // Asignar el contenido de búsqueda
 
                 await cargarTabla(config, campos);
                 agregarBotonMostrarTodos(config.ruta);
@@ -36,46 +37,52 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 async function cargarTabla(config, campos) {
-    try {
-        console.log("URL del endpoint:", config.ruta);
+    async function mostrar() {
+        try {
+            console.log("URL del endpoint:", config.ruta);
 
-        const response = await fetch(config.ruta);
-        if (!response.ok) throw new Error('Error al cargar los datos desde ' + config.ruta);
+            const response = await fetch(config.ruta);
+            if (!response.ok) throw new Error('Error al cargar los datos desde ' + config.ruta);
 
-        const data = await response.json();
-        const registros = data["$values"] || data; // Ajuste aquí
+            const data = await response.json();
+            const registros = data["$values"] || data; // Ajuste aquí
 
-        console.log("Datos recibidos:", registros);
+            console.log("Datos recibidos:", registros);
 
-        const cuerpo = document.querySelector(".cuerpo-1");
-        cuerpo.innerHTML = "";
-
-        if (Array.isArray(registros) && registros.length > 0) {
-            registros.forEach(item => {
-                let row = "<tr>";
-                campos.forEach(campo => {
-                    row += `<td>${item[campo] ?? ""}</td>`;
+            const cuerpo = document.querySelector(".cuerpo-1");
+            
+            cuerpo.innerHTML = "";
+            if (Array.isArray(registros) && registros.length > 0) {
+                registros.forEach(item => {
+                    let row = "<tr>";
+                    campos.forEach(campo => {
+                        row += `<td>${item[campo] ?? ""}</td>`;
+                    });
+                    row += `
+                        <td>
+                            <button class="buttonPersonalizado eliminar" onclick="eliminarElemento('${config.ruta}', ${item.id})">Eliminar</button>
+                            <button class="buttonPersonalizado actualizar" onclick="actualizarElemento('${config.ruta}', ${item.id})">Actualizar</button>
+                        </td>
+                    </tr>`;
+                    cuerpo.innerHTML += row;
                 });
-                row += `
-                    <td>
-                        <button class="buttonPersonalizado eliminar" onclick="eliminarElemento('${config.ruta}', ${item.id})">Eliminar</button>
-                        <button class="buttonPersonalizado actualizar" onclick="actualizarElemento('${config.ruta}', ${item.id})">Actualizar</button>
-                    </td>
-                </tr>`;
-                cuerpo.innerHTML += row;
-            });
-        } else {
-            cuerpo.innerHTML = "<tr><td colspan='4'>No hay datos</td></tr>";
+            cuerpo.innerHTML+= "</tbody></table>"
+            } else {
+                cuerpo.innerHTML = "<tr><td colspan='4'>No hay datos</td></tr>";
+                cuerpo.innerHTML+= "</tbody></table>"
+            }
+        } catch (error) {
+            console.error("Error cargando datos:", error);
+            document.querySelector(".cuerpo-1").innerHTML = "<tr><td colspan='4'>Error al cargar los datos.</td></tr>";
+            cuerpo.innerHTML+= "</tbody></table>"
         }
-    } catch (error) {
-        console.error("Error cargando datos:", error);
-        document.querySelector(".cuerpo-1").innerHTML = "<tr><td colspan='4'>Error al cargar los datos.</td></tr>";
     }
+    mostrar();
 }
 
 function agregarBotonMostrarTodos(endpoint) {
     const contenedor = document.querySelector(".content");
-    contenedor.innerHTML += `<button onclick="mostrarTodos('${endpoint}')">Mostrar todos los registros</button>`;
+    contenedor.innerHTML += `<button class="bttAllItems" onclick="mostrarTodos('${endpoint}')">Mostrar todos los registros</button>`;
 }
 
 async function mostrarTodos(endpoint) {
@@ -84,7 +91,7 @@ async function mostrarTodos(endpoint) {
         if (!response.ok) throw new Error("No se pudo cargar los datos");
         const data = await response.json();
         const registros = data["$values"] || data; // También aquí
-
+        mostrar();
         console.log("Todos los registros:", registros);
     } catch (error) {
         console.error("Error:", error);
@@ -92,11 +99,11 @@ async function mostrarTodos(endpoint) {
 }
 
 function configurarFormularioUnico(config) {
-    const form = document.getElementById("formulario-unico");
+    const form = document.querySelector(".formulario-unico");
     if (form) {
         form.addEventListener("submit", async function (e) {
             e.preventDefault();
-            const id = document.getElementById("datoUnico").value;
+            const id = document.querySelector(".datoUnico").value;
             try {
                 const response = await fetch(`${config.ruta}/${id}`);
                 if (!response.ok) throw new Error("No se encontró el registro con ese ID");
@@ -111,17 +118,26 @@ function configurarFormularioUnico(config) {
 }
 
 function configurarFormularioRegistro(config) {
-    const form = document.getElementById(config.formId);
+    const form = document.querySelector(".formularios");
     if (form) {
         form.addEventListener("submit", async function (e) {
             e.preventDefault();
             const formData = new FormData(form);
             const data = {};
+            
             formData.forEach((value, key) => {
-                data[key] = isNaN(value) ? value : parseInt(value);
+                if (key === 'restrictiondate') {
+                    data[key] = new Date(value).toISOString(); // Convierte a formato ISO
+                } else if (key === 'id_client') {
+                    data[key] = parseInt(value);
+                } else {
+                    data[key] = value;
+                }
             });
 
             try {
+                console.log(data);  // Verifica qué datos están siendo enviados
+
                 const response = await fetch(config.ruta, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
@@ -136,6 +152,7 @@ function configurarFormularioRegistro(config) {
         });
     }
 }
+
 
 async function eliminarElemento(endpoint, id) {
     if (!confirm("¿Estás seguro de que deseas eliminar este registro?")) return;

@@ -28,11 +28,8 @@ namespace API.Controllers
             {
                 id = frp.id,
                 id_forms = frp.id_forms,
-                FormsName = frp.FormsName,
-                id_rol = frp.id_rol, // Keep this as the property name, ensure it matches your Entity
-                RolName = frp.RolName,
+                id_rol = frp.id_rol,
                 id_permission = frp.id_permission,
-                PermissionName = frp.PermissionName
             }).ToList();
             return Ok(formRolPermissionDtos);
         }
@@ -50,11 +47,8 @@ namespace API.Controllers
             {
                 id = formRolPermission.id,
                 id_forms = formRolPermission.id_forms,
-                FormsName = formRolPermission.FormsName,
-                id_rol = formRolPermission.id_rol, // Keep this as the property name
-                RolName = formRolPermission.RolName,
+                id_rol = formRolPermission.id_rol,
                 id_permission = formRolPermission.id_permission,
-                PermissionName = formRolPermission.PermissionName
             };
             return Ok(formRolPermissionDto);
         }
@@ -70,7 +64,7 @@ namespace API.Controllers
             var formRolPermission = new FormRolPermission
             {
                 id_forms = formRolPermissionCreateDto.id_forms,
-                id_rol = formRolPermissionCreateDto.id_rol, // Keep this as the property name
+                id_rol = formRolPermissionCreateDto.id_rol,
                 id_permission = formRolPermissionCreateDto.id_permission
             };
 
@@ -80,11 +74,8 @@ namespace API.Controllers
             {
                 id = createdFormRolPermission.id,
                 id_forms = createdFormRolPermission.id_forms,
-                FormsName = createdFormRolPermission.FormName,
-                id_rol = createdFormRolPermission.id_rol, // Keep this as the property name
-                RolName = createdFormRolPermission.RolName,
+                id_rol = createdFormRolPermission.id_rol,
                 id_permission = createdFormRolPermission.id_permission,
-                PermissionName = createdFormRolPermission.PermissionName
             };
 
 
@@ -104,24 +95,24 @@ namespace API.Controllers
                 return BadRequest(ModelState);
             }
 
-            var existingFormRolPermissionDto = await _formRolPermissionService.GetFormRolPermissionByIdAsync(id);
-            if (existingFormRolPermissionDto == null)
+            var existingFormRolPermission = await _formRolPermissionService.GetFormRolPermissionByIdAsync(id);
+            if (existingFormRolPermission == null)
             {
                 return NotFound();
             }
 
             // Convertir el DTO a la entidad FormRolPermission
-            var existingFormRolPermission = new FormRolPermission
+            var formRolPermissionToUpdate = new FormRolPermission
             {
-                id = existingFormRolPermissionDto.id,
+                id = existingFormRolPermission.id, // Preservar el ID
                 id_forms = formRolPermissionDto.id_forms,
-                id_rol = formRolPermissionDto.id_rol, // Keep this as the property name
+                id_rol = formRolPermissionDto.id_rol,
                 id_permission = formRolPermissionDto.id_permission,
-                // Asegúrate de mapear all properties
+                // No actualizar Forms, RolName, PermissionName aquí. Estos son de solo lectura para las actualizaciones.
             };
 
 
-            var result = await _formRolPermissionService.UpdateFormRolPermissionAsync(existingFormRolPermission);
+            var result = await _formRolPermissionService.UpdateFormRolPermissionAsync(formRolPermissionToUpdate);
             if (!result)
             {
                 return NotFound();

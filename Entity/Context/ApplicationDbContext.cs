@@ -55,7 +55,15 @@ namespace Entity.Context
             // Definir las tablas para cada entidad
             modelBuilder.Entity<User>().ToTable("user");
             modelBuilder.Entity<Person>().ToTable("person");
-            modelBuilder.Entity<Client>().ToTable("client");
+            modelBuilder.Entity<Client>(entity =>
+            {
+                entity.ToTable("client");
+                // Configuración de la relación con User
+                entity.HasOne(c => c.user)
+                      .WithMany()
+                      .HasForeignKey(c => c.id_user)
+                      .IsRequired(false); // <--- Esto es clave: indica que la columna puede ser nula
+            });
             modelBuilder.Entity<Forms>(entity =>
             {
                 entity.ToTable("forms");
@@ -215,11 +223,7 @@ namespace Entity.Context
                 .HasForeignKey<VehicleHistory>(vh => vh.id_typevehicle)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // Relación entre Client y User
-            modelBuilder.Entity<Client>()
-                .HasOne(c => c.user)
-                .WithMany()
-                .HasForeignKey(c => c.id_user);
+
 
             // Relación entre Vehicle y Client
             modelBuilder.Entity<Vehicle>()

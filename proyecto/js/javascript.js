@@ -4,147 +4,166 @@ document.addEventListener("DOMContentLoaded", function () {
     const titulo = document.querySelector(".titulo");
 
     botones.forEach(boton => {
-        boton.addEventListener("click", function () {
-            let botonId = boton.id;
+        boton.addEventListener("click", async function () {
+            const botonId = boton.id;
+            try {
+                const contextResponse = await fetch("../json/context.json");
+                if (!contextResponse.ok) throw new Error("Error al cargar context.json");
 
-            fetch("../json/context.json")
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Error en la carga de context.json');
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    const objeto = data.find(item => item.id === botonId);
+                const contextData = await contextResponse.json();
+                const config = contextData.find(item => item.id === botonId);
+                if (!config) {
+                    contenedor.innerHTML = "<p>Contenido no encontrado para el botón.</p>";
+                    return;
+                }
 
-                    if (objeto) {
+                titulo.innerHTML = config.title;
+                contenedor.innerHTML = config.contenedor;
 
-                        titulo.innerHTML = objeto.title;
-                        contenedor.innerHTML = objeto.contenedor;
-                        const campos = objeto.campos || [];
+                const campos = config.campos || [];
 
-                        fetch(objeto.ruta)
-                            .then(response2 => {
-                                if (!response2.ok) {
-                                    throw new Error('Error al cargar los datos desde ' + objeto.ruta);
-                                }
-                                return response2.json();
-                            })
-                            .then(data2 => {
-                                const cuerpo = document.getElementById("cuerpo-1");
-                                if (Array.isArray(data2) && data2.length > 0) {
-                                    data2.forEach(item => {
-                                        let row = "<tr>";
-                                        campos.forEach(campo => {
-                                            row += `<td>${item[campo] ?? ""}</td>`;
-                                        });
-                                        row += `<td><button class="buttonPersonalizado eliminar" id='${objeto.Eliminar}'>Eliminar</button><button class="buttonPersonalizado actulizar" id='${objeto.Actulizar}'>Actualizar</button></td></tr>`;
-                                        cuerpo.innerHTML += row;
-                                    });
-                                } else {
-                                    cuerpo.innerHTML = "<tr><td colspan='4'>No hay datos</td></tr>";
-                                }
-                            })
-                            .catch(error => {
-                                contenedor.innerHTML += `<p>Error cargando datos: ${error.message}</p>`;
-                            });
+                await cargarTabla(config, campos);
+                agregarBotonMostrarTodos(config.ruta);
+                contenedor.innerHTML += config.formulario;
+                configurarFormularioUnico(config);
+                configurarFormularioRegistro(config);
 
-                        contenedor.innerHTML += `<button onclick="return getBlackList('${objeto.EndPoint}')">Todos los registros</button>`;
-
-                        contenedor.innerHTML += objeto.formulario;
-
-                        const form = document.getElementById("formulario-unico");
-                        // llamar el elemento por id-448    48
-                        if (form) {
-                            form.addEventListener("submit", async function (e) {
-                                e.preventDefault();
-
-                                const id = document.getElementById("datoUnico").value;
-
-                                try {
-                                    const response = await fetch(`${objeto.EndPoint}/${id}`);
-                                    if (!response.ok) {
-                                        throw new Error("No se encontró el registro con ese ID");
-                                    }
-
-                                    const data = await response.json();
-                                    console.log("Datos obtenidos:", data);
-                                    // Aquí puedes mostrar los datos si lo deseas
-
-                                } catch (error) {
-                                    console.error("Error:", error);
-                                    contenedor.innerHTML += `<p style="color:red;">${error.message}</p>`;
-                                }
-                            });
-                        }
-
-                    } else {
-                        contenedor.innerHTML = "<p>Contenido no encontrado para el botón.</p>";
-                    }
-
-                })
-            .catch(error => {
-                contenedor.innerHTML = `<p>Error al cargar el contexto: ${error.message}</p>`;
-            });
+            } catch (error) {
+                contenedor.innerHTML = `<p>Error: ${error.message}</p>`;
+            }
         });
     });
 });
-// mostrar todas las entidades
-async function getBlackList(endpoint) {
+
+async function cargarTabla(config, campos) {
     try {
-        const response = await fetch(endpoint);
-        if (!response.ok) {
-            alert("Error al cargar la BlackList");
-            throw new Error("No se pudo cargar la BlackList");
-        }
+        console.log("URL del endpoint:", config.ruta);
+
+        const response = await fetch(config.ruta);
+        if (!response.ok) throw new Error('Error al cargar los datos desde ' + config.ruta);
 
         const data = await response.json();
-        for (const iteracion in data) {
-            if (Object.prototype.hasOwnProperty.call(data, iteracion)) {
-                const element = data[iteracion];
-                console.log("Datos obtenidos:", element);
-            }
+        const registros = data["$values"] || data; // Ajuste aquí
+
+        console.log("Datos recibidos:", registros);
+
+        const cuerpo = document.querySelector(".cuerpo-1");
+        cuerpo.innerHTML = "";
+
+        if (Array.isArray(registros) && registros.length > 0) {
+            registros.forEach(item => {
+                let row = "<tr>";
+                campos.forEach(campo => {
+                    row += `<td>${item[campo] ?? ""}</td>`;
+                });
+                row += `
+                    <td>
+                        <button class="buttonPersonalizado eliminar" onclick="eliminarElemento('${config.ruta}', ${item.id})">Eliminar</button>
+                        <button class="buttonPersonalizado actualizar" onclick="actualizarElemento('${config.ruta}', ${item.id})">Actualizar</button>
+                    </td>
+                </tr>`;
+                cuerpo.innerHTML += row;
+            });
+        } else {
+            cuerpo.innerHTML = "<tr><td colspan='4'>No hay datos</td></tr>";
         }
+    } catch (error) {
+        console.error("Error cargando datos:", error);
+        document.querySelector(".cuerpo-1").innerHTML = "<tr><td colspan='4'>Error al cargar los datos.</td></tr>";
+    }
+}
+
+function agregarBotonMostrarTodos(endpoint) {
+    const contenedor = document.querySelector(".content");
+    contenedor.innerHTML += `<button onclick="mostrarTodos('${endpoint}')">Mostrar todos los registros</button>`;
+}
+
+async function mostrarTodos(endpoint) {
+    try {
+        const response = await fetch(endpoint);
+        if (!response.ok) throw new Error("No se pudo cargar los datos");
+        const data = await response.json();
+        const registros = data["$values"] || data; // También aquí
+
+        console.log("Todos los registros:", registros);
     } catch (error) {
         console.error("Error:", error);
     }
 }
 
-document.getElementById('blacklistForm').addEventListener('submit', async function (e) {
-    e.preventDefault(); // Evita que el formulario recargue la página
-    const formData = new FormData(e.target);
-    const data = {
-      reason: formData.get('reason'),
-      restrictiondate: formData.get('restrictiondate'),
-      id_client: parseInt(formData.get('id_client'))
-    };
+function configurarFormularioUnico(config) {
+    const form = document.getElementById("formulario-unico");
+    if (form) {
+        form.addEventListener("submit", async function (e) {
+            e.preventDefault();
+            const id = document.getElementById("datoUnico").value;
+            try {
+                const response = await fetch(`${config.ruta}/${id}`);
+                if (!response.ok) throw new Error("No se encontró el registro con ese ID");
+
+                const data = await response.json();
+                console.log("Datos obtenidos por ID:", data);
+            } catch (error) {
+                console.error("Error:", error);
+            }
+        });
+    }
+}
+
+function configurarFormularioRegistro(config) {
+    const form = document.getElementById(config.formId);
+    if (form) {
+        form.addEventListener("submit", async function (e) {
+            e.preventDefault();
+            const formData = new FormData(form);
+            const data = {};
+            formData.forEach((value, key) => {
+                data[key] = isNaN(value) ? value : parseInt(value);
+            });
+
+            try {
+                const response = await fetch(config.ruta, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+                alert(response.ok ? "Guardado exitosamente" : `Error: ${result.message}`);
+            } catch (error) {
+                alert("Error de red: " + error.message);
+            }
+        });
+    }
+}
+
+async function eliminarElemento(endpoint, id) {
+    if (!confirm("¿Estás seguro de que deseas eliminar este registro?")) return;
 
     try {
-      const response = await fetch('https://localhost:7035/api/BlackList', { // cambia URL según tu API
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(data)
-      });
+        const response = await fetch(`${endpoint}/${id}`, { method: "DELETE" });
+        const result = await response.json();
+        alert(response.ok ? "Eliminado correctamente" : `Error: ${result.message}`);
+    } catch (error) {
+        alert("Error eliminando: " + error.message);
+    }
+}
+
+async function actualizarElemento(endpoint, id) {
+    const nuevosDatos = prompt("Introduce los nuevos datos en formato JSON:");
+    if (!nuevosDatos) return;
+
+    try {
+        const parsed = JSON.parse(nuevosDatos);
+        const response = await fetch(`${endpoint}/${id}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(parsed)
+        });
 
         const result = await response.json();
-        document.getElementById('response').innerText =
-        response.ok ? 'Guardado exitosamente' : `Error: ${result.message || 'Error desconocido'}`;
+        alert(response.ok ? "Actualizado correctamente" : `Error: ${result.message}`);
     } catch (error) {
-      document.getElementById('response').innerText = 'Error de red: ' + error.message;
+        alert("Error actualizando: " + error.message);
     }
-  });
-
-
-// const buttonEliminar = document.querySelector(".eliminar");
-// const buttonActulizar = document.querySelector(".actulizar")
-
-
-// buttonEliminar.addEventListener("click",function(){
-
-// })
-
-// buttonActulizar.addEventListener("click",function(){
-
-// })
+}

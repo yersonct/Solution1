@@ -64,7 +64,7 @@ namespace API.Controllers
             var client = new Client
             {
                 name = clientDto.name,
-                id_user = clientDto.id_user,
+                id_user = clientDto.id_user, // No hay problema, ya que ClientCreateDTO tiene id_user como int?
             };
 
             var createdClient = await _clientService.CreateClientAsync(client);
@@ -119,4 +119,3 @@ namespace API.Controllers
         }
     }
 }
-

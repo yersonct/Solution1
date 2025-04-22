@@ -62,6 +62,7 @@ async function cargarTabla(config, campos) {
                         <td>
                             <button class="buttonPersonalizado eliminar" onclick="eliminarElemento('${config.ruta}', ${item.id})">Eliminar</button>
                             <button class="buttonPersonalizado actualizar" onclick="actualizarElemento('${config.ruta}', ${item.id})">Actualizar</button>
+                               <button class="buttonPersonalizado EliminadorLogico" onclick="EliminadorLogico('${config.ruta}', ${item.id})">ELiminador logico</button>
                         </td>
                     </tr>`;
                     cuerpo.innerHTML += row;

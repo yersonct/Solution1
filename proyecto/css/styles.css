@@ -282,9 +282,11 @@ tbody tr:last-child td:last-child {
     color: white;
     font-size: 16px;
     cursor: pointer;
-    margin: 0px 20px;
+    margin: 10px 20px;
 }
-
+.EliminadorLogico{
+    background-color: gold;
+}
 .buttonPersonalizado::after {
     content: "";
     position: absolute;
@@ -361,8 +363,9 @@ form {
     background-color: #339af0;
   }
 
-  .bttAllItems {
+.bttAllItems {
     background-color: #339af0; /* Indigo-600 */
+    margin: 0% 45% ;
     color: #ffffff;
     padding: 10px 20px;
     border: none;

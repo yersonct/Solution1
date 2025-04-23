@@ -26,7 +26,7 @@ namespace API.Controllers
         public async Task<ActionResult<IEnumerable<UserDTO>>> GetAllUsers()
         {
             var users = await _userService.GetAllUsersAsync();
-            var userDtos = users.Select(async u =>
+            var userDtos = await Task.WhenAll(users.Select(async u =>
             {
                 var person = await _personService.GetPersonByIdAsync(u.id_person);
                 return new UserDTO
@@ -35,9 +35,9 @@ namespace API.Controllers
                     UserName = u.username,
                     PersonId = u.id_person,
                     Password = u.password,
-                    PersonName = person?.name // Obtén el nombre de la persona
+                    PersonName = person?.name
                 };
-            }).Select(t => t.Result).ToList(); // Ejecuta las tareas asíncronas y convierte a lista
+            }));
             return Ok(userDtos);
         }
 
@@ -56,7 +56,7 @@ namespace API.Controllers
                 Id = user.id,
                 UserName = user.username,
                 PersonId = user.id_person,
-                PersonName = person?.name // Obtén el nombre de la persona
+                PersonName = person?.name
             };
             return Ok(userDto);
         }
@@ -74,6 +74,8 @@ namespace API.Controllers
                 username = userCreateDTO.UserName,
                 password = userCreateDTO.Password,
                 id_person = userCreateDTO.PersonId
+                // Si agregaste el campo Active en User, podrías inicializarlo aquí:
+                // Active = true
             };
 
             var createdUser = await _userService.CreateUserAsync(user);

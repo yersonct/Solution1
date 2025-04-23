@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Business.Interfaces;
+using Entity.Model;
 using Entity.DTOs;
 using System.Linq;
-using Entity.Model;
 
 namespace API.Controllers
 {
@@ -23,38 +23,37 @@ namespace API.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<FormRolPermissionDTO>>> GetAllFormRolPermissions()
         {
-            var formRolPermissions = await _formRolPermissionService.GetAllFormRolPermissionsAsync();
-            var formRolPermissionDtos = formRolPermissions.Select(frp => new FormRolPermissionDTO
+            try
             {
-                id = frp.id,
-                id_forms = frp.id_forms,
-                id_rol = frp.id_rol,
-                id_permission = frp.id_permission,
-            }).ToList();
-            return Ok(formRolPermissionDtos);
+                var formRolPermissions = await _formRolPermissionService.GetAllFormRolPermissionsAsync();
+                return Ok(formRolPermissions);
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, "Error retrieving form role permissions.");
+            }
         }
 
         [HttpGet("{id}")]
         public async Task<ActionResult<FormRolPermissionDTO>> GetFormRolPermissionById(int id)
         {
-            var formRolPermission = await _formRolPermissionService.GetFormRolPermissionByIdAsync(id);
-            if (formRolPermission == null)
+            try
             {
-                return NotFound();
+                var formRolPermission = await _formRolPermissionService.GetFormRolPermissionByIdAsync(id);
+                if (formRolPermission == null)
+                {
+                    return NotFound();
+                }
+                return Ok(formRolPermission);
             }
-
-            var formRolPermissionDto = new FormRolPermissionDTO
+            catch (Exception)
             {
-                id = formRolPermission.id,
-                id_forms = formRolPermission.id_forms,
-                id_rol = formRolPermission.id_rol,
-                id_permission = formRolPermission.id_permission,
-            };
-            return Ok(formRolPermissionDto);
+                return StatusCode(500, "Error retrieving form role permission.");
+            }
         }
 
         [HttpPost]
-        public async Task<ActionResult<FormRolPermissionDTO>> CreateFormRolPermission([FromBody] FormRolPermissionCreateDTO formRolPermissionCreateDto)
+        public async Task<ActionResult<FormRolPermission>> CreateFormRolPermission([FromBody] FormRolPermissionCreateDTO formRolPermissionDto)
         {
             if (!ModelState.IsValid)
             {
@@ -63,36 +62,36 @@ namespace API.Controllers
 
             var formRolPermission = new FormRolPermission
             {
-                id_forms = formRolPermissionCreateDto.id_forms,
-                id_rol = formRolPermissionCreateDto.id_rol,
-                id_permission = formRolPermissionCreateDto.id_permission
+                id_forms = formRolPermissionDto.id_forms,
+                id_rol = formRolPermissionDto.id_rol,
+                id_permission = formRolPermissionDto.id_permission,
+                active = true // Set active on creation
+                // You might need to fetch the related entities (Forms, Rol, Permission) here
+                // if you want to ensure they exist before creating the FormRolPermission.
             };
 
-            var createdFormRolPermission = await _formRolPermissionService.CreateFormRolPermissionAsync(formRolPermission);
-
-            var formRolPermissionDto = new FormRolPermissionDTO
+            try
             {
-                id = createdFormRolPermission.id,
-                id_forms = createdFormRolPermission.id_forms,
-                id_rol = createdFormRolPermission.id_rol,
-                id_permission = createdFormRolPermission.id_permission,
-            };
-
-
-            return CreatedAtAction(nameof(GetFormRolPermissionById), new { id = formRolPermissionDto.id }, formRolPermissionDto);
+                var createdFormRolPermission = await _formRolPermissionService.CreateFormRolPermissionAsync(formRolPermission);
+                return CreatedAtAction(nameof(GetFormRolPermissionById), new { id = createdFormRolPermission.id }, createdFormRolPermission);
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, "Error creating form role permission.");
+            }
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateFormRolPermission(int id, [FromBody] FormRolPermissionDTO formRolPermissionDto)
+        public async Task<IActionResult> UpdateFormRolPermission(int id, [FromBody] FormRolPermissionUpdateDTO formRolPermissionDto)
         {
-            if (id != formRolPermissionDto.id)
-            {
-                return BadRequest("El ID del FormRolPermission no coincide con el ID de la ruta.");
-            }
-
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
+            }
+
+            if (id != formRolPermissionDto.id)
+            {
+                return BadRequest("The ID in the request body does not match the route ID.");
             }
 
             var existingFormRolPermission = await _formRolPermissionService.GetFormRolPermissionByIdAsync(id);
@@ -101,34 +100,55 @@ namespace API.Controllers
                 return NotFound();
             }
 
-            // Convertir el DTO a la entidad FormRolPermission
             var formRolPermissionToUpdate = new FormRolPermission
             {
-                id = existingFormRolPermission.id, // Preservar el ID
-                id_forms = formRolPermissionDto.id_forms,
-                id_rol = formRolPermissionDto.id_rol,
-                id_permission = formRolPermissionDto.id_permission,
-                // No actualizar Forms, RolName, PermissionName aquí. Estos son de solo lectura para las actualizaciones.
+                id = formRolPermissionDto.id,
+                Forms = new Forms { name = formRolPermissionDto.formName },
+                Rol = new Rol { Name = formRolPermissionDto.rolName },
+                Permission = new Permission { name = formRolPermissionDto.permissionName },
+                active = formRolPermissionDto.active
             };
 
-
-            var result = await _formRolPermissionService.UpdateFormRolPermissionAsync(formRolPermissionToUpdate);
-            if (!result)
+            try
             {
+                var result = await _formRolPermissionService.UpdateFormRolPermissionAsync(formRolPermissionToUpdate);
+                if (result)
+                {
+                    return NoContent();
+                }
                 return NotFound();
             }
-            return NoContent();
+            catch (Exception)
+            {
+                return StatusCode(500, "Error updating form role permission.");
+            }
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteFormRolPermission(int id)
         {
-            var result = await _formRolPermissionService.DeleteFormRolPermissionAsync(id);
-            if (!result)
+            try
             {
+                var result = await _formRolPermissionService.DeleteFormRolPermissionAsync(id);
+                if (result)
+                {
+                    return NoContent();
+                }
                 return NotFound();
             }
-            return NoContent();
+            catch (Exception)
+            {
+                return StatusCode(500, "Error deleting form role permission.");
+            }
         }
+    }
+
+    public class FormRolPermissionUpdateDTO
+    {
+        public int id { get; set; }
+        public string formName { get; set; }
+        public string rolName { get; set; }
+        public string permissionName { get; set; }
+        public bool active { get; set; }
     }
 }

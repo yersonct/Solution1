@@ -29,22 +29,18 @@ namespace Web.Controllers
             try
             {
                 var membershipsVehicles = await _membershipsVehicleService.GetAllMembershipsVehiclesAsync();
-                var result = membershipsVehicles.Select(mv => new
+                var result = membershipsVehicles.Select(mv => new MembershipsVehicleDTO
                 {
-                    id = mv.id,
-                    vehicleId = mv.vehicle?.id, // Agregado manejo de nulos
-                    vehiclePlate = mv.vehicle?.plate, // Agregado manejo de nulos
-                    membershipsId = mv.memberships?.id, // Agregado manejo de nulos
-                    membershipsType = mv.memberships?.membershiptype, // Agregado manejo de nulos
-                    membershipsStartDate = mv.memberships?.startdate, // Agregado manejo de nulos
-                    membershipsEndDate = mv.memberships?.enddate, // Agregado manejo de nulos
-                    membershipsActive = mv.memberships?.active // Agregado manejo de nulos
+                    id = mv.id, // ✅ Asigna el ID
+                    VehiclePlate = mv.vehicle?.plate,
+                    MembershipsNmae = mv.memberships?.membershiptype,
+                    active = mv.active
                 }).ToList();
                 return Ok(result);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error en GetAll"); // Registra el error
+                _logger.LogError(ex, "Error en GetAll");
                 return StatusCode(500, "Internal server error");
             }
         }
@@ -67,23 +63,18 @@ namespace Web.Controllers
             {
                 var createdMembershipVehicle = await _membershipsVehicleService.CreateMembershipsVehicleAsync(membershipsVehicle);
 
-                var result = new // Proyecta con el formato deseado
+                var result = new MembershipsVehicleDTO // Proyecta con el formato deseado
                 {
-                    id = createdMembershipVehicle.id,
-                    vehicleId = createdMembershipVehicle.vehicle?.id,  // Agregado manejo de nulos
-                    vehiclePlate = createdMembershipVehicle.vehicle?.plate, // Agregado manejo de nulos
-                    membershipsId = createdMembershipVehicle.memberships?.id, // Agregado manejo de nulos
-                    membershipsType = createdMembershipVehicle.memberships?.membershiptype, // Agregado manejo de nulos
-                    membershipsStartDate = createdMembershipVehicle.memberships?.startdate, // Agregado manejo de nulos
-                    membershipsEndDate = createdMembershipVehicle.memberships?.enddate, // Agregado manejo de nulos
-                    membershipsActive = createdMembershipVehicle.memberships?.active  // Agregado manejo de nulos
+                    VehiclePlate = createdMembershipVehicle.vehicle?.plate, // Get Vehicle plate
+                    MembershipsNmae = createdMembershipVehicle.memberships?.membershiptype, //Get Memberships name
+                    active = createdMembershipVehicle.active
                 };
 
                 return CreatedAtAction(nameof(GetById), new { id = createdMembershipVehicle.id }, result);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error en Post");  // Registra el error
+                _logger.LogError(ex, "Error en Post"); // Registra el error
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
@@ -99,16 +90,11 @@ namespace Web.Controllers
                     return NotFound();
                 }
 
-                var result = new  // Proyecta con el formato deseado
+                var result = new MembershipsVehicleDTO // Proyecta con el formato deseado
                 {
-                    id = membershipsVehicle.id,
-                    vehicleId = membershipsVehicle.vehicle?.id, // Agregado manejo de nulos
-                    vehiclePlate = membershipsVehicle.vehicle?.plate, // Agregado manejo de nulos
-                    membershipsId = membershipsVehicle.memberships?.id, // Agregado manejo de nulos
-                    membershipsType = membershipsVehicle.memberships?.membershiptype, // Agregado manejo de nulos
-                    membershipsStartDate = membershipsVehicle.memberships?.startdate, // Agregado manejo de nulos
-                    membershipsEndDate = membershipsVehicle.memberships?.enddate, // Agregado manejo de nulos
-                    membershipsActive = membershipsVehicle.memberships?.active  // Agregado manejo de nulos
+                    VehiclePlate = membershipsVehicle.vehicle?.plate, // Get Vehicle plate
+                    MembershipsNmae = membershipsVehicle.memberships?.membershiptype, //Get Memberships name
+                    active = membershipsVehicle.active
                 };
                 return Ok(result);
             }
@@ -140,16 +126,11 @@ namespace Web.Controllers
 
                 await _membershipsVehicleService.UpdateMembershipsVehicleAsync(existingMembershipVehicle);
 
-                var result = new // Proyecta con el formato deseado
+                var result = new MembershipsVehicleDTO // Proyecta con el formato deseado
                 {
-                    id = existingMembershipVehicle.id,
-                    vehicleId = existingMembershipVehicle.vehicle?.id, // Agregado manejo de nulos
-                    vehiclePlate = existingMembershipVehicle.vehicle?.plate, // Agregado manejo de nulos
-                    membershipsId = existingMembershipVehicle.memberships?.id, // Agregado manejo de nulos
-                    membershipsType = existingMembershipVehicle.memberships?.membershiptype, // Agregado manejo de nulos
-                    membershipsStartDate = existingMembershipVehicle.memberships?.startdate, // Agregado manejo de nulos
-                    membershipsEndDate = existingMembershipVehicle.memberships?.enddate, // Agregado manejo de nulos
-                    membershipsActive = existingMembershipVehicle.memberships?.active  // Agregado manejo de nulos
+                    VehiclePlate = existingMembershipVehicle.vehicle?.plate, // Get Vehicle plate
+                    MembershipsNmae = existingMembershipVehicle.memberships?.membershiptype, //Get Memberships name
+                    active = existingMembershipVehicle.active
                 };
                 return Ok(result);
             }
@@ -185,4 +166,3 @@ namespace Web.Controllers
         }
     }
 }
-

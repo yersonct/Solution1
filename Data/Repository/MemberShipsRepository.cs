@@ -26,6 +26,13 @@ namespace Data.Repository
         {
             try
             {
+                entity.active = true; // Establecer como activo al crear
+                // Asegurar que las fechas sean UTC al crear
+                if (entity.startdate.Kind != DateTimeKind.Utc)
+                    entity.startdate = entity.startdate.ToUniversalTime();
+                if (entity.enddate.Kind != DateTimeKind.Utc)
+                    entity.enddate = entity.enddate.ToUniversalTime();
+
                 await _context.Set<MemberShips>().AddAsync(entity);
                 await _context.SaveChangesAsync();
                 return entity;
@@ -44,7 +51,14 @@ namespace Data.Repository
                 var membershipToDelete = await _context.Set<MemberShips>().FindAsync(id);
                 if (membershipToDelete != null)
                 {
-                    _context.Set<MemberShips>().Remove(membershipToDelete);
+                    // Asegurar que las fechas sean UTC antes de la actualización para la eliminación lógica
+                    if (membershipToDelete.startdate.Kind != DateTimeKind.Utc)
+                        membershipToDelete.startdate = membershipToDelete.startdate.ToUniversalTime();
+                    if (membershipToDelete.enddate.Kind != DateTimeKind.Utc)
+                        membershipToDelete.enddate = membershipToDelete.enddate.ToUniversalTime();
+
+                    membershipToDelete.active = false; // Eliminación lógica
+                    _context.Entry(membershipToDelete).State = EntityState.Modified;
                     await _context.SaveChangesAsync();
                     return true;
                 }
@@ -52,7 +66,7 @@ namespace Data.Repository
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error al eliminar la membresía con ID: {MemberShipsId}", id);
+                _logger.LogError(ex, "Error al eliminar (lógicamente) la membresía con ID: {MemberShipsId}", id);
                 return false;
             }
         }
@@ -63,11 +77,12 @@ namespace Data.Repository
             {
                 return await _context.Set<MemberShips>()
                     .Include(u => u.membershipsvehicles)
+                    .Where(m => m.active) // Filtrar solo las activas
                     .ToListAsync();
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error al obtener todas las membresías.");
+                _logger.LogError(ex, "Error al obtener todas las membresías activas.");
                 return new List<MemberShips>();
             }
         }
@@ -78,11 +93,11 @@ namespace Data.Repository
             {
                 return await _context.Set<MemberShips>()
                     .Include(u => u.membershipsvehicles)
-                    .FirstOrDefaultAsync(u => u.id == id);
+                    .FirstOrDefaultAsync(u => u.id == id && u.active); // Filtrar solo las activas
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error al obtener la membresía con ID: {MemberShipsId}", id);
+                _logger.LogError(ex, "Error al obtener la membresía activa con ID: {MemberShipsId}", id);
                 return null;
             }
         }
@@ -91,18 +106,24 @@ namespace Data.Repository
         {
             try
             {
+                // Asegurar que las fechas sean UTC al actualizar
+                if (entity.startdate.Kind != DateTimeKind.Utc)
+                    entity.startdate = entity.startdate.ToUniversalTime();
+                if (entity.enddate.Kind != DateTimeKind.Utc)
+                    entity.enddate = entity.enddate.ToUniversalTime();
+
                 _context.Entry(entity).State = EntityState.Modified;
                 await _context.SaveChangesAsync();
                 return true;
             }
             catch (DbUpdateConcurrencyException ex)
             {
-                _logger.LogError(ex, "Error de concurrencia al actualizar la membresía con ID: {MemberShipsId}", entity.id);
+                _logger.LogError(ex, "Error de concurrencia al actualizar la membresía activa con ID: {MemberShipsId}", entity.id);
                 return false;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error al actualizar la membresía con ID: {MemberShipsId}", entity.id);
+                _logger.LogError(ex, "Error al actualizar la membresía activa con ID: {MemberShipsId}", entity.id);
                 return false;
             }
         }

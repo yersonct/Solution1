@@ -33,20 +33,24 @@ namespace Business.Services
 
         public async Task<RolUser> CreateRolUserAsync(RolUser rolUser)
         {
-            // Aquí podrías agregar lógica de negocio antes de crear la relación Rol-Usuario
+            rolUser.active = true; // Set active to true on creation
             return await _rolUserRepository.AddAsync(rolUser);
         }
 
         public async Task<bool> UpdateRolUserAsync(RolUser rolUser)
         {
-            // Aquí podrías agregar lógica de negocio antes de actualizar la relación Rol-Usuario
             return await _rolUserRepository.UpdateAsync(rolUser);
         }
 
         public async Task<bool> DeleteRolUserAsync(int id)
         {
-            // Aquí podrías agregar lógica de negocio antes de eliminar la relación Rol-Usuario
-            return await _rolUserRepository.DeleteAsync(id);
+            var rolUserToDelete = await _rolUserRepository.GetByIdAsync(id);
+            if (rolUserToDelete == null)
+            {
+                return false;
+            }
+            rolUserToDelete.active = false; // Logical delete
+            return await _rolUserRepository.UpdateAsync(rolUserToDelete);
         }
     }
 }

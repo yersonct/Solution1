@@ -34,6 +34,8 @@ namespace Business.Services
         public async Task<User> CreateUserAsync(User user)
         {
             // Aquí podrías agregar lógica de negocio antes de crear el usuario
+            // Asegúrate de que la propiedad 'Active' (si la agregaste a la entidad User) se inicialice en true
+            // user.Active = true; 
             return await _userRepository.AddAsync(user);
         }
 

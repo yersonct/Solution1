@@ -65,7 +65,7 @@ namespace API.Controllers
             {
                 Name = rolDto.Name,
                 Description = rolDto.Description,
-                Active = rolDto.Active
+                Active = true // Asegúrate de que se cree como activo
             };
 
             var createdRol = await _rolService.CreateRolAsync(rol);
@@ -93,12 +93,12 @@ namespace API.Controllers
 
             existingRol.Name = rolDto.Name;
             existingRol.Description = rolDto.Description;
-            existingRol.Active = rolDto.Active;
+            existingRol.Active = rolDto.Active; // Permite actualizar el estado activo
 
             var result = await _rolService.UpdateRolAsync(existingRol);
             if (!result)
             {
-                return NotFound();
+                return StatusCode(500, "Ocurrió un error al actualizar el rol.");
             }
             return NoContent();
         }

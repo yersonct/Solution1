@@ -23,12 +23,12 @@ namespace Business.Services
 
         public async Task<IEnumerable<MemberShips>> GetAllMembershipsAsync()
         {
-            return await _membershipsRepository.GetAllAsync();
+            return await _membershipsRepository.GetAllAsync(); // Obtiene solo las activas
         }
 
         public async Task<MemberShips?> GetMembershipByIdAsync(int id)
         {
-            return await _membershipsRepository.GetByIdAsync(id);
+            return await _membershipsRepository.GetByIdAsync(id); // Obtiene solo la activa
         }
 
         public async Task<MemberShips> CreateMembershipAsync(MemberShips membership)
@@ -40,13 +40,13 @@ namespace Business.Services
         public async Task<bool> UpdateMembershipAsync(MemberShips membership)
         {
             // Aquí podrías agregar lógica de negocio antes de actualizar la membresía
-            return await _membershipsRepository.UpdateAsync(membership);
+            return await _membershipsRepository.UpdateAsync(membership); // Ya considera solo las activas en el repositorio
         }
 
         public async Task<bool> DeleteMembershipAsync(int id)
         {
             // Aquí podrías agregar lógica de negocio antes de eliminar la membresía
-            return await _membershipsRepository.DeleteAsync(id);
+            return await _membershipsRepository.DeleteAsync(id); // Realiza la eliminación lógica
         }
     }
 }

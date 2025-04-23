@@ -33,19 +33,19 @@ namespace Business.Services
 
         public async Task<Permission> CreatePermissionAsync(Permission permission)
         {
-            // Aquí podrías agregar lógica de negocio antes de crear el permiso
+            // You can add business logic before creating the permission
             return await _permissionRepository.AddAsync(permission);
         }
 
         public async Task<bool> UpdatePermissionAsync(Permission permission)
         {
-            // Aquí podrías agregar lógica de negocio antes de actualizar el permiso
+            // You can add business logic before updating the permission
             return await _permissionRepository.UpdateAsync(permission);
         }
 
         public async Task<bool> DeletePermissionAsync(int id)
         {
-            // Aquí podrías agregar lógica de negocio antes de eliminar el permiso
+            // You can add business logic before deleting the permission
             return await _permissionRepository.DeleteAsync(id);
         }
     }

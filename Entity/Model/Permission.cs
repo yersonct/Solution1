@@ -10,6 +10,8 @@ namespace Entity.Model
     {
         public int id { get; set; }
         public string name { get; set; }
+
+        public bool active { get; set; }
         public List<FormRolPermission> FormRolPermissions { get; set; } = new List<FormRolPermission>();
     }
 }

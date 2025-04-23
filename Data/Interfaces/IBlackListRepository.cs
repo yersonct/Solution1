@@ -10,8 +10,8 @@ namespace Data.Interfaces
     public interface IBlacklistRepository : IRepository<BlackList>
     {
         Task AddBlacklistAsync(BlackList entity);
-        //Task<IEnumerable<BlackList>> GetAllWithClientAsync();
-        //Task<BlackList> GetByIdWithClientAsync(int id);
-
+        Task DeleteAsync(BlackList entity);
+        Task<IEnumerable<BlackList>> GetAllWithClientAsync();
+        Task<BlackList> GetByIdWithClientAsync(int id);
     }
 }

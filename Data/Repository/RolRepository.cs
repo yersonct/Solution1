@@ -26,6 +26,7 @@ namespace Data.Repository
         {
             try
             {
+                entity.Active = true; // Establecer Active en true al agregar
                 await _context.Set<Rol>().AddAsync(entity);
                 await _context.SaveChangesAsync();
                 return entity;
@@ -44,7 +45,8 @@ namespace Data.Repository
                 var rolToDelete = await _context.Set<Rol>().FindAsync(id);
                 if (rolToDelete != null)
                 {
-                    _context.Set<Rol>().Remove(rolToDelete);
+                    rolToDelete.Active = false; // Marcar como inactivo en lugar de eliminar
+                    _context.Entry(rolToDelete).State = EntityState.Modified;
                     await _context.SaveChangesAsync();
                     return true;
                 }
@@ -52,7 +54,7 @@ namespace Data.Repository
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error al eliminar el rol con ID: {RolId}", id);
+                _logger.LogError(ex, "Error al eliminar (lógicamente) el rol con ID: {RolId}", id);
                 return false;
             }
         }
@@ -63,8 +65,9 @@ namespace Data.Repository
             {
                 return await _context.Set<Rol>()
                     .Include(r => r.FormRolPermissions)
-                        .ThenInclude(frp => frp.Forms) // Carga explícitamente la entidad Forms
+                        .ThenInclude(frp => frp.Forms)
                     .Include(r => r.RolUsers)
+                    .Where(r => r.Active) // Filtrar solo roles activos
                     .ToListAsync();
             }
             catch (Exception ex)
@@ -80,9 +83,9 @@ namespace Data.Repository
             {
                 return await _context.Set<Rol>()
                     .Include(r => r.FormRolPermissions)
-                        .ThenInclude(frp => frp.Forms) // Carga explícitamente la entidad Forms
+                        .ThenInclude(frp => frp.Forms)
                     .Include(r => r.RolUsers)
-                    .FirstOrDefaultAsync(r => r.id == id);
+                    .FirstOrDefaultAsync(r => r.id == id && r.Active); // Filtrar solo roles activos
             }
             catch (Exception ex)
             {

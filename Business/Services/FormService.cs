@@ -33,19 +33,19 @@ namespace Business.Services
 
         public async Task<Forms> CreateFormAsync(Forms form)
         {
-            // Aquí podrías agregar lógica de negocio antes de crear el formulario
+            // You can add business logic here before creating the form
             return await _formRepository.AddAsync(form);
         }
 
         public async Task<bool> UpdateFormAsync(Forms form)
         {
-            // Aquí podrías agregar lógica de negocio antes de actualizar el formulario
+            // You can add business logic here before updating the form
             return await _formRepository.UpdateAsync(form);
         }
 
         public async Task<bool> DeleteFormAsync(int id)
         {
-            // Aquí podrías agregar lógica de negocio antes de eliminar el formulario
+            // You can add business logic here before deleting the form
             return await _formRepository.DeleteAsync(id);
         }
     }

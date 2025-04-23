@@ -1,11 +1,11 @@
 ﻿using Business.Interfaces;
 using Entity.DTOs;
 using Microsoft.AspNetCore.Mvc;
-using System.Threading.Tasks;
-using Utilities.Exceptions;
-using System.Net;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
+using System.Threading.Tasks;
+using Utilities.Exceptions;
 
 namespace Web.Controllers
 {
@@ -25,14 +25,7 @@ namespace Web.Controllers
         public async Task<IActionResult> GetAll()
         {
             var result = await _blackListService.GetAllAsync();
-            var blackListDtos = result.Select(b => new BlackListDTO
-            {
-                id = b.id,
-                reason = b.reason,
-                restrictiondate = b.restrictiondate,
-                id_client = b.id_client
-            }).ToList();
-            return Ok(blackListDtos);
+            return Ok(result); // Ya proyectado en el servicio con clientName y filtrado por active
         }
 
         [HttpGet("{id}")]
@@ -45,14 +38,7 @@ namespace Web.Controllers
             {
                 return NotFound();
             }
-            var blackListDto = new BlackListDTO
-            {
-                id = result.id,
-                reason = result.reason,
-                restrictiondate = result.restrictiondate,
-                id_client = result.id_client
-            };
-            return Ok(blackListDto);
+            return Ok(result); // Ya proyectado en el servicio con clientName y filtrado por active
         }
 
         [HttpPost]

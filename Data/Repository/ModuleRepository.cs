@@ -26,6 +26,7 @@ namespace Data.Repository
         {
             try
             {
+                entity.active = true; // Establecer active en true al agregar
                 await _context.Set<Modules>().AddAsync(entity);
                 await _context.SaveChangesAsync();
                 return entity;
@@ -44,7 +45,8 @@ namespace Data.Repository
                 var moduleToDelete = await _context.Set<Modules>().FindAsync(id);
                 if (moduleToDelete != null)
                 {
-                    _context.Set<Modules>().Remove(moduleToDelete);
+                    moduleToDelete.active = false; // Marcar como inactivo en lugar de eliminar
+                    _context.Entry(moduleToDelete).State = EntityState.Modified;
                     await _context.SaveChangesAsync();
                     return true;
                 }
@@ -52,7 +54,7 @@ namespace Data.Repository
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error al eliminar el módulo con ID: {ModuleId}", id);
+                _logger.LogError(ex, "Error al eliminar (lógicamente) el módulo con ID: {ModuleId}", id);
                 return false;
             }
         }
@@ -61,7 +63,10 @@ namespace Data.Repository
         {
             try
             {
-                return await _context.Set<Modules>().Include(u => u.FormModules).ToListAsync();
+                return await _context.Set<Modules>()
+                    .Include(u => u.FormModules)
+                    .Where(m => m.active) // Filtrar solo módulos activos
+                    .ToListAsync();
             }
             catch (Exception ex)
             {
@@ -74,7 +79,9 @@ namespace Data.Repository
         {
             try
             {
-                return await _context.Set<Modules>().Include(u => u.FormModules).FirstOrDefaultAsync(u => u.id == id);
+                return await _context.Set<Modules>()
+                    .Include(u => u.FormModules)
+                    .FirstOrDefaultAsync(u => u.id == id && u.active); // Filtrar solo módulos activos
             }
             catch (Exception ex)
             {

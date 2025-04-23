@@ -12,7 +12,7 @@ namespace Entity.DTOs
         public int id_rol { get; set; }
 
         public int id_user { get; set; }
-        public String RolName { get; set; }
-        public String UserName { get; set; }
+        public string RolName { get; set; }
+        public string UserName { get; set; }
     }
 }

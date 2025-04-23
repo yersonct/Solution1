@@ -26,6 +26,7 @@ namespace Data.Repository
         {
             try
             {
+                entity.active = true; // Establecer como activo al crear
                 await _context.Set<MembershipsVehicle>().AddAsync(entity);
                 await _context.SaveChangesAsync();
                 return entity;
@@ -44,7 +45,8 @@ namespace Data.Repository
                 var membershipsVehicleToDelete = await _context.Set<MembershipsVehicle>().FindAsync(id);
                 if (membershipsVehicleToDelete != null)
                 {
-                    _context.Set<MembershipsVehicle>().Remove(membershipsVehicleToDelete);
+                    membershipsVehicleToDelete.active = false; // Eliminación lógica
+                    _context.Entry(membershipsVehicleToDelete).State = EntityState.Modified;
                     await _context.SaveChangesAsync();
                     return true;
                 }
@@ -52,7 +54,7 @@ namespace Data.Repository
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error al eliminar la relación MembershipsVehicle con ID: {MembershipsVehicleId}", id);
+                _logger.LogError(ex, "Error al eliminar (lógicamente) la relación MembershipsVehicle con ID: {MembershipsVehicleId}", id);
                 return false;
             }
         }
@@ -64,11 +66,12 @@ namespace Data.Repository
                 return await _context.Set<MembershipsVehicle>()
                     .Include(mv => mv.vehicle)
                     .Include(mv => mv.memberships)
+                    .Where(mv => mv.active) // Filtrar solo los activos
                     .ToListAsync();
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error al obtener todas las relaciones MembershipsVehicle.");
+                _logger.LogError(ex, "Error al obtener todas las relaciones MembershipsVehicle activas.");
                 return new List<MembershipsVehicle>();
             }
         }
@@ -80,11 +83,11 @@ namespace Data.Repository
                 return await _context.Set<MembershipsVehicle>()
                     .Include(mv => mv.vehicle)
                     .Include(mv => mv.memberships)
-                    .FirstOrDefaultAsync(mv => mv.id == id);
+                    .FirstOrDefaultAsync(mv => mv.id == id && mv.active); // Filtrar solo los activos
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error al obtener la relación MembershipsVehicle con ID: {MembershipsVehicleId}", id);
+                _logger.LogError(ex, "Error al obtener la relación MembershipsVehicle activa con ID: {MembershipsVehicleId}", id);
                 return null;
             }
         }
@@ -99,12 +102,12 @@ namespace Data.Repository
             }
             catch (DbUpdateConcurrencyException ex)
             {
-                _logger.LogError(ex, "Error de concurrencia al actualizar la relación MembershipsVehicle con ID: {MembershipsVehicleId}", entity.id);
+                _logger.LogError(ex, "Error de concurrencia al actualizar la relación MembershipsVehicle activa con ID: {MembershipsVehicleId}", entity.id);
                 return false;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error al actualizar la relación MembershipsVehicle con ID: {MembershipsVehicleId}", entity.id);
+                _logger.LogError(ex, "Error al actualizar la relación MembershipsVehicle activa con ID: {MembershipsVehicleId}", entity.id);
                 return false;
             }
         }

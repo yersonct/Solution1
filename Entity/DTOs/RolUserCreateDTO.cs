@@ -8,6 +8,7 @@ namespace Entity.DTOs
 {
     public class RolUserCreateDTO
     {
+        public int id { get; set; }
         public int id_rol { get; set; }
         public int id_user { get; set; }
     }

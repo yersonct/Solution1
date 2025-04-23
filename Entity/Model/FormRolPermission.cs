@@ -15,6 +15,7 @@ namespace Entity.Model
         public Rol Rol { get; set; }
         public Forms Forms { get; set; }
         public Permission Permission { get; set; }
-    }
 
+        public bool active { get; set; } // Add the active property
+    }
 }

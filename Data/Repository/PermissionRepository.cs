@@ -26,13 +26,14 @@ namespace Data.Repository
         {
             try
             {
+                entity.active = true; // Set active to true on add
                 await _context.Set<Permission>().AddAsync(entity);
                 await _context.SaveChangesAsync();
                 return entity;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error al agregar el permiso.");
+                _logger.LogError(ex, "Error adding permission.");
                 throw;
             }
         }
@@ -44,7 +45,8 @@ namespace Data.Repository
                 var permissionToDelete = await _context.Set<Permission>().FindAsync(id);
                 if (permissionToDelete != null)
                 {
-                    _context.Set<Permission>().Remove(permissionToDelete);
+                    permissionToDelete.active = false; // Set active to false for logical delete
+                    _context.Entry(permissionToDelete).State = EntityState.Modified;
                     await _context.SaveChangesAsync();
                     return true;
                 }
@@ -52,7 +54,7 @@ namespace Data.Repository
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error al eliminar el permiso con ID: {PermissionId}", id);
+                _logger.LogError(ex, "Error logically deleting permission with ID: {PermissionId}", id);
                 return false;
             }
         }
@@ -63,12 +65,13 @@ namespace Data.Repository
             {
                 return await _context.Set<Permission>()
                     .Include(p => p.FormRolPermissions)
-                        .ThenInclude(frp => frp.Forms) // ¡Cargamos la entidad Forms!
+                        .ThenInclude(frp => frp.Forms)
+                    .Where(p => p.active) // Filter for active permissions
                     .ToListAsync();
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error al obtener todos los permisos.");
+                _logger.LogError(ex, "Error getting all permissions.");
                 return new List<Permission>();
             }
         }
@@ -79,12 +82,12 @@ namespace Data.Repository
             {
                 return await _context.Set<Permission>()
                     .Include(p => p.FormRolPermissions)
-                        .ThenInclude(frp => frp.Forms) // ¡Cargamos la entidad Forms!
-                    .FirstOrDefaultAsync(u => u.id == id);
+                        .ThenInclude(frp => frp.Forms)
+                    .FirstOrDefaultAsync(u => u.id == id && u.active); // Get only active permission
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error al obtener el permiso con ID: {PermissionId}", id);
+                _logger.LogError(ex, "Error getting permission with ID: {PermissionId}", id);
                 return null;
             }
         }
@@ -99,12 +102,12 @@ namespace Data.Repository
             }
             catch (DbUpdateConcurrencyException ex)
             {
-                _logger.LogError(ex, "Error de concurrencia al actualizar el permiso con ID: {PermissionId}", entity.id);
+                _logger.LogError(ex, "Concurrency error updating permission with ID: {PermissionId}", entity.id);
                 return false;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error al actualizar el permiso con ID: {PermissionId}", entity.id);
+                _logger.LogError(ex, "Error updating permission with ID: {PermissionId}", entity.id);
                 return false;
             }
         }

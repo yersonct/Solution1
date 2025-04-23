@@ -31,8 +31,8 @@ namespace Business.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error al obtener todos los permisos de rol de formulario.");
-                throw; // Re-lanza la excepción para que el controlador la maneje
+                _logger.LogError(ex, "Error getting all form role permissions.");
+                throw; // Re-throw the exception for the controller to handle
             }
         }
 
@@ -45,8 +45,8 @@ namespace Business.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error al obtener el permiso de rol de formulario por ID: {Id}", id);
-                throw; // Re-lanza la excepción
+                _logger.LogError(ex, "Error getting form role permission by ID: {Id}", id);
+                throw; // Re-throw the exception
             }
         }
 
@@ -54,32 +54,30 @@ namespace Business.Services
         {
             try
             {
-                // Convierte la entidad a DTO antes de pasarla al repositorio
-                var dto = new FormRolPermissionCreateDTO
+                var createDto = new FormRolPermissionCreateDTO
                 {
-                    id = entity.id,
+                    id_forms = entity.id_forms,
+                    id_rol = entity.id_rol,
+                    id_permission = entity.id_permission
+                };
+                var createdDto = await _formRolPermissionRepository.AddAsync(createDto);
+
+                return new FormRolPermission
+                {
+                    id = createdDto.id,
                     id_forms = entity.id_forms,
                     id_rol = entity.id_rol,
                     id_permission = entity.id_permission,
+                    Forms = entity.Forms, // You might need to fetch these if not tracked
+                    Rol = entity.Rol,     // depending on your context's change tracking
+                    Permission = entity.Permission,
+                    active = createdDto.active
                 };
-                // Llama al repositorio con el DTO
-                var createdDto = await _formRolPermissionRepository.AddAsync(dto);
-
-                // Construye y devuelve la entidad FormRolPermission a partir del DTO creado.
-                var createdEntity = new FormRolPermission
-                {
-                    id = createdDto.id,
-                    id_forms = createdDto.id_forms,
-                    id_rol = createdDto.id_rol,
-                    id_permission = createdDto.id_permission,
-                    // Aquí se necesitaría lógica adicional para obtener los objetos Forms, Rol y Permission
-                };
-                return createdEntity;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error al crear el permiso de rol de formulario.");
-                throw; // Re-lanza la excepción
+                _logger.LogError(ex, "Error creating form role permission.");
+                throw; // Re-throw the exception
             }
         }
 
@@ -87,22 +85,21 @@ namespace Business.Services
         {
             try
             {
-                // Convierte la entidad a DTO para actualizarla en el repositorio
-                var dto = new FormRolPermissionDTO
+                var updateDto = new FormRolPermissionDTO
                 {
                     id = entity.id,
-                    id_forms = entity.id_forms,
-                    id_rol = entity.id_rol,
-                    id_permission = entity.id_permission,
+                    formName = entity.Forms?.name ?? "",
+                    rolName = entity.Rol?.Name ?? "",
+                    permissionName = entity.Permission?.name ?? "",
+                    active = entity.active
                 };
-                // Llama al repositorio con el DTO
-                var result = await _formRolPermissionRepository.UpdateAsync(dto);
+                var result = await _formRolPermissionRepository.UpdateAsync(updateDto);
                 return result;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error al actualizar el permiso de rol de formulario.");
-                throw; // Re-lanza la excepción
+                _logger.LogError(ex, "Error updating form role permission.");
+                throw; // Re-throw the exception
             }
         }
 
@@ -115,8 +112,8 @@ namespace Business.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error al eliminar el permiso de rol de formulario con ID: {Id}", id);
-                throw; // Re-lanza la excepción
+                _logger.LogError(ex, "Error deleting form role permission with ID: {Id}", id);
+                throw; // Re-throw the exception
             }
         }
     }

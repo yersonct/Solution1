@@ -13,8 +13,8 @@ namespace Entity.Model
         public string color { get; set; }
 
         public int id_client { get; set; } // ❗ FK hacia Client
+        public bool active { get; set; }
         public Client client { get; set; }
-
         public List<RegisteredVehicle> registeredvehicles { get; set; } = new List<RegisteredVehicle>();
 
         public List<MembershipsVehicle> membershipsvehicles { get; set; } = new List<MembershipsVehicle>();

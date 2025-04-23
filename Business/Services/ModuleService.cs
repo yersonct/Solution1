@@ -34,6 +34,7 @@ namespace Business.Services
         public async Task<Modules> CreateModuleAsync(Modules module)
         {
             // Aquí podrías agregar lógica de negocio antes de crear el módulo
+            // No es necesario establecer active a true aquí si ya lo haces en el repositorio
             return await _moduleRepository.AddAsync(module);
         }
 

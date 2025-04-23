@@ -44,7 +44,10 @@ namespace Data.Repository
                 var userToDelete = await _context.Set<User>().FindAsync(id);
                 if (userToDelete != null)
                 {
-                    _context.Set<User>().Remove(userToDelete);
+                    // Implementación del borrado lógico: marcar como inactivo (asumiendo que tienes un campo 'Active')
+                    // Si no tienes un campo 'Active' en tu entidad User, deberías agregarlo.
+                    // userToDelete.Active = false;
+                    _context.Entry(userToDelete).State = EntityState.Modified;
                     await _context.SaveChangesAsync();
                     return true;
                 }
@@ -52,7 +55,7 @@ namespace Data.Repository
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error al eliminar el usuario con ID: {UserId}", id);
+                _logger.LogError(ex, "Error al eliminar (lógicamente) el usuario con ID: {UserId}", id);
                 return false;
             }
         }
@@ -63,7 +66,8 @@ namespace Data.Repository
             {
                 return await _context.Set<User>()
                     .Include(u => u.person)
-                    //.Include(u => u.RolUsers)
+                    // .Include(u => u.RolUsers)
+                    // .Where(u => u.Active) // Filtrar solo usuarios activos (si tienes el campo Active)
                     .ToListAsync();
             }
             catch (Exception ex)
@@ -79,7 +83,8 @@ namespace Data.Repository
             {
                 return await _context.Set<User>()
                     .Include(u => u.person)
-                    //.Include(u => u.rolusers)
+                    // .Include(u => u.rolusers)
+                    // .FirstOrDefaultAsync(u => u.id == id && u.Active); // Filtrar solo usuarios activos (si tienes el campo Active)
                     .FirstOrDefaultAsync(u => u.id == id);
             }
             catch (Exception ex)

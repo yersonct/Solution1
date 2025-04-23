@@ -23,12 +23,12 @@ namespace Business.Services
 
         public async Task<IEnumerable<MembershipsVehicle>> GetAllMembershipsVehiclesAsync()
         {
-            return await _membershipsVehicleRepository.GetAllAsync();
+            return await _membershipsVehicleRepository.GetAllAsync(); // Obtiene solo los activos
         }
 
         public async Task<MembershipsVehicle?> GetMembershipsVehicleByIdAsync(int id)
         {
-            return await _membershipsVehicleRepository.GetByIdAsync(id);
+            return await _membershipsVehicleRepository.GetByIdAsync(id); // Obtiene solo el activo
         }
 
         public async Task<MembershipsVehicle> CreateMembershipsVehicleAsync(MembershipsVehicle membershipsVehicle)
@@ -40,13 +40,13 @@ namespace Business.Services
         public async Task<bool> UpdateMembershipsVehicleAsync(MembershipsVehicle membershipsVehicle)
         {
             // Aquí podrías agregar lógica de negocio antes de actualizar la relación
-            return await _membershipsVehicleRepository.UpdateAsync(membershipsVehicle);
+            return await _membershipsVehicleRepository.UpdateAsync(membershipsVehicle); // Ya considera solo los activos en el repositorio
         }
 
         public async Task<bool> DeleteMembershipsVehicleAsync(int id)
         {
             // Aquí podrías agregar lógica de negocio antes de eliminar la relación
-            return await _membershipsVehicleRepository.DeleteAsync(id);
+            return await _membershipsVehicleRepository.DeleteAsync(id); // Realiza la eliminación lógica
         }
     }
 }

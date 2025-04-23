@@ -32,7 +32,7 @@ namespace API.Controllers
                 Document = p.document,
                 Phone = p.phone,
                 Email = p.email,
-                Active = p.active
+                active = p.active
             }).ToList();
             return Ok(personDtos);
         }
@@ -54,7 +54,7 @@ namespace API.Controllers
                 Document = person.document,
                 Phone = person.phone,
                 Email = person.email,
-                Active = person.active
+                active = person.active
             };
             return Ok(personDto);
         }
@@ -74,7 +74,7 @@ namespace API.Controllers
                 document = createPersonDTO.Document,
                 phone = createPersonDTO.Phone,
                 email = createPersonDTO.Email,
-                active = createPersonDTO.Active
+                active = true // Ensure new persons are active
             };
 
             var createdPerson = await _personService.CreatePersonAsync(person);
@@ -105,7 +105,7 @@ namespace API.Controllers
             existingPerson.document = updatePersonDTO.Document;
             existingPerson.phone = updatePersonDTO.Phone;
             existingPerson.email = updatePersonDTO.Email;
-            existingPerson.active = updatePersonDTO.Active;
+            existingPerson.active = updatePersonDTO.active; // Allow updating the active status
 
             var result = await _personService.UpdatePersonAsync(existingPerson);
             if (!result)

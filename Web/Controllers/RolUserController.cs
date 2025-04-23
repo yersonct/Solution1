@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Business.Interfaces;
+using Entity.DTOs;
+using System.Linq;
 using Entity.Model;
-using Entity.DTOs; // Add this using statement
-using System.Linq; // Add this using
 
 namespace API.Controllers
 {
@@ -14,49 +14,66 @@ namespace API.Controllers
     public class RolUsersController : ControllerBase
     {
         private readonly IRolUserService _rolUserService;
+        private readonly IRolService _rolService;
+        private readonly IUserService _userService;
 
-        public RolUsersController(IRolUserService rolUserService)
+        public RolUsersController(
+            IRolUserService rolUserService,
+            IRolService rolService,
+            IUserService userService)
         {
             _rolUserService = rolUserService ?? throw new ArgumentNullException(nameof(rolUserService));
+            _rolService = rolService ?? throw new ArgumentNullException(nameof(rolService));
+            _userService = userService ?? throw new ArgumentNullException(nameof(userService));
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<RolUserDTO>>> GetAllRolUsers() // Change to RolUserDTO
+        public async Task<ActionResult<IEnumerable<object>>> GetAllRolUsers()
         {
-            var rolUsers = await _rolUserService.GetAllRolUsersAsync();
-            var rolUserDtos = rolUsers.Select(ru => new RolUserDTO // Project to DTO
+            try
             {
-                id = ru.id,
-                id_rol = ru.id_rol,
-                id_user = ru.id_user,
-                RolName = ru.Rol?.Name, // Access Name property
-                UserName = ru.User?.username // Access Name property
-            }).ToList();
-            return Ok(rolUserDtos);
+                var rolUsers = await _rolUserService.GetAllRolUsersAsync();
+                var results = rolUsers
+                    .Where(ru => ru.active)
+                    .Select(ru => new
+                    {
+                        RolName = ru.Rol?.Name,
+                        UserName = ru.User?.username
+                    })
+                    .ToList();
+                return Ok(results);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Error al obtener las relaciones Rol-Usuario: {ex.Message}");
+            }
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<RolUserDTO>> GetRolUserById(int id) // Change to RolUserDTO
+        public async Task<ActionResult<object>> GetRolUserById(int id)
         {
-            var rolUser = await _rolUserService.GetRolUserByIdAsync(id);
-            if (rolUser == null)
+            try
             {
-                return NotFound();
-            }
+                var rolUser = await _rolUserService.GetRolUserByIdAsync(id);
+                if (rolUser == null || !rolUser.active)
+                {
+                    return NotFound();
+                }
 
-            var rolUserDto = new RolUserDTO // Project to DTO
+                return Ok(new
+                {
+                    RolName = rolUser.Rol?.Name,
+                    UserName = rolUser.User?.username
+                });
+            }
+            catch (Exception ex)
             {
-                id = rolUser.id,
-                id_rol = rolUser.id_rol,
-                id_user = rolUser.id_user,
-                RolName = rolUser.Rol?.Name, // Access Name property
-                UserName = rolUser.User?.username // Access Name property
-            };
-            return Ok(rolUserDto);
+                return StatusCode(500, $"Error al obtener la relación Rol-Usuario: {ex.Message}");
+            }
         }
 
         [HttpPost]
-        public async Task<ActionResult<RolUser>> CreateRolUser([FromBody] RolUserCreateDTO rolUserCreateDto) // Use CreateDTO
+        public async Task<ActionResult<object>> CreateRolUser([FromBody] RolUserCreateDTO rolUserCreateDto)
         {
             if (!ModelState.IsValid)
             {
@@ -67,14 +84,30 @@ namespace API.Controllers
             {
                 id_rol = rolUserCreateDto.id_rol,
                 id_user = rolUserCreateDto.id_user,
+                active = true
             };
 
-            var createdRolUser = await _rolUserService.CreateRolUserAsync(rolUser);
-            return CreatedAtAction(nameof(GetRolUserById), new { id = createdRolUser.id }, createdRolUser);
+            try
+            {
+                var createdRolUser = await _rolUserService.CreateRolUserAsync(rolUser);
+
+                var rol = await _rolService.GetRolByIdAsync(createdRolUser.id_rol);
+                var user = await _userService.GetUserByIdAsync(createdRolUser.id_user);
+
+                return CreatedAtAction(nameof(GetRolUserById), new { id = createdRolUser.id }, new
+                {
+                    RolName = rol?.Name,
+                    UserName = user?.username
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Error al crear la relación Rol-Usuario: {ex.Message}");
+            }
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateRolUser(int id, [FromBody] RolUserDTO rolUserDto) // Use RolUserDTO
+        public async Task<IActionResult> UpdateRolUser(int id, [FromBody] RolUserDTO rolUserDto)
         {
             if (id != rolUserDto.id)
             {
@@ -87,7 +120,7 @@ namespace API.Controllers
             }
 
             var existingRolUser = await _rolUserService.GetRolUserByIdAsync(id);
-            if (existingRolUser == null)
+            if (existingRolUser == null || !existingRolUser.active)
             {
                 return NotFound();
             }
@@ -95,24 +128,45 @@ namespace API.Controllers
             existingRolUser.id_rol = rolUserDto.id_rol;
             existingRolUser.id_user = rolUserDto.id_user;
 
-
-            var result = await _rolUserService.UpdateRolUserAsync(existingRolUser);
-            if (!result)
+            try
             {
-                return NotFound();
+                var result = await _rolUserService.UpdateRolUserAsync(existingRolUser);
+                if (!result)
+                {
+                    return StatusCode(500, "Error al actualizar la relación Rol-Usuario.");
+                }
+                return NoContent();
             }
-            return NoContent();
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Error al actualizar la relación Rol-Usuario: {ex.Message}");
+            }
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteRolUser(int id)
         {
-            var result = await _rolUserService.DeleteRolUserAsync(id);
-            if (!result)
+            try
             {
-                return NotFound();
+                var rolUserToDelete = await _rolUserService.GetRolUserByIdAsync(id);
+                if (rolUserToDelete == null || !rolUserToDelete.active)
+                {
+                    return NotFound();
+                }
+
+                rolUserToDelete.active = false;
+                var result = await _rolUserService.UpdateRolUserAsync(rolUserToDelete);
+
+                if (!result)
+                {
+                    return StatusCode(500, "Error al eliminar lógicamente la relación Rol-Usuario.");
+                }
+                return NoContent();
             }
-            return NoContent();
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Error al eliminar lógicamente la relación Rol-Usuario: {ex.Message}");
+            }
         }
     }
 }

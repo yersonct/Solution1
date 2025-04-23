@@ -9,11 +9,9 @@ namespace Entity.DTOs
     public class FormRolPermissionDTO
     {
         public int id { get; set; }
-        public int id_forms { get; set; }
-
-        public int id_rol { get; set; }
-
-        public int id_permission { get; set; }
-
+        public string formName { get; set; }
+        public string rolName { get; set; }
+        public string permissionName { get; set; }
+        public bool active { get; set; } // Add the active property
     }
 }

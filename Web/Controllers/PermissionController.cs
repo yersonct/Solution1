@@ -28,6 +28,7 @@ namespace API.Controllers
             {
                 id = p.id,
                 name = p.name,
+                active = p.active // Include active status in DTO
             }).ToList();
             return Ok(permissionDtos);
         }
@@ -45,6 +46,7 @@ namespace API.Controllers
             {
                 id = permission.id,
                 name = permission.name,
+                active = permission.active // Include active status in DTO
             };
             return Ok(permissionDto);
         }
@@ -60,6 +62,7 @@ namespace API.Controllers
             var permission = new Permission
             {
                 name = permissionDto.name,
+                active = true // Ensure new permissions are active by default
             };
 
             var createdPermission = await _permissionService.CreatePermissionAsync(permission);
@@ -71,7 +74,7 @@ namespace API.Controllers
         {
             if (id != permissionDto.id)
             {
-                return BadRequest("El ID del permiso no coincide con el ID de la ruta.");
+                return BadRequest("The permission ID does not match the route ID.");
             }
 
             if (!ModelState.IsValid)
@@ -86,12 +89,12 @@ namespace API.Controllers
             }
 
             existingPermission.name = permissionDto.name;
-
+            existingPermission.active = permissionDto.active; // Allow updating the active status
 
             var result = await _permissionService.UpdatePermissionAsync(existingPermission);
             if (!result)
             {
-                return NotFound();
+                return StatusCode(500, "An error occurred while updating the permission.");
             }
             return NoContent();
         }

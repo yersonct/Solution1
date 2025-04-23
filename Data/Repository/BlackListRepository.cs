@@ -15,18 +15,33 @@ namespace Repository
 
         public async Task AddBlacklistAsync(BlackList entity)
         {
-            var exists = await _context.Set<BlackList>().AnyAsync(b => b.id_client == entity.id_client);
+            var exists = await _context.Set<BlackList>().AnyAsync(b => b.id_client == entity.id_client && b.active);
             if (exists)
-                throw new InvalidOperationException("Ya existe una entrada en la lista negra para este cliente.");
+                throw new InvalidOperationException("Ya existe una entrada activa en la lista negra para este cliente.");
 
+            entity.active = true;
             await _context.Set<BlackList>().AddAsync(entity);
             await _context.SaveChangesAsync();
+        }
+
+        public async Task<IEnumerable<BlackList>> GetAllAsync()
+        {
+            return await _context.Set<BlackList>()
+                                 .Where(b => b.active)
+                                 .ToListAsync();
+        }
+
+        public async Task<BlackList> GetByIdAsync(int id)
+        {
+            return await _context.Set<BlackList>()
+                                 .FirstOrDefaultAsync(b => b.id == id && b.active);
         }
 
         public async Task<IEnumerable<BlackList>> GetAllWithClientAsync()
         {
             return await _context.Set<BlackList>()
-                                 .Include(b => b.client) // asegúrate de que la relación esté bien configurada
+                                 .Include(b => b.client)
+                                 .Where(b => b.active)
                                  .ToListAsync();
         }
 
@@ -34,8 +49,33 @@ namespace Repository
         {
             return await _context.Set<BlackList>()
                                  .Include(b => b.client)
-                                 .FirstOrDefaultAsync(b => b.id == id);
+                                 .FirstOrDefaultAsync(b => b.id == id && b.active);
         }
 
+        public void Update(BlackList entity)
+        {
+            _context.Set<BlackList>().Update(entity);
+        }
+
+        public async Task SaveChangesAsync()
+        {
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task DeleteAsync(BlackList entityToDelete)
+        {
+            var existingEntity = await _context.Set<BlackList>().FindAsync(entityToDelete.id);
+            if (existingEntity != null)
+            {
+                // Asegurar que la fecha sea UTC antes de la actualización
+                if (existingEntity.restrictiondate.Kind != DateTimeKind.Utc)
+                {
+                    existingEntity.restrictiondate = existingEntity.restrictiondate.ToUniversalTime();
+                }
+                existingEntity.active = false; // Eliminación lógica
+                _context.Set<BlackList>().Update(existingEntity);
+                await _context.SaveChangesAsync();
+            }
+        }
     }
 }

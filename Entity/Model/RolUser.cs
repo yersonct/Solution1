@@ -11,7 +11,9 @@ namespace Entity.Model
         public int id { get; set; }
         public int id_rol { get; set; }
         public int id_user { get; set; }
-        public  User User { get; set; }
-        public  Rol Rol { get; set; }
+
+        public bool active { get; set; }
+        public User User { get; set; }
+        public Rol Rol { get; set; }
     }
 }

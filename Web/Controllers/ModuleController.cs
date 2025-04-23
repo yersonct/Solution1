@@ -28,6 +28,7 @@ namespace API.Controllers
             {
                 id = m.id,
                 name = m.name,
+                active = m.active // Incluye el estado activo en el DTO
             }).ToList();
             return Ok(moduleDtos);
         }
@@ -45,6 +46,7 @@ namespace API.Controllers
             {
                 id = module.id,
                 name = module.name,
+                active = module.active // Incluye el estado activo en el DTO
             };
             return Ok(moduleDto);
         }
@@ -60,6 +62,7 @@ namespace API.Controllers
             var module = new Modules
             {
                 name = moduleDto.name,
+                active = true // Asegúrate de que se cree como activo
             };
 
             var createdModule = await _moduleService.CreateModuleAsync(module);
@@ -86,12 +89,12 @@ namespace API.Controllers
             }
 
             existingModule.name = moduleDto.name;
-
+            existingModule.active = moduleDto.active; // Permite actualizar el estado activo
 
             var result = await _moduleService.UpdateModuleAsync(existingModule);
             if (!result)
             {
-                return NotFound();
+                return StatusCode(500, "Ocurrió un error al actualizar el módulo.");
             }
             return NoContent();
         }

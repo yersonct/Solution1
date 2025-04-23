@@ -2,7 +2,6 @@
 using Data.Interfaces;
 using Entity.DTOs;
 using Entity.Model;
-using Repository;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -21,19 +20,21 @@ namespace Business.Services
 
         public async Task<IEnumerable<BlackListDTO>> GetAllAsync()
         {
-            var data = await _repo.GetAllAsync();
+            var data = await _repo.GetAllWithClientAsync();
             return data.Select(b => new BlackListDTO
             {
                 id = b.id,
                 reason = b.reason,
                 restrictiondate = b.restrictiondate,
-                id_client = b.id_client
+                id_client = b.id_client,
+                clientName = b.client?.name,
+                active = b.active
             });
         }
 
         public async Task<BlackListDTO?> GetByIdAsync(int id)
         {
-            var b = await _repo.GetByIdAsync(id);
+            var b = await _repo.GetByIdWithClientAsync(id);
             if (b == null) return null;
 
             return new BlackListDTO
@@ -41,9 +42,12 @@ namespace Business.Services
                 id = b.id,
                 reason = b.reason,
                 restrictiondate = b.restrictiondate,
-                id_client = b.id_client
+                id_client = b.id_client,
+                clientName = b.client?.name,
+                active = b.active
             };
         }
+
         public async Task CreateAsync(BlackListDTO dto)
         {
             if (string.IsNullOrWhiteSpace(dto.reason))
@@ -52,50 +56,22 @@ namespace Business.Services
             var entity = new BlackList
             {
                 reason = dto.reason,
-                restrictiondate = dto.restrictiondate,
+                restrictiondate = dto.restrictiondate.ToUniversalTime(), // <--- Convertir a UTC al crear
                 id_client = dto.id_client
             };
 
-            await _repo.AddAsync(entity); // O llama tu método directo en la capa Data
+            await _repo.AddBlacklistAsync(entity);
         }
-
-        //public async Task<IEnumerable<BlackListDTO>> GetAllWithClientAsync()
-        //{
-        //    var data = await _repo.GetAllWithClientAsync();
-        //    return data.Select(b => new BlackListDTO
-        //    {
-        //        id = b.id,
-        //        reason = b.reason,
-        //        restrictiondate = b.restrictiondate,
-        //        id_client = b.id_client,
-        //        // Puedes extender aquí si agregaste campos del cliente en el DTO
-        //    });
-        //}
-
-        //public async Task<BlackListDTO?> GetByIdWithClientAsync(int id)
-        //{
-        //    var b = await _repo.GetByIdWithClientAsync(id);
-        //    if (b == null) return null;
-
-        //    return new BlackListDTO
-        //    {
-        //        id = b.id,
-        //        reason = b.reason,
-        //        restrictiondate = b.restrictiondate,
-        //        id_client = b.id_client,
-        //        // Puedes extender aquí si agregaste campos del cliente en el DTO
-        //    };
-        //}
 
         public async Task UpdateAsync(BlackListDTO dto)
         {
-            var entity = new BlackList
-            {
-                id = dto.id,
-                reason = dto.reason,
-                restrictiondate = dto.restrictiondate,
-                id_client = dto.id_client
-            };
+            var entity = await _repo.GetByIdAsync(dto.id);
+            if (entity == null || !entity.active) throw new FileNotFoundException("Entrada de la lista negra no encontrada o inactiva.");
+
+            entity.reason = dto.reason;
+            entity.restrictiondate = dto.restrictiondate.ToUniversalTime(); // <--- Convertir a UTC al actualizar
+            entity.id_client = dto.id_client;
+
             _repo.Update(entity);
             await _repo.SaveChangesAsync();
         }
@@ -103,11 +79,9 @@ namespace Business.Services
         public async Task DeleteAsync(int id)
         {
             var entity = await _repo.GetByIdAsync(id);
-            if (entity != null)
-            {
-                _repo.Delete(entity);
-                await _repo.SaveChangesAsync();
-            }
+            if (entity == null || !entity.active) throw new FileNotFoundException("Entrada de la lista negra no encontrada o ya inactiva.");
+
+            await _repo.DeleteAsync(entity); // La conversión a UTC debería ocurrir antes si la entidad ya existe
         }
     }
 }

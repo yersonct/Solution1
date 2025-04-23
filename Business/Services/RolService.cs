@@ -34,6 +34,7 @@ namespace Business.Services
         public async Task<Rol> CreateRolAsync(Rol rol)
         {
             // Aquí podrías agregar lógica de negocio antes de crear el rol
+            // No es necesario establecer Active a true aquí si ya lo haces en el repositorio
             return await _rolRepository.AddAsync(rol);
         }
 

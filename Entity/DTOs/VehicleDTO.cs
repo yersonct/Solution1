@@ -14,7 +14,10 @@ namespace Entity.DTOs
         public string Color { get; set; }
         public int Id_Client { get; set; }
 
+        public bool active { get; set; }
+        public string ClientName { get; set; }
         public Client Client { get; set; }
+
         public RegisteredVehicle? RegisteredVehicle { get; set; }
         public MembershipsVehicle? MembershipsVehicle { get; set; }
     }

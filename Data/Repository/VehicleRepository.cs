@@ -26,6 +26,7 @@ namespace Data.Repository
         {
             try
             {
+                entity.active = true; // Establecer como activo al crear
                 await _context.Set<Vehicle>().AddAsync(entity);
                 await _context.SaveChangesAsync();
                 return entity;
@@ -44,7 +45,8 @@ namespace Data.Repository
                 var vehicleToDelete = await _context.Set<Vehicle>().FindAsync(id);
                 if (vehicleToDelete != null)
                 {
-                    _context.Set<Vehicle>().Remove(vehicleToDelete);
+                    vehicleToDelete.active = false; // Eliminación lógica
+                    _context.Entry(vehicleToDelete).State = EntityState.Modified;
                     await _context.SaveChangesAsync();
                     return true;
                 }
@@ -52,7 +54,7 @@ namespace Data.Repository
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error al eliminar el vehículo con ID: {VehicleId}", id);
+                _logger.LogError(ex, "Error al eliminar (lógicamente) el vehículo con ID: {VehicleId}", id);
                 return false;
             }
         }
@@ -63,11 +65,12 @@ namespace Data.Repository
             {
                 return await _context.Set<Vehicle>()
                     .Include(v => v.client)
+                    .Where(v => v.active) // Filtrar solo los activos
                     .ToListAsync();
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error al obtener todos los vehículos.");
+                _logger.LogError(ex, "Error al obtener todos los vehículos activos.");
                 return new List<Vehicle>();
             }
         }
@@ -78,11 +81,11 @@ namespace Data.Repository
             {
                 return await _context.Set<Vehicle>()
                     .Include(v => v.client)
-                    .FirstOrDefaultAsync(v => v.id == id);
+                    .FirstOrDefaultAsync(v => v.id == id && v.active); // Filtrar solo los activos
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error al obtener el vehículo con ID: {VehicleId}", id);
+                _logger.LogError(ex, "Error al obtener el vehículo activo con ID: {VehicleId}", id);
                 return null;
             }
         }
@@ -97,12 +100,12 @@ namespace Data.Repository
             }
             catch (DbUpdateConcurrencyException ex)
             {
-                _logger.LogError(ex, "Error de concurrencia al actualizar el vehículo con ID: {VehicleId}", entity.id);
+                _logger.LogError(ex, "Error de concurrencia al actualizar el vehículo activo con ID: {VehicleId}", entity.id);
                 return false;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error al actualizar el vehículo con ID: {VehicleId}", entity.id);
+                _logger.LogError(ex, "Error al actualizar el vehículo activo con ID: {VehicleId}", entity.id);
                 return false;
             }
         }

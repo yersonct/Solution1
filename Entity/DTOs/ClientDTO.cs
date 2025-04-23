@@ -10,7 +10,8 @@ namespace Entity.DTOs
     {
         public int Id { get; set; }
         public string Name { get; set; }
-        public int? id_user { get; set; }
+        public int? id_user { get; set; } // Opcional, si aún quieres el ID
+        public string UserName { get; set; } // Nueva propiedad para el nombre de usuario
         //public int BlackListId { get; set; }
         //public List<int> VehicleId { get; set; }
     }

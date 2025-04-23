@@ -34,6 +34,7 @@ namespace Business.Services
         public async Task<Person> CreatePersonAsync(Person person)
         {
             // Aquí podrías agregar lógica de negocio antes de crear la persona
+            person.active = true; // Aseguramos que las nuevas personas estén activas
             return await _personRepository.AddAsync(person);
         }
 

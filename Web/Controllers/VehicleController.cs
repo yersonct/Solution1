@@ -22,24 +22,31 @@ namespace API.Controllers
             _vehicleService = vehicleService ?? throw new ArgumentNullException(nameof(vehicleService));
         }
 
+        private JsonSerializerSettings GetJsonSerializerSettings()
+        {
+            return new JsonSerializerSettings
+            {
+                ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
+                NullValueHandling = NullValueHandling.Ignore
+            };
+        }
+
         [HttpGet]
         public async Task<ActionResult<string>> GetAllVehicles()
         {
             var vehicles = await _vehicleService.GetAllVehiclesAsync();
-            var vehicleDtos = vehicles.Select(v => new
+            var vehicleDtos = vehicles.Select(v => new VehicleDTO
             {
-                id = v.id,
-                plate = v.plate,
-                color = v.color,
-                id_Client = v.id_client,
-                clientName = v.client?.name
+                Id = v.id,
+                Plate = v.plate,
+                Color = v.color,
+                Id_Client = v.id_client,
+                ClientName = v.client?.name, // ✅ Obtener el nombre del cliente desde la relación
+                active = v.active
+                // Client = v.client // ❌ No necesitamos serializar el objeto Client completo
             }).ToList();
 
-            var json = JsonConvert.SerializeObject(vehicleDtos, Newtonsoft.Json.Formatting.Indented, new JsonSerializerSettings
-            {
-                ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
-                NullValueHandling = NullValueHandling.Ignore
-            });
+            var json = JsonConvert.SerializeObject(vehicleDtos, Newtonsoft.Json.Formatting.Indented, GetJsonSerializerSettings());
             return Ok(json);
         }
 
@@ -52,21 +59,18 @@ namespace API.Controllers
                 return NotFound();
             }
 
-            var vehicleDto = new
+            var vehicleDto = new VehicleDTO
             {
-                id = vehicle.id,
-                plate = vehicle.plate,
-                color = vehicle.color,
-                id_Client = vehicle.id_client,
-                clientName = vehicle.client?.name
+                Id = vehicle.id,
+                Plate = vehicle.plate,
+                Color = vehicle.color,
+                Id_Client = vehicle.id_client,
+                ClientName = vehicle.client?.name, // ✅ Obtener el nombre del cliente desde la relación
+                active = vehicle.active
+                // Client = vehicle.client // ❌ No necesitamos serializar el objeto Client completo
             };
 
-
-            var json = JsonConvert.SerializeObject(vehicleDto, Newtonsoft.Json.Formatting.Indented, new JsonSerializerSettings
-            {
-                ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
-                NullValueHandling = NullValueHandling.Ignore
-            });
+            var json = JsonConvert.SerializeObject(vehicleDto, Newtonsoft.Json.Formatting.Indented, GetJsonSerializerSettings());
             return Ok(json);
         }
 
@@ -83,6 +87,7 @@ namespace API.Controllers
                 plate = vehicleDto.plate,
                 color = vehicleDto.color,
                 id_client = vehicleDto.id_client,
+                active = true
             };
 
             var createdVehicle = await _vehicleService.CreateVehicleAsync(vehicle);
@@ -111,7 +116,7 @@ namespace API.Controllers
             existingVehicle.plate = vehicleDto.Plate;
             existingVehicle.color = vehicleDto.Color;
             existingVehicle.id_client = vehicleDto.Id_Client;
-
+            existingVehicle.active = vehicleDto.active;
 
             var result = await _vehicleService.UpdateVehicleAsync(existingVehicle);
             if (!result)

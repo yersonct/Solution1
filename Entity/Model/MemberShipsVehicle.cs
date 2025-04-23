@@ -15,5 +15,7 @@ namespace Entity.Model
 
         public int id_memberships { get; set; }
         public MemberShips memberships { get; set; }
+
+        public bool active { get; set; } // Para eliminación lógica
     }
 }

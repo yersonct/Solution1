@@ -1,4 +1,5 @@
-﻿using System;
+﻿// Data.Repository/ClientRepository.cs
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -23,6 +24,7 @@ namespace Data.Repository
 
         public async Task<Client> AddAsync(Client entity)
         {
+            entity.active = true; // Establecer activo por defecto
             try
             {
                 await _context.Set<Client>().AddAsync(entity);
@@ -43,7 +45,8 @@ namespace Data.Repository
                 var clientToDelete = await _context.Set<Client>().FindAsync(id);
                 if (clientToDelete != null)
                 {
-                    _context.Set<Client>().Remove(clientToDelete);
+                    clientToDelete.active = false; // Eliminación lógica
+                    _context.Entry(clientToDelete).State = EntityState.Modified;
                     await _context.SaveChangesAsync();
                     return true;
                 }
@@ -51,7 +54,7 @@ namespace Data.Repository
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error al eliminar el cliente con ID: {ClientId}", id);
+                _logger.LogError(ex, "Error al eliminar lógicamente el cliente con ID: {ClientId}", id);
                 return false;
             }
         }
@@ -61,13 +64,14 @@ namespace Data.Repository
             try
             {
                 return await _context.Set<Client>()
-                                     .Include(c => c.user)
-                                     .Include(c => c.vehicles)
-                                     .ToListAsync();
+                    .Include(c => c.user)
+                    .Include(c => c.vehicles)
+                    .Where(c => c.active) // Filtrar solo clientes activos
+                    .ToListAsync();
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error al obtener todos los clientes.");
+                _logger.LogError(ex, "Error al obtener todos los clientes activos.");
                 return new List<Client>();
             }
         }
@@ -77,13 +81,13 @@ namespace Data.Repository
             try
             {
                 return await _context.Set<Client>()
-                                     .Include(c => c.user)
-                                     .Include(c => c.vehicles)
-                                     .FirstOrDefaultAsync(c => c.id == id);
+                    .Include(c => c.user)
+                    .Include(c => c.vehicles)
+                    .FirstOrDefaultAsync(c => c.id == id && c.active); // Filtrar por ID y activo
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error al obtener el cliente con ID: {ClientId}", id);
+                _logger.LogError(ex, "Error al obtener el cliente activo con ID: {ClientId}", id);
                 return null;
             }
         }

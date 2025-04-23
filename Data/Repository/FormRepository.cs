@@ -26,13 +26,14 @@ namespace Data.Repository
         {
             try
             {
+                entity.active = true; // Set active to true when adding a new form
                 await _context.Set<Forms>().AddAsync(entity);
                 await _context.SaveChangesAsync();
                 return entity;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error al agregar el formulario.");
+                _logger.LogError(ex, "Error adding form.");
                 throw;
             }
         }
@@ -44,7 +45,8 @@ namespace Data.Repository
                 var formToDelete = await _context.Set<Forms>().FindAsync(id);
                 if (formToDelete != null)
                 {
-                    _context.Set<Forms>().Remove(formToDelete);
+                    formToDelete.active = false; // Set active to false instead of deleting
+                    _context.Entry(formToDelete).State = EntityState.Modified;
                     await _context.SaveChangesAsync();
                     return true;
                 }
@@ -52,7 +54,7 @@ namespace Data.Repository
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error al eliminar el formulario con ID: {FormId}", id);
+                _logger.LogError(ex, "Error logically deleting form with ID: {FormId}", id);
                 return false;
             }
         }
@@ -61,11 +63,14 @@ namespace Data.Repository
         {
             try
             {
-                return await _context.Set<Forms>().Include(u => u.FormModules).ToListAsync();
+                return await _context.Set<Forms>()
+                    .Include(u => u.FormModules)
+                    .Where(f => f.active) // Filter out inactive forms
+                    .ToListAsync();
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error al obtener todos los formularios.");
+                _logger.LogError(ex, "Error getting all forms.");
                 return new List<Forms>();
             }
         }
@@ -74,11 +79,13 @@ namespace Data.Repository
         {
             try
             {
-                return await _context.Set<Forms>().Include(u => u.FormModules).FirstOrDefaultAsync(u => u.id == id);
+                return await _context.Set<Forms>()
+                    .Include(u => u.FormModules)
+                    .FirstOrDefaultAsync(u => u.id == id && u.active); // Get only active forms
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error al obtener el formulario con ID: {FormId}", id);
+                _logger.LogError(ex, "Error getting form with ID: {FormId}", id);
                 return null;
             }
         }
@@ -93,12 +100,12 @@ namespace Data.Repository
             }
             catch (DbUpdateConcurrencyException ex)
             {
-                _logger.LogError(ex, "Error de concurrencia al actualizar el formulario con ID: {FormId}", entity.id);
+                _logger.LogError(ex, "Concurrency error updating form with ID: {FormId}", entity.id);
                 return false;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error al actualizar el formulario con ID: {FormId}", entity.id);
+                _logger.LogError(ex, "Error updating form with ID: {FormId}", entity.id);
                 return false;
             }
         }

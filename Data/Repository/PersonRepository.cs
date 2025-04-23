@@ -44,7 +44,8 @@ namespace Data.Repository
                 var personToDelete = await _context.Set<Person>().FindAsync(id);
                 if (personToDelete != null)
                 {
-                    _context.Set<Person>().Remove(personToDelete);
+                    personToDelete.active = false; // Implementación del borrado lógico
+                    _context.Entry(personToDelete).State = EntityState.Modified;
                     await _context.SaveChangesAsync();
                     return true;
                 }
@@ -52,7 +53,7 @@ namespace Data.Repository
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error al eliminar la persona con ID: {PersonId}", id);
+                _logger.LogError(ex, "Error al eliminar (lógicamente) la persona con ID: {PersonId}", id);
                 return false;
             }
         }
@@ -61,11 +62,11 @@ namespace Data.Repository
         {
             try
             {
-                return await _context.Set<Person>().Include(u => u.user).ToListAsync();
+                return await _context.Set<Person>().Include(u => u.user).Where(p => p.active).ToListAsync(); // Solo trae los activos
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error al obtener todas las personas.");
+                _logger.LogError(ex, "Error al obtener todas las personas activas.");
                 return new List<Person>();
             }
         }
@@ -74,11 +75,11 @@ namespace Data.Repository
         {
             try
             {
-                return await _context.Set<Person>().Include(u => u.user).FirstOrDefaultAsync(u => u.id == id);
+                return await _context.Set<Person>().Include(u => u.user).FirstOrDefaultAsync(u => u.id == id && u.active); // Solo trae los activos
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error al obtener la persona con ID: {PersonId}", id);
+                _logger.LogError(ex, "Error al obtener la persona activa con ID: {PersonId}", id);
                 return null;
             }
         }

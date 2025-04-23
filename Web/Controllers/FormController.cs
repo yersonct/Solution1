@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Business.Interfaces;
 using Entity.Model;
-using Entity.DTOs; // Asegúrate de tener el namespace de tus DTOs
+using Entity.DTOs;
 using System.Linq;
 
 namespace API.Controllers
@@ -28,7 +28,8 @@ namespace API.Controllers
             {
                 id = f.id,
                 name = f.name,
-                url = f.url
+                url = f.url,
+                active = f.active // Include the active status in the DTO
             }).ToList();
             return Ok(formDtos);
         }
@@ -46,7 +47,8 @@ namespace API.Controllers
             {
                 id = form.id,
                 name = form.name,
-                url = form.url
+                url = form.url,
+                active = form.active // Include the active status in the DTO
             };
             return Ok(formDto);
         }
@@ -62,7 +64,8 @@ namespace API.Controllers
             var form = new Forms
             {
                 name = formDto.name,
-                url = formDto.url
+                url = formDto.url,
+                active = true // Ensure new forms are created as active
             };
 
             var createdForm = await _formService.CreateFormAsync(form);
@@ -74,7 +77,7 @@ namespace API.Controllers
         {
             if (id != formDto.id)
             {
-                return BadRequest("El ID del formulario no coincide con el ID de la ruta.");
+                return BadRequest("The form ID does not match the route ID.");
             }
 
             if (!ModelState.IsValid)
@@ -90,12 +93,12 @@ namespace API.Controllers
 
             existingForm.name = formDto.name;
             existingForm.url = formDto.url;
-
+            existingForm.active = formDto.active; // Allow updating the active status
 
             var result = await _formService.UpdateFormAsync(existingForm);
             if (!result)
             {
-                return NotFound();
+                return StatusCode(500, "An error occurred while updating the form.");
             }
             return NoContent();
         }

@@ -10,6 +10,8 @@ namespace Entity.Model
     {
         public int id { get; set; }
         public string name { get; set; }
+
+        public bool active { get; set; }
         public List<FormModule> FormModules { get; set; } = new List<FormModule>();
     }
 

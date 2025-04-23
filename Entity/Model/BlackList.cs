@@ -1,4 +1,5 @@
-﻿using System;
+﻿// Entity.Model/BlackList.cs
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -14,6 +15,8 @@ namespace Entity.Model
 
         // Esta propiedad actúa como clave foránea para la relación 1:1
         public int id_client { get; set; }
-        public  Client client { get; set; }
+        public Client client { get; set; }
+
+        public bool active { get; set; } // Propiedad para el eliminador lógico
     }
 }

@@ -23,7 +23,13 @@
             "assets": [
               {
                 "glob": "**/*",
-                "input": "public"
+                "input": "public",
+                "output": "assets"
+              },
+              { 
+                "glob": "**/*",
+                "input": "src/app/login", 
+                "output": "assets/login"
               }
             ],
             "styles": [
@@ -81,7 +87,14 @@
             "assets": [
               {
                 "glob": "**/*",
-                "input": "public"
+                "input": "public",
+                "output": "assets"
+              },
+              { 
+
+                "glob": "**/*",
+                "input": "src/app/login",  
+                "output": "assets/login"
               }
             ],
             "styles": [

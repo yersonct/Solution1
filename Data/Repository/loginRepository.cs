@@ -1,19 +1,14 @@
-﻿using Entity.Context; // Asegúrate de ajustar el namespace
-using Entity.Model;  // Asegúrate de ajustar el namespace
-using Microsoft.EntityFrameworkCore;
-using System.Threading.Tasks;
+﻿using Data.Interfaces;
 using Entity.Context;
 using Entity.Model;
+using Microsoft.EntityFrameworkCore;
+using System.Threading.Tasks;
 
 namespace Data.Repositories
 {
-    public interface IUserRepository
+    public class UserRepository : IloginRepository
     {
-        Task<User> GetUserByUsernameAsync(string username);
-    }
-    public class UserRepository : IUserRepository
-    {
-        private readonly ApplicationDbContext _context; // Usa tu DbContext
+        private readonly ApplicationDbContext _context;
 
         public UserRepository(ApplicationDbContext context)
         {

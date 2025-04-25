@@ -1,15 +1,13 @@
 import { bootstrapApplication } from '@angular/platform-browser';
 import { AppComponent } from './app/app.component';
-import { provideRouter, Routes } from '@angular/router';
-
-// Define tus rutas aquí o impórtalas desde un archivo separado (recomendado)
-const routes: Routes = [
-  // { path: '', component: HomeComponent },  <-- Ejemplo, define tus rutas reales
-  // { path: 'login', component: LoginComponent },
-];
+import { appConfig } from './app/app.config';
+import { importProvidersFrom } from '@angular/core';
+import { ReactiveFormsModule } from '@angular/forms';
+import { HttpClientModule } from '@angular/common/http';
 
 bootstrapApplication(AppComponent, {
   providers: [
-    provideRouter(routes)
-  ]
-}).catch(err => console.error(err));
+    appConfig.providers,
+    importProvidersFrom(ReactiveFormsModule, HttpClientModule),
+  ],
+}).catch((err) => console.error(err));

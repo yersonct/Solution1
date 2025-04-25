@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Business.Interfaces
 {
-    public class IAuthService
+    public interface IAuthService
     {
         Task<LoginResponse> AuthenticateAsync(string username, string password);
     }

@@ -8,16 +8,18 @@ using Data.Repositories;
 using Entity.DTOs;
 using Business.Interfaces;
 using Org.BouncyCastle.Crypto.Generators;
-using Entity.Model; // Asegúrate de ajustar el namespace
+using Entity.Model;
+using Data.Interfaces; // Asegúrate de ajustar el namespace
+using BCrypt.Net; // Importa la biblioteca BCrypt.Net
 
 namespace TuProyecto.Business.Services
 {
     public class AuthService : IAuthService
     {
-        private readonly IUserRepository _userRepository; // Usa tu repositorio de usuario
+        private readonly IloginRepository _userRepository; // Usa tu repositorio de usuario
         private readonly IConfiguration _configuration;
 
-        public AuthService(IUserRepository userRepository, IConfiguration configuration)
+        public AuthService(IloginRepository userRepository, IConfiguration configuration)
         {
             _userRepository = userRepository;
             _configuration = configuration;

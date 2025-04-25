@@ -1,13 +1,16 @@
 import { bootstrapApplication } from '@angular/platform-browser';
 import { AppComponent } from './app/app.component';
-import { appConfig } from './app/app.config';
-import { importProvidersFrom } from '@angular/core';
-import { ReactiveFormsModule } from '@angular/forms';
-import { HttpClientModule } from '@angular/common/http';
+import { provideRouter } from '@angular/router';
+import { routes } from './app/app-routing.module';
+import { provideHttpClient } from '@angular/common/http';
+// Import any services you need here (e.g., AuthService)
+// import { AuthService } from './app/services/auth.service';
 
 bootstrapApplication(AppComponent, {
   providers: [
-    appConfig.providers,
-    importProvidersFrom(ReactiveFormsModule, HttpClientModule),
-  ],
-}).catch((err) => console.error(err));
+    provideRouter(routes),
+    provideHttpClient(),
+    //  provide your services here, or ensure they use providedIn: 'root'
+    //  AuthService,
+  ]
+});

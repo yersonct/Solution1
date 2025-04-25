@@ -1,71 +1,73 @@
-import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable, of, throwError } from 'rxjs';
-import { tap, catchError } from 'rxjs/operators';
-import { Router } from '@angular/router';
+// import { Injectable } from '@angular/core';
+// import { HttpClient } from '@angular/common/http';
+// import { BehaviorSubject, Observable, throwError } from 'rxjs';
+// import { tap, catchError, map } from 'rxjs/operators';
+// import { Router } from '@angular/router';
 
-interface User {
-  username: string;
-  token: string;
-}
+// interface LoginResponse {
+//   token: string;
+//   expiration: string; // O Date si lo parseas
+// }
 
-@Injectable({
-  providedIn: 'root'
-})
-export class AuthService {
-  private currentUser: User | null = null;
-  private apiUrl = 'http://localhost:3000/auth'; // Reemplaza con tu URL de la API
+// interface User {
+//   username: string;
+//   token: string | null;
+// }
 
-  constructor(
-    private http: HttpClient,
-    private router: Router
-    ) {}
+// @Injectable({
+//   providedIn: 'root'
+// })
+// export class AuthService {
+//   private currentUserSubject = new BehaviorSubject<User | null>(this.getCurrentUserFromStorage());
+//   public currentUser = this.currentUserSubject.asObservable();
+//   private apiUrl = 'https://localhost:7035/api'; // Reemplaza con tu URL de la API
 
-  // Método para iniciar sesión
-  login(username: string, password: string): Observable<void> {
-    // En un escenario real, aquí harías una petición HTTP a tu API
-    // para verificar las credenciales.  Para este ejemplo, usaré datos de prueba.
-    return of({ username: 'testuser', token: 'fake-token' }).pipe( //Simulo la respuesta de la API
-      tap((response: any) => { // Type assertion added
-        if (username === 'testuser' && password === 'password') {
-          this.currentUser = { username, token: response.token };
-          localStorage.setItem('currentUser', JSON.stringify(this.currentUser));
-        } else {
-          throw new Error('Credenciales inválidas'); // Simulate login failure
-        }
-      }),
-      catchError(err => {
-        return throwError(() => err);
-      })
-    );
-  }
+//   constructor(
+//     private http: HttpClient,
+//     private router: Router
+//   ) {}
 
-  // Método para cerrar sesión
-  logout(): void {
-    this.currentUser = null;
-    localStorage.removeItem('currentUser');
-    this.router.navigate(['/login']); // Redirige al login
-  }
+//   login(credentials: any): Observable<boolean> {
+//     return this.http.post<LoginResponse>(`${this.apiUrl}/login`, credentials)
+//       .pipe(
+//         map(response => {
+//           if (response && response.token) {
+//             const user: User = { username: credentials.username, token: response.token };
+//             localStorage.setItem('currentUser', JSON.stringify(user));
+//             this.currentUserSubject.next(user);
+//             return true;
+//           } else {
+//             this.currentUserSubject.next(null);
+//             return false;
+//           }
+//         }),
+//         catchError(err => {
+//           this.currentUserSubject.next(null);
+//           return throwError(() => 'Credenciales inválidas'); // Mensaje genérico para el usuario
+//         })
+//       );
+//   }
 
-  // Método para obtener el usuario actual
-  getCurrentUser(): User | null {
-    if (this.currentUser)
-      return this.currentUser;
-    const storedUser = localStorage.getItem('currentUser');
-    if (storedUser) {
-      this.currentUser = JSON.parse(storedUser);
-    }
-    return this.currentUser;
-  }
+//   logout(): void {
+//     localStorage.removeItem('currentUser');
+//     this.currentUserSubject.next(null);
+//     this.router.navigate(['/login']);
+//   }
 
-  // Método para verificar si el usuario está autenticado
-  isAuthenticated(): boolean {
-    return !!this.getCurrentUser();
-  }
+//   getCurrentUserValue(): User | null {
+//     return this.currentUserSubject.value;
+//   }
 
-    // Método para obtener el token
-    getToken(): string | null {
-      const user = this.getCurrentUser();
-      return user ? user.token : null;
-    }
-}
+//   private getCurrentUserFromStorage(): User | null {
+//     const storedUser = localStorage.getItem('currentUser');
+//     return storedUser ? JSON.parse(storedUser) : null;
+//   }
+
+//   isAuthenticated(): boolean {
+//     return !!this.getCurrentUserValue()?.token;
+//   }
+
+//   getToken(): string | null {
+//     return this.getCurrentUserValue()?.token || null;
+//   }
+// }

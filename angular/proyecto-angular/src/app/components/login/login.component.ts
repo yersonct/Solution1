@@ -1,53 +1,47 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router'; // Importa el Router
-import { AuthService } from '../services/auth.service'; 
-
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [ReactiveFormsModule, CommonModule],
+  imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.css']
 })
 export class LoginComponent implements OnInit {
   loginForm!: FormGroup;
   loading = false;
-  error = '';
+  error: string = '';
 
-  constructor(
-    private fb: FormBuilder,
-    private router: Router, // Inyecta el Router
-    private authService: AuthService // Inyecta el servicio de autenticación
-  ) { }
+  constructor(private formBuilder: FormBuilder) {}
 
-  ngOnInit() {
-    this.loginForm = this.fb.group({
+  ngOnInit(): void {
+    this.loginForm = this.formBuilder.group({
       username: ['', Validators.required],
       password: ['', Validators.required]
     });
   }
 
-  onSubmit() {
-    this.loading = true;
-    this.error = '';
+  onSubmit(): void {
     if (this.loginForm.invalid) {
-      this.loading = false;
       return;
     }
-    // Lógica de inicio de sesión aquí
+
+    this.loading = true;
+    this.error = '';
+
+    // Simulación de login
     const { username, password } = this.loginForm.value;
-    this.authService.login(username, password).subscribe({
-      next: () => {
-        this.router.navigate(['/']); // Redirige a la página principal
-        this.loading = false;
-      },
-      error: (err) => {
-        this.error = err.message || 'Credenciales inválidas';
-        this.loading = false;
+    console.log('Login con:', username, password);
+
+    setTimeout(() => {
+      this.loading = false;
+      if (username === 'admin' && password === 'admin') {
+        alert('Login exitoso!');
+      } else {
+        this.error = 'Usuario o contraseña incorrectos.';
       }
-    });
+    }, 1500);
   }
 }

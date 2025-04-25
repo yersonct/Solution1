@@ -8,7 +8,7 @@ using System.Collections.Generic;
 using Business.Services;
 using Microsoft.Extensions.Logging; // Agregado para el logger
 
-namespace Web.Controllers
+namespace configuracion.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]

@@ -7,7 +7,7 @@ using System.Net;
 using System.Threading.Tasks;
 using Utilities.Exceptions;
 
-namespace Web.Controllers
+namespace configuracion.Controllers
 {
     [ApiController]
     [Route("api/blacklist")]

@@ -5,7 +5,7 @@ using Entity.DTOs;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace Web.Controllers
+namespace configuracion.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]

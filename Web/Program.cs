@@ -11,16 +11,29 @@ using Microsoft.Extensions.Logging;
 using Npgsql;
 using Repository;
 using System.Data;
+using configuracion;
+//using TuProyecto.Configuration; // Asegúrate de usar el namespace correcto
 
-internal class Program
-{
-    private static void Main(string[] args)
-    {
+
         var builder = WebApplication.CreateBuilder(args);
+
+        builder.Services.AddControllers();
+
+        builder.Services.AddEndpointsApiExplorer();
+        builder.Services.AddSwaggerGen();
 
         // 🔹 Registrar el DbContext con PostgreSQL
         builder.Services.AddDbContext<ApplicationDbContext>(options =>
             options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+        var origenesPermitidos = builder.Configuration.GetValue<string>("OrigenesPermitidos")!.Split(",");
+        builder.Services.AddCors(opciones =>
+        {
+            opciones.AddDefaultPolicy(politica =>
+            {
+                politica.WithOrigins(origenesPermitidos).AllowAnyHeader().AllowAnyMethod();
+            });
+        });
 
         // 🔹 Registrar servicios de datos y negocios
         builder.Services.AddScoped<IFormService, FormService>();
@@ -72,29 +85,19 @@ internal class Program
         builder.Services.AddScoped<IInvoiceRepository, InvoiceRepository>();
 
         // 🔹 Agregar servicios de controladores y Swagger
-        builder.Services.AddControllers()
-            .AddJsonOptions(options =>
-            {
-                options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.Preserve;
-            });
-        builder.Services.AddEndpointsApiExplorer();
-        builder.Services.AddSwaggerGen();
+       
 
-        // 🔹 Configurar CORS
-        builder.Services.AddCors(options =>
-        {
-            options.AddPolicy("AllowAll",
-                policy => policy.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
-        });
+        // 🔹 Configurar CORS usando la clase de configuración
+        //builder.Services.ConfigureCors(builder.Configuration);
 
         // 🔹 Configurar logging
-        builder.Logging.AddConsole();
+        //builder.Logging.AddConsole();
 
         // 🔹 Construir la aplicación
         var app = builder.Build();
 
         // 🔹 Aplicar middlewares
-        app.UseCors("AllowAll");
+        //app.UseConfiguredCors();
 
         if (app.Environment.IsDevelopment())
         {
@@ -103,10 +106,9 @@ internal class Program
         }
 
         app.UseHttpsRedirection();
+        app.UseCors();
         app.UseAuthorization();
         app.MapControllers();
 
         // 🔹 Ejecutar la aplicación
         app.Run();
-    }
-}

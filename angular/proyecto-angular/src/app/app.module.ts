@@ -1,27 +1,23 @@
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms'; // Importa esto
-import { HttpClientModule } from '@angular/common/http'; // Importa HttpClientModule
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { HttpClientModule } from '@angular/common/http';
 
 import { AppRoutingModule } from './app-routing.module';
-import { AppComponent } from './app.component';
-import { LoginComponent } from './components/login/login.component';
-import { HomeComponent } from './components/home/home.component';
+
+// Ya no importamos HomeComponent y LoginComponent aquí
 
 @NgModule({
-  declarations: [
-    AppComponent,
-    LoginComponent,
-    HomeComponent,
-  ],
   imports: [
     BrowserModule,
     AppRoutingModule,
-    FormsModule, // Y esto
+    FormsModule,
     ReactiveFormsModule,
-    HttpClientModule
+    HttpClientModule,
+    // Si AppComponent no es standalone, podrías importar aquí otros módulos que necesite
   ],
+  declarations: [],
   providers: [],
-  bootstrap: [AppComponent]
+  // bootstrap: [AppComponent] // <-- Elimina esta línea
 })
 export class AppModule { }

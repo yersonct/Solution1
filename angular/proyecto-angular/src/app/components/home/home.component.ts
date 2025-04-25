@@ -7,9 +7,7 @@ import { Component, OnInit } from '@angular/core';
 })
 export class HomeComponent implements OnInit {
   public titulo: string = 'Bienvenido a la Página de Inicio';
-  public mensaje: string = 'Esta es una aplicación de ejemplo en Angular.';
   public fechaActual: Date;
-
   constructor() {
     this.fechaActual = new Date();
   }
@@ -20,9 +18,7 @@ export class HomeComponent implements OnInit {
     console.log('HomeComponent inicializado');
   }
 
-  public decirHola(): string {
-    return '¡Hola desde HomeComponent!';
-  }
+
 
   public obtenerFechaFormateada(): string {
     return this.fechaActual.toLocaleDateString('es-ES', {
@@ -36,7 +32,5 @@ export class HomeComponent implements OnInit {
     });
   }
 
-  public onButtonClick(): void {
-    alert('¡Hiciste clic en el botón!');
-  }
+
 }

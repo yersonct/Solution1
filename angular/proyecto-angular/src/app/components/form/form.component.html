@@ -1,0 +1,26 @@
+<div *ngIf="forms.length > 0">
+    <h3>Lista de Formularios</h3>
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Nombre</th>
+          <th>Url</th>
+          <th>Activo</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let form of forms; let i = index">
+          <td>{{ form.name}}</td>
+          <td>{{ form.url }}</td>
+          <td>{{ form.active ? 'Sí' : 'No' }}</td>
+          <td>
+            <button class="btn btn-danger btn-sm btn-editloig">Eliminar Logico</button>
+            
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  

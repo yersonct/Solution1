@@ -11,12 +11,19 @@ using Microsoft.Extensions.Logging;
 using Npgsql;
 using Repository;
 using System.Data;
-using configuracion;
+//using configuracion;
 //using TuProyecto.Configuration; // Asegúrate de usar el namespace correcto
 
 
         var builder = WebApplication.CreateBuilder(args);
-
+        var origenesPermitidos = builder.Configuration.GetValue<string>("OrigenesPermitidos")!.Split(",");
+        builder.Services.AddCors(opciones =>
+        {
+            opciones.AddDefaultPolicy(politica =>
+            {
+                politica.WithOrigins(origenesPermitidos).AllowAnyHeader().AllowAnyMethod();
+            });
+        });
         builder.Services.AddControllers();
 
         builder.Services.AddEndpointsApiExplorer();
@@ -26,14 +33,7 @@ using configuracion;
         builder.Services.AddDbContext<ApplicationDbContext>(options =>
             options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-        var origenesPermitidos = builder.Configuration.GetValue<string>("OrigenesPermitidos")!.Split(",");
-        builder.Services.AddCors(opciones =>
-        {
-            opciones.AddDefaultPolicy(politica =>
-            {
-                politica.WithOrigins(origenesPermitidos).AllowAnyHeader().AllowAnyMethod();
-            });
-        });
+      
 
         // 🔹 Registrar servicios de datos y negocios
         builder.Services.AddScoped<IFormService, FormService>();

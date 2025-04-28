@@ -1,1 +1,19 @@
-<p>form-rol-permission works!</p>
+
+<table>
+    <thead>
+      <tr>
+        <th>Formularios</th>
+        <th>Roles</th>
+        <th>Permisos</th>
+        <th>Activo</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let FormRolPermission of FormRolPermissions">
+        <td>{{ FormRolPermission.formName }}</td>
+        <td>{{ FormRolPermission.rolName }}</td>
+        <td>{{ FormRolPermission.permissionName }}</td>
+        <td>{{ FormRolPermission.active ? 'Sí' : 'No' }}</td>
+      </tr>
+    </tbody>
+  </table>

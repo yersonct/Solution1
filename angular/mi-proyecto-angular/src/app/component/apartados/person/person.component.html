@@ -1,1 +1,25 @@
-<p>person works!</p>
+<h1>Bienvenido a mi aplicación</h1>
+<h2>Lista de Formularios</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Nombre</th>
+      <th>Apellido</th>
+      <th>Documento</th>
+      <th>Phone</th>
+      <th>Email</th>
+      <th>Activo</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor="let Person of Persons">
+      <td>{{ Person.name }}</td>
+      <td>{{ Person.lastName }}</td>
+      <td>{{ Person.document }}</td>
+      <td>{{ Person.phone }}</td>
+      <td>{{ Person.email }}</td>
+      <td>{{ Person.active ? 'Sí' : 'No' }}</td>
+    </tr>
+  </tbody>
+</table>

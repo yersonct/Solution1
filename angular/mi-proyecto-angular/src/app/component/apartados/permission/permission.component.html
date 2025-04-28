@@ -1,1 +1,15 @@
-<p>permission works!</p>
+
+<table>
+    <thead>
+      <tr>
+        <th>Nombre</th>
+        <th>Activo</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let Permission of Permissions">
+        <td>{{ Permission.name }}</td>
+        <td>{{ Permission.active ? 'Sí' : 'No' }}</td>
+      </tr>
+    </tbody>
+  </table>

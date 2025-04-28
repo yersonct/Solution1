@@ -1,1 +1,23 @@
-<p>user works!</p>
+<h1>Bienvenido a mi aplicación</h1>
+<h2>Lista de Formularios</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>nombre  usuario</th>
+      <th>controseña</th>
+      <th>person id</th>
+      <th>nombre de la persona</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor="let user of Users">
+      <td>{{ user.id }}</td>
+      <td>{{ user.userName }}</td>
+      <td>{{ user.password }}</td>
+      <td>{{ user.personId }}</td>
+      <td>{{ user.active ? 'Sí' : 'No' }}</td>
+    </tr>
+  </tbody>
+</table>

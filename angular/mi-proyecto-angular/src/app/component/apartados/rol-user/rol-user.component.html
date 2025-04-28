@@ -1,1 +1,19 @@
-<p>rol-user works!</p>
+<h1>Bienvenido a mi aplicación</h1>
+<h2>Lista de Formularios</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Rol</th>
+      <th>Nombre de usuario</th>
+
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor="let RolUser of RolUsers">
+      <td>{{ RolUser.rolName }}</td>
+      <td>{{ RolUser.userName }}</td>
+      <!-- <td>{{ user.active ? 'Sí' : 'No' }}</td> -->
+    </tr>
+  </tbody>
+</table>

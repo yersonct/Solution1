@@ -1,1 +1,19 @@
-<p>form-module works!</p>
+
+<table>
+    <thead>
+      <tr>
+        <th>Formulario</th>
+        <th>Modulo</th>
+        <th>Activo</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let FormModule of FormModules">
+        <!-- <td>{{ FormModule.id_forms }}</td> -->
+        <td>{{ FormModule.formName }}</td>
+        <!-- <td>{{ FormModule.id_module }}</td> -->
+        <td>{{ FormModule.moduleName }}</td>
+        <!-- <td>{{ FormModule.active ? 'Sí' : 'No' }}</td> -->
+      </tr>
+    </tbody>
+  </table>

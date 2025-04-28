@@ -1,0 +1,56 @@
+.menu-lateral {
+    width: 200px; /* Ancho del menú */
+    background-color: #333; /* Color de fondo (gris oscuro) */
+    color: #fff; /* Color del texto (blanco) */
+    padding: 10px;
+    box-sizing: border-box;
+    height: 100vh; /* Ajusta la altura según necesites */
+    overflow-y: auto; /* Para el scroll si el menú es muy largo */
+  }
+  
+  .menu-lateral ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  
+  .menu-lateral li {
+    margin-bottom: 5px;
+  }
+  
+  .menu-lateral li a {
+    display: block;
+    padding: 10px;
+    color: #eee; /* Color del texto de los enlaces */
+    text-decoration: none;
+  }
+  
+  .menu-lateral li a:hover {
+    background-color: #555; /* Color de fondo al pasar el ratón */
+  }
+  
+  /* Estilos para el encabezado del menú expandible */
+  .menu-item-header {
+    padding: 10px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+  }
+  
+  .menu-item-header span {
+    margin-right: 5px;
+  }
+  
+  /* Estilos para el submenú */
+  .submenu {
+    padding-left: 20px;
+  }
+  
+  .submenu li {
+    padding: 8px 0;
+    cursor: pointer;
+  }
+  
+  .submenu li:hover {
+    background-color: #555;
+  }

@@ -1,1 +1,15 @@
-<p>module works!</p>
+
+<table>
+    <thead>
+      <tr>
+        <th>Nombre</th>
+        <th>Activo</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let Module of Modules">
+        <td>{{ Module.name }}</td>
+        <td>{{ Module.active ? 'Sí' : 'No' }}</td>
+      </tr>
+    </tbody>
+  </table>

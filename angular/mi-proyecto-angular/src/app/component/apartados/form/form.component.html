@@ -1,1 +1,21 @@
-<p>form works!</p>
+<h1>Bienvenido a mi aplicación</h1>
+<h2>Lista de Formularios</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Nombre</th>
+      <th>URL</th>
+      <th>Activo</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor="let form of forms">
+      <td>{{ form.id }}</td>
+      <td>{{ form.name }}</td>
+      <td>{{ form.url }}</td>
+      <td>{{ form.active ? 'Sí' : 'No' }}</td>
+    </tr>
+  </tbody>
+</table>

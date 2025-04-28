@@ -1,1 +1,21 @@
-<p>rol works!</p>
+<h1>Bienvenido a mi aplicación</h1>
+<h2>Lista de Formularios</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Nombre</th>
+      <th>description</th>
+      <th>Activo</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor="let rol of Roles">
+      <td>{{ rol.id }}</td>
+      <td>{{ rol.name }}</td>
+      <td>{{ rol.description }}</td>
+      <td>{{ rol.active ? 'Sí' : 'No' }}</td>
+    </tr>
+  </tbody>
+</table>

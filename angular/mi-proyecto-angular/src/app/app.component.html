@@ -1,44 +1,32 @@
 <div style="display: flex;">
-    <app-menu-lateral style="width: 200px;"></app-menu-lateral>
-    <div style="flex-grow: 1; padding: 20px;">
-      <button (click)="activeComponent = 'FormComponent'">Mostrar Formulario</button>
-      <button (click)="activeComponent = 'FormModuleComponent'">Mostrar Formulario Módulo</button>
-      <button (click)="activeComponent = 'FormRolPermissionComponent'">Mostrar Formulario Rol Permiso</button>
-      <button (click)="activeComponent = 'ModuleComponent'">Mostrar Módulo</button>
-      <button (click)="activeComponent = 'PermissionComponent'">Mostrar Permiso</button>
-      <button (click)="activeComponent = 'PersonComponent'">Mostrar Persona</button>
-      <button (click)="activeComponent = 'RolComponent'">Mostrar Rol</button>
-      <button (click)="activeComponent = 'RolUserComponent'">Mostrar Rol Usuario</button>
-      <button (click)="activeComponent = 'UserComponent'">Mostrar Usuario</button>
-  
-      <div *ngIf="activeComponent" style="margin-top: 20px; border: 1px solid #ccc; padding: 10px;">
-        <ng-container *ngIf="activeComponent === 'FormComponent'">
-          <app-form></app-form>
-        </ng-container>
-        <ng-container *ngIf="activeComponent === 'FormModuleComponent'">
-          <app-form-module></app-form-module>
-        </ng-container>
-        <ng-container *ngIf="activeComponent === 'FormRolPermissionComponent'">
-          <app-form-rol-permission></app-form-rol-permission>
-        </ng-container>
-        <ng-container *ngIf="activeComponent === 'ModuleComponent'">
-          <app-module></app-module>
-        </ng-container>
-        <ng-container *ngIf="activeComponent === 'PermissionComponent'">
-          <app-permission></app-permission>
-        </ng-container>
-        <ng-container *ngIf="activeComponent === 'PersonComponent'">
-          <app-person></app-person>
-        </ng-container>
-        <ng-container *ngIf="activeComponent === 'RolComponent'">
-          <app-rol></app-rol>
-        </ng-container>
-        <ng-container *ngIf="activeComponent === 'RolUserComponent'">
-          <app-rol-user></app-rol-user>
-        </ng-container>
-        <ng-container *ngIf="activeComponent === 'UserComponent'">
-          <app-user></app-user>
-        </ng-container>
-      </div>
-    </div>
+  <app-menu-lateral (componentToShow)="onComponentToShow($event)" style="width: 200px;"></app-menu-lateral>
+  <div style="flex-grow: 1; padding: 20px;">
+    <ng-container *ngIf="activeComponent === 'FormComponent'">
+      <app-form></app-form>
+    </ng-container>
+    <ng-container *ngIf="activeComponent === 'RolComponent'">
+      <app-rol></app-rol>
+    </ng-container>
+    <ng-container *ngIf="activeComponent === 'PersonComponent'">
+      <app-person></app-person>
+    </ng-container>
+    <ng-container *ngIf="activeComponent === 'UserComponent'">
+      <app-user></app-user>
+    </ng-container>
+    <ng-container *ngIf="activeComponent === 'RolUserComponent'">
+      <app-rol-user></app-rol-user>
+    </ng-container>
+    <ng-container *ngIf="activeComponent === 'FormRolPermissionComponent'">
+      <app-form-rol-permission></app-form-rol-permission>
+    </ng-container>
+    <ng-container *ngIf="activeComponent === 'FormModuleComponent'">
+      <app-form-module></app-form-module>
+    </ng-container>
+    <ng-container *ngIf="activeComponent === 'PermissionComponent'">
+      <app-permission></app-permission>
+    </ng-container>
+    <ng-container *ngIf="activeComponent === 'ModuleComponent'">
+      <app-module></app-module>
+    </ng-container>
   </div>
+</div>

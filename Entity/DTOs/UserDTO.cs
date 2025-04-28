@@ -11,10 +11,11 @@ namespace Entity.DTOs
     {
         public int Id { get; set; }
         public string UserName { get; set; }
-        //public bool Active { get; set; }
         public string Password { get; set; }
         public int PersonId { get; set; }
         public string PersonName { get; set; }
+
+        public bool active { get; set; }
 
     }
 }

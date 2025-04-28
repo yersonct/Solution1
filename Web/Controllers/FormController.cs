@@ -1,17 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Business.Interfaces;
 using Entity.Model;
 using Entity.DTOs;
+using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-
     public class FormsController : ControllerBase
     {
         private readonly IFormService _formService;
@@ -30,8 +29,9 @@ namespace API.Controllers
                 id = f.id,
                 name = f.name,
                 url = f.url,
-                active = f.active // Include the active status in the DTO
+                active = f.active
             }).ToList();
+
             return Ok(formDtos);
         }
 
@@ -49,8 +49,9 @@ namespace API.Controllers
                 id = form.id,
                 name = form.name,
                 url = form.url,
-                active = form.active // Include the active status in the DTO
+                active = form.active
             };
+
             return Ok(formDto);
         }
 
@@ -66,7 +67,7 @@ namespace API.Controllers
             {
                 name = formDto.name,
                 url = formDto.url,
-                active = true // Ensure new forms are created as active
+                active = true
             };
 
             var createdForm = await _formService.CreateFormAsync(form);
@@ -94,13 +95,14 @@ namespace API.Controllers
 
             existingForm.name = formDto.name;
             existingForm.url = formDto.url;
-            existingForm.active = formDto.active; // Allow updating the active status
+            existingForm.active = formDto.active;
 
             var result = await _formService.UpdateFormAsync(existingForm);
             if (!result)
             {
                 return StatusCode(500, "An error occurred while updating the form.");
             }
+
             return NoContent();
         }
 

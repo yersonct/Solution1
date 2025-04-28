@@ -46,7 +46,7 @@ namespace Data.Repository
                 {
                     // Implementación del borrado lógico: marcar como inactivo (asumiendo que tienes un campo 'Active')
                     // Si no tienes un campo 'Active' en tu entidad User, deberías agregarlo.
-                    // userToDelete.Active = false;
+                     userToDelete.active = false;
                     _context.Entry(userToDelete).State = EntityState.Modified;
                     await _context.SaveChangesAsync();
                     return true;

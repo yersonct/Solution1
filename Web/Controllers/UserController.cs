@@ -35,7 +35,8 @@ namespace API.Controllers
                     UserName = u.username,
                     PersonId = u.id_person,
                     Password = u.password,
-                    PersonName = person?.name
+                    PersonName = person?.name,
+                    active = u.active
                 };
             }));
             return Ok(userDtos);
@@ -56,7 +57,8 @@ namespace API.Controllers
                 Id = user.id,
                 UserName = user.username,
                 PersonId = user.id_person,
-                PersonName = person?.name
+                PersonName = person?.name,
+                active = user.active
             };
             return Ok(userDto);
         }
@@ -73,9 +75,9 @@ namespace API.Controllers
             {
                 username = userCreateDTO.UserName,
                 password = userCreateDTO.Password,
-                id_person = userCreateDTO.PersonId
+                id_person = userCreateDTO.PersonId,
                 // Si agregaste el campo Active en User, podrías inicializarlo aquí:
-                // Active = true
+                 active = true
             };
 
             var createdUser = await _userService.CreateUserAsync(user);

@@ -1,5 +1,5 @@
 <div style="display: flex;">
-  <app-menu-lateral  style="width: 200px;"></app-menu-lateral>
+  <app-menu-lateral (componentToShow)="onComponentToShow($event)" style="width: 200px;"></app-menu-lateral>
   <div style="flex-grow: 1; padding: 20px;">
     <button (click)="activeComponent = 'FormComponent'">Mostrar Formulario</button>
     <button (click)="activeComponent = 'FormModuleComponent'">Mostrar Formulario Módulo</button>

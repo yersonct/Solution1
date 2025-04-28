@@ -35,7 +35,7 @@ namespace Business.Services
         {
             // Aquí podrías agregar lógica de negocio antes de crear el usuario
             // Asegúrate de que la propiedad 'Active' (si la agregaste a la entidad User) se inicialice en true
-            // user.Active = true; 
+             user.active = true;
             return await _userRepository.AddAsync(user);
         }
 

@@ -34,11 +34,11 @@ namespace API.Controllers
             {
                 var rolUsers = await _rolUserService.GetAllRolUsersAsync();
                 var results = rolUsers
-                    .Where(ru => ru.active)
                     .Select(ru => new
                     {
                         RolName = ru.Rol?.Name,
-                        UserName = ru.User?.username
+                        UserName = ru.User?.username,
+                        Active = ru.active
                     })
                     .ToList();
                 return Ok(results);
@@ -55,7 +55,7 @@ namespace API.Controllers
             try
             {
                 var rolUser = await _rolUserService.GetRolUserByIdAsync(id);
-                if (rolUser == null || !rolUser.active)
+                if (rolUser == null)
                 {
                     return NotFound();
                 }
@@ -63,7 +63,8 @@ namespace API.Controllers
                 return Ok(new
                 {
                     RolName = rolUser.Rol?.Name,
-                    UserName = rolUser.User?.username
+                    UserName = rolUser.User?.username,
+                    Active = rolUser.active
                 });
             }
             catch (Exception ex)
@@ -97,7 +98,8 @@ namespace API.Controllers
                 return CreatedAtAction(nameof(GetRolUserById), new { id = createdRolUser.id }, new
                 {
                     RolName = rol?.Name,
-                    UserName = user?.username
+                    UserName = user?.username,
+                    Active = createdRolUser.active
                 });
             }
             catch (Exception ex)
@@ -120,13 +122,14 @@ namespace API.Controllers
             }
 
             var existingRolUser = await _rolUserService.GetRolUserByIdAsync(id);
-            if (existingRolUser == null || !existingRolUser.active)
+            if (existingRolUser == null)
             {
                 return NotFound();
             }
 
             existingRolUser.id_rol = rolUserDto.id_rol;
             existingRolUser.id_user = rolUserDto.id_user;
+            existingRolUser.active = rolUserDto.active; // Allow updating the active status
 
             try
             {
@@ -149,14 +152,12 @@ namespace API.Controllers
             try
             {
                 var rolUserToDelete = await _rolUserService.GetRolUserByIdAsync(id);
-                if (rolUserToDelete == null || !rolUserToDelete.active)
+                if (rolUserToDelete == null)
                 {
                     return NotFound();
                 }
 
-                rolUserToDelete.active = false;
-                var result = await _rolUserService.UpdateRolUserAsync(rolUserToDelete);
-
+                var result = await _rolUserService.DeleteRolUserAsync(id); // Use the logical delete method in the service
                 if (!result)
                 {
                     return StatusCode(500, "Error al eliminar lógicamente la relación Rol-Usuario.");

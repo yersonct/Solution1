@@ -1,19 +1,58 @@
 
+<h2>Lista de Formularios por Módulo</h2>
 <table>
-    <thead>
-      <tr>
-        <th>Formulario</th>
-        <th>Modulo</th>
-        <th>Activo</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr *ngFor="let FormModule of FormModules">
-        <!-- <td>{{ FormModule.id_forms }}</td> -->
-        <td>{{ FormModule.formName }}</td>
-        <!-- <td>{{ FormModule.id_module }}</td> -->
-        <td>{{ FormModule.moduleName }}</td>
-        <!-- <td>{{ FormModule.active ? 'Sí' : 'No' }}</td> -->
-      </tr>
-    </tbody>
-  </table>
+  <thead>
+    <tr>
+      <th>Formulario</th>
+      <th>Módulo</th>
+      <th>Activo</th>
+      <th>Acción</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor="let FormModule of FormModules">
+      <td>{{ FormModule.formName }}</td>
+      <td>{{ FormModule.moduleName }}</td>
+      <td>{{ FormModule.active ? 'Sí' : 'No' }}</td>
+      <td>
+        <button (click)="actualizarFormModule(FormModule)">Actualizar</button><br>
+        <button (click)="eliminarFormModule(FormModule)">Eliminar</button>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<div *ngIf="errorMessage" style="color: red;">
+  {{ errorMessage }}
+</div>
+
+<div *ngIf="modoEdicion && formModuleSeleccionado">
+  <h3>Editar Formulario por Módulo</h3>
+  <form (submit)="guardarFormModule()">
+    <div>
+      <label for="formName">Formulario:</label>
+      <input type="text" id="formName" name="formName" [(ngModel)]="formModuleSeleccionado.formName" required>
+    </div>
+    <div>
+      <label for="moduleName">Módulo:</label>
+      <input type="text" id="moduleName" name="moduleName" [(ngModel)]="formModuleSeleccionado.moduleName" required>
+    </div>
+    <button type="submit">Guardar</button>
+    <button type="button" (click)="cancelarEdicion()">Cancelar</button>
+  </form>
+</div>
+
+<h2>Registrar Nuevo Formulario por Módulo</h2>
+<form (ngSubmit)="registrarNuevoFormModule()">
+  <div>
+    <label for="nuevoFormName">Formulario:</label>
+    <input type="text" id="nuevoFormName" name="nuevoFormName" [(ngModel)]="nuevoFormModule.formName" required>
+  </div>
+  <div>
+    <label for="nuevoModuleName">Módulo:</label>
+    <input type="text" id="nuevoModuleName" name="nuevoModuleName" [(ngModel)]="nuevoFormModule.moduleName" required>
+  </div>
+  <button type="submit">Registrar Relación</button>
+  <div *ngIf="registroFormModuleMensaje">{{ registroFormModuleMensaje }}</div>
+  <div *ngIf="registroFormModuleError" style="color: red;">{{ registroFormModuleError }}</div>
+</form>

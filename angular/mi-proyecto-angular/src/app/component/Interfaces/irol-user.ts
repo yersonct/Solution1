@@ -1,4 +1,6 @@
 export interface IRolUser {
+    id: number;
     rolName: string,
-    userName: string
+    userName: string,
+    active: boolean
 }

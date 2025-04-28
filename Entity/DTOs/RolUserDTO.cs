@@ -14,5 +14,6 @@ namespace Entity.DTOs
         public int id_user { get; set; }
         public string RolName { get; set; }
         public string UserName { get; set; }
+        public bool active { get; set; }
     }
 }

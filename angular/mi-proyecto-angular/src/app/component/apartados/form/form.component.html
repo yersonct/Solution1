@@ -1,21 +1,58 @@
 <h1>Bienvenido a mi aplicación</h1>
 <h2>Lista de Formularios</h2>
-
 <table>
   <thead>
     <tr>
-      <th>ID</th>
       <th>Nombre</th>
       <th>URL</th>
       <th>Activo</th>
+      <th>Accion</th>
     </tr>
   </thead>
   <tbody>
     <tr *ngFor="let form of forms">
-      <td>{{ form.id }}</td>
       <td>{{ form.name }}</td>
       <td>{{ form.url }}</td>
       <td>{{ form.active ? 'Sí' : 'No' }}</td>
+      <td>
+        <button (click)="actualizarFormulario(form)">Actualizar</button><br>
+        <button (click)="eliminarFormulario(form)">Eliminar</button>
+      </td>
     </tr>
   </tbody>
 </table>
+
+<div *ngIf="errorMessage" style="color: red;">
+  {{ errorMessage }}
+</div>
+
+<div *ngIf="modoEdicion && formularioSeleccionado">
+  <h3>Editar Formulario</h3>
+  <form (submit)="guardarFormulario()">
+    <div>
+      <label for="nombre">Nombre:</label>
+      <input type="text" id="nombre" name="nombre" [(ngModel)]="formularioSeleccionado.name" required>
+    </div>
+    <div>
+      <label for="url">URL:</label>
+      <input type="url" id="url" name="url" [(ngModel)]="formularioSeleccionado.url">
+    </div>
+    <button type="submit">Guardar</button>
+    <button type="button" (click)="cancelarEdicion()">Cancelar</button>
+  </form>
+</div>
+
+<h2>Registrar Nuevo Formulario</h2>
+<form (ngSubmit)="registrarNuevoFormulario()">
+  <div>
+    <label for="nuevoNombre">Nombre:</label>
+    <input type="text" id="nuevoNombre" name="nuevoNombre" [(ngModel)]="nuevoFormulario.name" required>
+  </div>
+  <div>
+    <label for="nuevaUrl">URL:</label>
+    <input type="url" id="nuevaUrl" name="nuevaUrl" [(ngModel)]="nuevoFormulario.url">
+  </div>
+  <button type="submit">Registrar Formulario</button>
+  <div *ngIf="registroFormularioMensaje">{{ registroFormularioMensaje }}</div>
+  <div *ngIf="registroFormularioError" style="color: red;">{{ registroFormularioError }}</div>
+</form>

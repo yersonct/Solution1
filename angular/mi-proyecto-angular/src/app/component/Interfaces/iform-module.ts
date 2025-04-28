@@ -3,5 +3,6 @@ export interface IFormModule {
     id_forms: number,
     formName: string,
     id_module: number,
-    moduleName: string
+    moduleName: string,
+    active:boolean
 }

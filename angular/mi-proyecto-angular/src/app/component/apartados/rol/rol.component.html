@@ -1,21 +1,61 @@
+
 <h1>Bienvenido a mi aplicación</h1>
-<h2>Lista de Formularios</h2>
+<h2>Lista de Roles</h2>
 
 <table>
   <thead>
     <tr>
-      <th>ID</th>
       <th>Nombre</th>
-      <th>description</th>
+      <th>Descripción</th>
       <th>Activo</th>
+      <th>Acción</th>
     </tr>
   </thead>
   <tbody>
     <tr *ngFor="let rol of Roles">
-      <td>{{ rol.id }}</td>
       <td>{{ rol.name }}</td>
       <td>{{ rol.description }}</td>
       <td>{{ rol.active ? 'Sí' : 'No' }}</td>
+      <td>
+        <button (click)="actualizarRol(rol)">Actualizar</button><br>
+        <button (click)="eliminarRol(rol)">Eliminar</button>
+      </td>
     </tr>
   </tbody>
 </table>
+
+<div *ngIf="errorMessage" style="color: red;">
+  {{ errorMessage }}
+</div>
+
+<div *ngIf="modoEdicion && rolSeleccionado">
+  <h3>Editar Rol</h3>
+  <form (submit)="guardarRol()">
+    <div>
+      <label for="name">Nombre:</label>
+      <input type="text" id="name" name="name" [(ngModel)]="rolSeleccionado.name" required>
+    </div>
+    <div>
+      <label for="description">Descripción:</label>
+      <input type="text" id="description" name="description" [(ngModel)]="rolSeleccionado.description">
+    </div>
+
+    <button type="submit">Guardar</button>
+    <button type="button" (click)="cancelarEdicion()">Cancelar</button>
+  </form>
+</div>
+
+<h2>Registrar Nuevo Rol</h2>
+<form (ngSubmit)="registrarNuevoRol()">
+  <div>
+    <label for="nuevoNombre">Nombre:</label>
+    <input type="text" id="nuevoNombre" name="nuevoNombre" [(ngModel)]="nuevoRol.name" required>
+  </div>
+  <div>
+    <label for="nuevaDescripcion">Descripción:</label>
+    <input type="text" id="nuevaDescripcion" name="nuevaDescripcion" [(ngModel)]="nuevoRol.description">
+  </div>
+  <button type="submit">Registrar Rol</button>
+  <div *ngIf="registroRolMensaje">{{ registroRolMensaje }}</div>
+  <div *ngIf="registroRolError" style="color: red;">{{ registroRolError }}</div>
+</form>

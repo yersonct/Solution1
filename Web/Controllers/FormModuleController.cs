@@ -32,7 +32,7 @@ namespace API.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error al obtener todos los FormModules");
+                _logger.LogError(ex, "Error al obtener todos los FormModules activos.");
                 return StatusCode(500, "Internal Server Error"); // Mejor manejo de errores
             }
         }
@@ -45,14 +45,14 @@ namespace API.Controllers
                 var formModule = await _formModuleService.GetFormModuleByIdAsync(id);
                 if (formModule == null)
                 {
-                    _logger.LogWarning($"FormModule con ID {id} no encontrado");
+                    _logger.LogWarning($"FormModule activo con ID {id} no encontrado");
                     return NotFound();
                 }
                 return Ok(formModule);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Error al obtener FormModule con ID {id}");
+                _logger.LogError(ex, $"Error al obtener FormModule activo con ID {id}");
                 return StatusCode(500, "Internal Server Error");
             }
         }
@@ -92,7 +92,7 @@ namespace API.Controllers
                 var result = await _formModuleService.UpdateFormModuleAsync(id, formModule);
                 if (!result)
                 {
-                    _logger.LogWarning($"FormModule con ID {id} no encontrado para actualizar");
+                    _logger.LogWarning($"FormModule activo con ID {id} no encontrado para actualizar");
                     return NotFound();
                 }
                 return NoContent();
@@ -112,7 +112,7 @@ namespace API.Controllers
                 var result = await _formModuleService.DeleteFormModuleAsync(id);
                 if (!result)
                 {
-                    _logger.LogWarning($"FormModule con ID {id} no encontrado para eliminar");
+                    _logger.LogWarning($"FormModule activo con ID {id} no encontrado para eliminar");
                     return NotFound();
                 }
                 return NoContent();
@@ -125,4 +125,3 @@ namespace API.Controllers
         }
     }
 }
-

@@ -1,15 +1,48 @@
 
+<h2>Lista de Permisos</h2>
 <table>
-    <thead>
-      <tr>
-        <th>Nombre</th>
-        <th>Activo</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr *ngFor="let Permission of Permissions">
-        <td>{{ Permission.name }}</td>
-        <td>{{ Permission.active ? 'Sí' : 'No' }}</td>
-      </tr>
-    </tbody>
-  </table>
+  <thead>
+    <tr>
+      <th>Nombre</th>
+      <th>Activo</th>
+      <th>Acción</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor="let Permission of Permissions">
+      <td>{{ Permission.name }}</td>
+      <td>{{ Permission.active ? 'Sí' : 'No' }}</td>
+      <td>
+        <button (click)="actualizarPermission(Permission)">Actualizar</button><br>
+        <button (click)="eliminarPermission(Permission)">Eliminar</button>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<div *ngIf="errorMessage" style="color: red;">
+  {{ errorMessage }}
+</div>
+
+<div *ngIf="modoEdicion && permissionSeleccionado">
+  <h3>Editar Permiso</h3>
+  <form (submit)="guardarPermission()">
+    <div>
+      <label for="name">Nombre:</label>
+      <input type="text" id="name" name="name" [(ngModel)]="permissionSeleccionado.name" required>
+    </div>
+    <button type="submit">Guardar</button>
+    <button type="button" (click)="cancelarEdicion()">Cancelar</button>
+  </form>
+</div>
+
+<h2>Registrar Nuevo Permiso</h2>
+<form (ngSubmit)="registrarNuevoPermission()">
+  <div>
+    <label for="nuevoNombre">Nombre:</label>
+    <input type="text" id="nuevoNombre" name="nuevoNombre" [(ngModel)]="nuevoPermission.name" required>
+  </div>
+  <button type="submit">Registrar Permiso</button>
+  <div *ngIf="registroPermissionMensaje">{{ registroPermissionMensaje }}</div>
+  <div *ngIf="registroPermissionError" style="color: red;">{{ registroPermissionError }}</div>
+</form>

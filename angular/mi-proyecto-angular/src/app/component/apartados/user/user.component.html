@@ -1,23 +1,71 @@
+
 <h1>Bienvenido a mi aplicación</h1>
-<h2>Lista de Formularios</h2>
+<h2>Lista de Usuarios</h2>
 
 <table>
   <thead>
     <tr>
-      <th>ID</th>
-      <th>nombre  usuario</th>
-      <th>controseña</th>
-      <th>person id</th>
-      <th>nombre de la persona</th>
+      <th>Nombre de usuario</th>
+      <th>Contraseña</th>
+      <th>Nombre de la persona</th>
+      <th>Activo</th>
+      <th>Acción</th>
     </tr>
   </thead>
   <tbody>
     <tr *ngFor="let user of Users">
-      <td>{{ user.id }}</td>
       <td>{{ user.userName }}</td>
       <td>{{ user.password }}</td>
-      <td>{{ user.personId }}</td>
+      <td>{{ user.personName }}</td>
       <td>{{ user.active ? 'Sí' : 'No' }}</td>
+      <td>
+        <button (click)="actualizarUsuario(user)">Actualizar</button><br>
+        <button (click)="eliminarUsuario(user)">Eliminar</button>
+      </td>
     </tr>
   </tbody>
 </table>
+
+<div *ngIf="errorMessage" style="color: red;">
+  {{ errorMessage }}
+</div>
+
+<div *ngIf="modoEdicion && userSeleccionado">
+  <h3>Editar Usuario</h3>
+  <form (submit)="guardarUsuario()">
+    <div>
+      <label for="userName">Nombre de usuario:</label>
+      <input type="text" id="userName" name="userName" [(ngModel)]="userSeleccionado.userName" required>
+    </div>
+    <div>
+      <label for="password">Contraseña:</label>
+      <input type="password" id="password" name="password" [(ngModel)]="userSeleccionado.password" required>
+    </div>
+    <div>
+      <label for="personName">Nombre de la persona:</label>
+      <input type="text" id="personName" name="personName" [(ngModel)]="userSeleccionado.personName">
+    </div>
+    
+    <button type="submit">Guardar</button>
+    <button type="button" (click)="cancelarEdicion()">Cancelar</button>
+  </form>
+</div>
+
+<h2>Registrar Nuevo Usuario</h2>
+<form (ngSubmit)="registrarNuevoUsuario()">
+  <div>
+    <label for="nuevoUserName">Nombre de usuario:</label>
+    <input type="text" id="nuevoUserName" name="nuevoUserName" [(ngModel)]="nuevoUser.userName" required>
+  </div>
+  <div>
+    <label for="nuevoPassword">Contraseña:</label>
+    <input type="password" id="nuevoPassword" name="nuevoPassword" [(ngModel)]="nuevoUser.password" required>
+  </div>
+  <div>
+    <label for="nuevoPersonName">Nombre de la persona:</label>
+    <input type="text" id="nuevoPersonName" name="nuevoPersonName" [(ngModel)]="nuevoUser.personName">
+  </div>
+  <button type="submit">Registrar Usuario</button>
+  <div *ngIf="registroUserMensaje">{{ registroUserMensaje }}</div>
+  <div *ngIf="registroUserError" style="color: red;">{{ registroUserError }}</div>
+</form>

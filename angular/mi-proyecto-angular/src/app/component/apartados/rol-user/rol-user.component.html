@@ -1,19 +1,60 @@
 <h1>Bienvenido a mi aplicación</h1>
-<h2>Lista de Formularios</h2>
+<h2>Lista de Roles de Usuario</h2>
 
 <table>
   <thead>
     <tr>
       <th>Rol</th>
       <th>Nombre de usuario</th>
-
+      <th>Activo</th>
+      <th>Acción</th>
     </tr>
   </thead>
   <tbody>
     <tr *ngFor="let RolUser of RolUsers">
       <td>{{ RolUser.rolName }}</td>
       <td>{{ RolUser.userName }}</td>
-      <!-- <td>{{ user.active ? 'Sí' : 'No' }}</td> -->
+      <td>{{ RolUser.active ? 'Sí' : 'No' }}</td>
+      <td>
+        <button (click)="actualizarRolUser(RolUser)">Actualizar</button><br>
+        <button (click)="eliminarRolUser(RolUser)">Eliminar</button>
+      </td>
     </tr>
   </tbody>
 </table>
+
+<div *ngIf="errorMessage" style="color: red;">
+  {{ errorMessage }}
+</div>
+
+<div *ngIf="modoEdicion && rolUserSeleccionado">
+  <h3>Editar Rol de Usuario</h3>
+  <form (submit)="guardarRolUser()">
+    <div>
+      <label for="rolName">Rol:</label>
+      <input type="text" id="rolName" name="rolName" [(ngModel)]="rolUserSeleccionado.rolName" required>
+    </div>
+    <div>
+      <label for="userName">Nombre de usuario:</label>
+      <input type="text" id="userName" name="userName" [(ngModel)]="rolUserSeleccionado.userName" required>
+    </div>
+
+    <button type="submit">Guardar</button>
+    <button type="button" (click)="cancelarEdicion()">Cancelar</button>
+  </form>
+</div>
+
+<h2>Registrar Nuevo Rol de Usuario</h2>
+<form (ngSubmit)="registrarNuevoRolUser()">
+  <div>
+    <label for="nuevoRolName">Rol:</label>
+    <input type="text" id="nuevoRolName" name="nuevoRolName" [(ngModel)]="nuevoRolUser.rolName" required>
+  </div>
+  <div>
+    <label for="nuevoUserName">Nombre de usuario:</label>
+    <input type="text" id="nuevoUserName" name="nuevoUserName" [(ngModel)]="nuevoRolUser.userName" required>
+  </div>
+  <button type="submit">Registrar Asignación</button>
+  <div *ngIf="registroRolUserMensaje">{{ registroRolUserMensaje }}</div>
+  <div *ngIf="registroRolUserError" style="color: red;">{{ registroRolUserError }}</div>
+</form>

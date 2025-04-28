@@ -1,15 +1,48 @@
 
+<h2>Lista de Módulos</h2>
 <table>
-    <thead>
-      <tr>
-        <th>Nombre</th>
-        <th>Activo</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr *ngFor="let Module of Modules">
-        <td>{{ Module.name }}</td>
-        <td>{{ Module.active ? 'Sí' : 'No' }}</td>
-      </tr>
-    </tbody>
-  </table>
+  <thead>
+    <tr>
+      <th>Nombre</th>
+      <th>Activo</th>
+      <th>Acción</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor="let Module of Modules">
+      <td>{{ Module.name }}</td>
+      <td>{{ Module.active ? 'Sí' : 'No' }}</td>
+      <td>
+        <button (click)="actualizarModule(Module)">Actualizar</button><br>
+        <button (click)="eliminarModule(Module)">Eliminar</button>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<div *ngIf="errorMessage" style="color: red;">
+  {{ errorMessage }}
+</div>
+
+<div *ngIf="modoEdicion && moduleSeleccionado">
+  <h3>Editar Módulo</h3>
+  <form (submit)="guardarModule()">
+    <div>
+      <label for="name">Nombre:</label>
+      <input type="text" id="name" name="name" [(ngModel)]="moduleSeleccionado.name" required>
+    </div>
+    <button type="submit">Guardar</button>
+    <button type="button" (click)="cancelarEdicion()">Cancelar</button>
+  </form>
+</div>
+
+<h2>Registrar Nuevo Módulo</h2>
+<form (ngSubmit)="registrarNuevoModule()">
+  <div>
+    <label for="nuevoNombre">Nombre:</label>
+    <input type="text" id="nuevoNombre" name="nuevoNombre" [(ngModel)]="nuevoModule.name" required>
+  </div>
+  <button type="submit">Registrar Módulo</button>
+  <div *ngIf="registroModuleMensaje">{{ registroModuleMensaje }}</div>
+  <div *ngIf="registroModuleError" style="color: red;">{{ registroModuleError }}</div>
+</form>

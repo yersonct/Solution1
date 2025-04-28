@@ -1,19 +1,68 @@
 
+<h2>Permisos por Formulario y Rol</h2>
 <table>
-    <thead>
-      <tr>
-        <th>Formularios</th>
-        <th>Roles</th>
-        <th>Permisos</th>
-        <th>Activo</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr *ngFor="let FormRolPermission of FormRolPermissions">
-        <td>{{ FormRolPermission.formName }}</td>
-        <td>{{ FormRolPermission.rolName }}</td>
-        <td>{{ FormRolPermission.permissionName }}</td>
-        <td>{{ FormRolPermission.active ? 'Sí' : 'No' }}</td>
-      </tr>
-    </tbody>
-  </table>
+  <thead>
+    <tr>
+      <th>Formulario</th>
+      <th>Rol</th>
+      <th>Permiso</th>
+      <th>Activo</th>
+      <th>Acción</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor="let FormRolPermission of FormRolPermissions">
+      <td>{{ FormRolPermission.formName }}</td>
+      <td>{{ FormRolPermission.rolName }}</td>
+      <td>{{ FormRolPermission.permissionName }}</td>
+      <td>{{ FormRolPermission.active ? 'Sí' : 'No' }}</td>
+      <td>
+        <button (click)="actualizarFormRolPermission(FormRolPermission)">Actualizar</button><br>
+        <button (click)="eliminarFormRolPermission(FormRolPermission)">Eliminar</button>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<div *ngIf="errorMessage" style="color: red;">
+  {{ errorMessage }}
+</div>
+
+<div *ngIf="modoEdicion && formRolPermissionSeleccionado">
+  <h3>Editar Permiso por Formulario y Rol</h3>
+  <form (submit)="guardarFormRolPermission()">
+    <div>
+      <label for="formName">Formulario:</label>
+      <input type="text" id="formName" name="formName" [(ngModel)]="formRolPermissionSeleccionado.formName" required>
+    </div>
+    <div>
+      <label for="rolName">Rol:</label>
+      <input type="text" id="rolName" name="rolName" [(ngModel)]="formRolPermissionSeleccionado.rolName" required>
+    </div>
+    <div>
+      <label for="permissionName">Permiso:</label>
+      <input type="text" id="permissionName" name="permissionName" [(ngModel)]="formRolPermissionSeleccionado.permissionName" required>
+    </div>
+    <button type="submit">Guardar</button>
+    <button type="button" (click)="cancelarEdicion()">Cancelar</button>
+  </form>
+</div>
+
+<h2>Registrar Nuevo Permiso por Formulario y Rol</h2>
+<form (ngSubmit)="registrarNuevoFormRolPermission()">
+  <div>
+    <label for="nuevoFormName">Formulario:</label>
+    <input type="text" id="nuevoFormName" name="nuevoFormName" [(ngModel)]="nuevoFormRolPermission.formName" required>
+  </div>
+  <div>
+    <label for="nuevoRolName">Rol:</label>
+    <input type="text" id="nuevoRolName" name="nuevoRolName" [(ngModel)]="nuevoFormRolPermission.rolName" required>
+  </div>
+  <div>
+    <label for="nuevoPermissionName">Permiso:</label>
+    <input type="text" id="nuevoPermissionName" name="nuevoPermissionName" [(ngModel)]="nuevoFormRolPermission.permissionName" required>
+  </div>
+  <button type="submit">Registrar Permiso</button>
+  <div *ngIf="registroFormRolPermissionMensaje">{{ registroFormRolPermissionMensaje }}</div>
+  <div *ngIf="registroFormRolPermissionError" style="color: red;">{{ registroFormRolPermissionError }}</div>
+</form>

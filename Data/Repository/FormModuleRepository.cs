@@ -30,19 +30,21 @@ namespace Data.Repository
                 return await _context.Set<FormModule>()
                     .Include(fm => fm.Forms)
                     .Include(fm => fm.Modules)
+                    .Where(fm => fm.active) // Filtra solo los registros activos (true)
                     .Select(fm => new FormModuleDTO
                     {
                         Id = fm.id,
-                        id_forms = fm.id,
+                        id_forms = fm.id_forms,
                         FormName = fm.Forms.name,
-                        id_module = fm.id,
-                        ModuleName = fm.Modules.name
+                        id_module = fm.id_module,
+                        ModuleName = fm.Modules.name,
+                        active = fm.active // Incluimos la propiedad Active en el DTO
                     })
                     .ToListAsync();
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error al obtener todos los FormModule.");
+                _logger.LogError(ex, "Error al obtener todos los FormModule activos.");
                 return new List<FormModuleDTO>();
             }
         }
@@ -54,20 +56,21 @@ namespace Data.Repository
                 return await _context.Set<FormModule>()
                     .Include(fm => fm.Forms)
                     .Include(fm => fm.Modules)
-                    .Where(fm => fm.id == id)
+                    .Where(fm => fm.id == id && fm.active) // Filtra por ID y solo registros activos (true)
                     .Select(fm => new FormModuleDTO
                     {
                         Id = fm.id,
-                        id_forms = fm.id,
+                        id_forms = fm.id_forms,
                         FormName = fm.Forms.name,
-                        id_module = fm.id,
-                        ModuleName = fm.Modules.name
+                        id_module = fm.id_module,
+                        ModuleName = fm.Modules.name,
+                        active = fm.active // Incluimos la propiedad Active en el DTO
                     })
                     .FirstOrDefaultAsync();
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error al obtener el FormModule con ID: {FormModuleId}", id);
+                _logger.LogError(ex, "Error al obtener el FormModule activo con ID: {FormModuleId}", id);
                 return null;
             }
         }
@@ -79,14 +82,14 @@ namespace Data.Repository
                 var entity = new FormModule
                 {
                     id_forms = dto.id_forms,
-                    id_module = dto.id_module
-                    // La propiedad 'Id' probablemente se generará automáticamente por la base de datos
+                    id_module = dto.id_module,
+                    active = true // Establecer como activo al crear
                 };
 
                 _context.Set<FormModule>().Add(entity);
                 await _context.SaveChangesAsync();
 
-                return await GetByIdAsync(entity.id) // Aquí se usa el Id generado por la base de datos
+                return await GetByIdAsync(entity.id)
                        ?? throw new Exception("No se pudo recuperar el FormModule recién creado.");
             }
             catch (Exception ex)
@@ -101,10 +104,10 @@ namespace Data.Repository
             try
             {
                 var entity = await _context.Set<FormModule>().FindAsync(id);
-                if (entity == null) return false;
+                if (entity == null || !entity.active) return false;
 
-                entity.id = dto.id_forms;
-                entity.id = dto.id_module;
+                entity.id_forms = dto.id_forms;
+                entity.id_module = dto.id_module;
 
                 _context.Set<FormModule>().Update(entity);
                 await _context.SaveChangesAsync();
@@ -122,9 +125,10 @@ namespace Data.Repository
             try
             {
                 var entity = await _context.Set<FormModule>().FindAsync(id);
-                if (entity == null) return false;
+                if (entity == null || !entity.active) return false;
 
-                _context.Set<FormModule>().Remove(entity);
+                entity.active = false; // Realizar la eliminación lógica
+                _context.Set<FormModule>().Update(entity);
                 await _context.SaveChangesAsync();
                 return true;
             }

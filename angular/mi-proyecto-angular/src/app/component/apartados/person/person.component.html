@@ -1,5 +1,6 @@
+
 <h1>Bienvenido a mi aplicación</h1>
-<h2>Lista de Formularios</h2>
+<h2>Lista de Personas</h2>
 
 <table>
   <thead>
@@ -7,9 +8,10 @@
       <th>Nombre</th>
       <th>Apellido</th>
       <th>Documento</th>
-      <th>Phone</th>
+      <th>Teléfono</th>
       <th>Email</th>
       <th>Activo</th>
+      <th>Acción</th>
     </tr>
   </thead>
   <tbody>
@@ -20,6 +22,66 @@
       <td>{{ Person.phone }}</td>
       <td>{{ Person.email }}</td>
       <td>{{ Person.active ? 'Sí' : 'No' }}</td>
+      <td>
+        <button (click)="actualizarPerson(Person)">Actualizar</button><br>
+        <button (click)="eliminarPerson(Person)">Eliminar</button>
+      </td>
     </tr>
   </tbody>
 </table>
+
+<div *ngIf="errorMessage" style="color: red;">
+  {{ errorMessage }}
+</div>
+
+<div *ngIf="modoEdicion && personSeleccionado">
+  <h3>Editar Persona</h3>
+  <form (submit)="guardarPerson()">
+    <div>
+      <label for="name">Nombre:</label>
+      <input type="text" id="name" name="name" [(ngModel)]="personSeleccionado.name" required>
+    </div>
+    <div>
+      <label for="lastName">Apellido:</label>
+      <input type="text" id="lastName" name="lastName" [(ngModel)]="personSeleccionado.lastName" required>
+    </div>
+    <div>
+      <label for="document">Documento:</label>
+      <input type="number" id="document" name="document" [(ngModel)]="personSeleccionado.document" required>
+    </div>
+    <div>
+      <label for="phone">Teléfono:</label>
+      <input type="text" id="phone" name="phone" [(ngModel)]="personSeleccionado.phone">
+    </div>
+    <div>
+      <label for="email">Email:</label>
+      <input type="email" id="email" name="email" [(ngModel)]="personSeleccionado.email">
+    </div>
+    <button type="submit">Guardar</button>
+    <button type="button" (click)="cancelarEdicion()">Cancelar</button>
+  </form>
+</div>
+
+<h2>Registrar Nueva Persona</h2>
+<form (ngSubmit)="registrarNuevaPerson()">
+  <div>
+    <label for="nuevoNombre">Nombre:</label>
+    <input type="text" id="nuevoNombre" name="nuevoNombre" [(ngModel)]="nuevoPerson.name" required>
+  </div>
+  <div>
+    <label for="nuevoApellido">Apellido:</label>
+    <input type="text" id="nuevoApellido" name="nuevoApellido" [(ngModel)]="nuevoPerson.lastName" required>
+  </div>
+  <div>
+    <label for="nuevoDocumento">Documento:</label>
+    <input type="number" id="nuevoDocumento" name="nuevoDocumento" [(ngModel)]="nuevoPerson.document" required>
+  </div>
+  <div>
+    <label for="nuevoTelefono">Teléfono:</label>
+    <input type="text" id="nuevoTelefono" name="nuevoTelefono" [(ngModel)]="nuevoPerson.phone">
+  </div>
+  <div>
+    <label for="nuevoEmail">Email:</label>
+    <input type="email" id="nuevoEmail" name="nuevoEmail" [(ngModel)]="nuevoPerson.email">
+  </div>
+  <button type="submit">Registrar Persona</button>

@@ -33,7 +33,7 @@ namespace Business.Services
 
         public async Task<RolUser> CreateRolUserAsync(RolUser rolUser)
         {
-            rolUser.active = true; // Set active to true on creation
+            rolUser.active = true; // Establecer active a true al crear
             return await _rolUserRepository.AddAsync(rolUser);
         }
 
@@ -49,7 +49,7 @@ namespace Business.Services
             {
                 return false;
             }
-            rolUserToDelete.active = false; // Logical delete
+            rolUserToDelete.active = false; // Borrado lógico
             return await _rolUserRepository.UpdateAsync(rolUserToDelete);
         }
     }

@@ -12,6 +12,8 @@ namespace Entity.Model
         public int id_forms { get; set; }
         public int id_module { get; set; }
 
+        public bool active {  get; set; }
+
         public Forms Forms { get; set; }
         public Modules Modules { get; set; }
     }

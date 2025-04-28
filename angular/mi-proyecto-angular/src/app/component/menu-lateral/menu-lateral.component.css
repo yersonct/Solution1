@@ -1,56 +1,72 @@
 .menu-lateral {
-    width: 200px; /* Ancho del menú */
-    background-color: #333; /* Color de fondo (gris oscuro) */
-    color: #fff; /* Color del texto (blanco) */
-    padding: 10px;
-    box-sizing: border-box;
-    height: 100vh; /* Ajusta la altura según necesites */
-    overflow-y: auto; /* Para el scroll si el menú es muy largo */
-  }
-  
-  .menu-lateral ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-  }
-  
-  .menu-lateral li {
-    margin-bottom: 5px;
-  }
-  
-  .menu-lateral li a {
-    display: block;
-    padding: 10px;
-    color: #eee; /* Color del texto de los enlaces */
-    text-decoration: none;
-  }
-  
-  .menu-lateral li a:hover {
-    background-color: #555; /* Color de fondo al pasar el ratón */
-  }
-  
-  /* Estilos para el encabezado del menú expandible */
-  .menu-item-header {
-    padding: 10px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-  }
-  
-  .menu-item-header span {
-    margin-right: 5px;
-  }
-  
-  /* Estilos para el submenú */
-  .submenu {
-    padding-left: 20px;
-  }
-  
-  .submenu li {
-    padding: 8px 0;
-    cursor: pointer;
-  }
-  
-  .submenu li:hover {
-    background-color: #555;
-  }
+  width: 13vw; /* Ancho del menú */
+  background-color: #054068; /* Color de fondo (gris oscuro) */
+  color: #fff; /* Color del texto (blanco) */
+  padding: 20px;
+  box-sizing: border-box;
+  height: 100vh; /* Fijo al alto de la ventana */
+  overflow-y: auto; /* Para el scroll si el menú es muy largo */
+  position: fixed; /* Lo fija en la pantalla */
+  top: 0;
+  left: 0;
+  z-index: 1000; /* Asegura que esté por encima de otros elementos */
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.menu-lateral ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.menu-lateral li {
+  margin-bottom: 10px;
+}
+
+.menu-lateral li a,
+.menu-lateral .menu-item-header {
+  display: block;
+  padding: 12px 15px;
+  color: #eee;
+  text-decoration: none;
+  cursor: pointer;
+  border-radius: 5px;
+  transition: background-color 0.2s ease-in-out, padding-left 0.2s ease-in-out;
+}
+
+.menu-lateral li a:hover,
+.menu-lateral .menu-item-header:hover {
+  background-color: #086788;
+  padding-left: 20px;
+}
+
+.menu-lateral .menu-item-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 5px;
+}
+
+.menu-lateral .menu-item-header span {
+  margin-right: 8px;
+}
+
+.menu-lateral .submenu {
+  padding-left: 15px;
+  overflow: hidden;
+}
+
+.menu-lateral .submenu li {
+  padding: 10px 0;
+  cursor: pointer;
+  border-left: 2px solid #086788;
+  margin-left: 5px;
+}
+
+.menu-lateral .submenu li a {
+  padding: 8px 10px;
+  border-radius: 3px;
+}
+
+.menu-lateral .submenu li:hover {
+  background-color: #555;
+}

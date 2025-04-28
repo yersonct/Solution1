@@ -13,6 +13,7 @@ namespace Entity.DTOs
         public string FormName { get; set; }
         public int id_module { get; set; }
         public string ModuleName { get; set; }
+        public bool active { get; set; }
 
     }
 }

@@ -7,6 +7,7 @@ import { environment } from '../environments/environment';
   providedIn: 'root'
 })
 export class ApiFormService {
+  [x: string]: any;
   private apiUrl = environment.apiUrl;
 
   constructor(private https: HttpClient) { }

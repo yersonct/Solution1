@@ -1,11 +1,43 @@
+/* Estilos generales para el body para intentar evitar el desbordamiento */
+body {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  overflow-x: hidden; /* Intenta ocultar el desbordamiento horizontal */
+}
+
+*, *::before, *::after {
+  box-sizing: inherit;
+}
+
+h1 {
+  color: #333;
+  text-align: center;
+  margin-bottom: 20px;
+  animation: slideDown 0.5s ease-out forwards;
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+h2 {
+  color: #555;
+  margin-top: 30px;
+  margin-bottom: 15px;
+  border-bottom: 2px solid #ddd;
+  padding-bottom: 8px;
+}
+
 table {
   width: 100%;
   border-collapse: collapse;
   margin-top: 20px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Sombra suave */
-  border-radius: 8px; /* Bordes redondeados */
-  overflow: hidden; /* Para que los bordes redondeados funcionen bien con el fondo */
-  animation: fadeIn 0.5s ease-out forwards; /* Animación de aparición */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  overflow: hidden;
+  animation: fadeIn 0.5s ease-out forwards;
 }
 
 @keyframes fadeIn {
@@ -16,15 +48,15 @@ table {
 th, td {
   padding: 12px 15px;
   text-align: left;
-  border-bottom: 1px solid #e0e0e0; /* Línea divisoria más clara */
-  transition: background-color 0.3s ease; /* Transición suave para el hover */
+  border-bottom: 1px solid #e0e0e0;
+  transition: background-color 0.3s ease;
 }
 
 th {
-  background-color: #3498db; /* Un azul moderno */
+  background-color: #3498db;
   color: white;
   font-weight: bold;
-  text-transform: uppercase; /* Mayúsculas para los encabezados */
+  text-transform: uppercase;
 }
 
 tr:nth-child(even) {
@@ -32,11 +64,10 @@ tr:nth-child(even) {
 }
 
 tr:hover td {
-  background-color: #e6f7ff; /* Un ligero cambio de color al pasar el ratón */
-  cursor: pointer; /* Indica que la fila es interactiva */
+  background-color: #e6f7ff;
+  cursor: pointer;
 }
 
-/* Animación para las celdas al pasar el ratón */
 tr:hover td {
   animation: slideIn 0.2s ease-out forwards;
 }
@@ -46,7 +77,6 @@ tr:hover td {
   to { transform: translateX(0); }
 }
 
-/* Animación sutil para los encabezados al pasar el ratón */
 th:hover {
   background-color: #2980b9;
   animation: pulse 0.3s ease-in-out forwards;
@@ -56,4 +86,180 @@ th:hover {
   0% { transform: scale(1); }
   50% { transform: scale(1.03); }
   100% { transform: scale(1); }
+}
+
+div[style*="color: red;"] {
+  margin-top: 15px;
+  padding: 10px;
+  background-color: #ffebee;
+  border: 1px solid #ef9a9a;
+  border-radius: 4px;
+  font-weight: bold;
+  text-align: center;
+  animation: showAlert 0.3s ease-out;
+}
+
+@keyframes showAlert {
+  from { opacity: 0; transform: scale(0.9); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+div[style*="modoEdicion"] {
+  margin-top: 30px;
+  padding: 20px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  animation: fadeInUp 0.3s ease-out forwards;
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+div[style*="modoEdicion"] h3 {
+  color: #333;
+  margin-top: 0;
+  margin-bottom: 15px;
+  border-bottom: 2px solid #ddd;
+  padding-bottom: 8px;
+}
+
+div[style*="modoEdicion"] form div {
+  margin-bottom: 10px;
+}
+
+div[style*="modoEdicion"] label {
+  display: block;
+  margin-bottom: 5px;
+  color: #555;
+  font-weight: bold;
+}
+
+div[style*="modoEdicion"] input[type="text"],
+div[style*="modoEdicion"] input[type="password"],
+div[style*="modoEdicion"] input[type="checkbox"] {
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  width: calc(100% - 18px);
+  box-sizing: border-box;
+}
+
+div[style*="modoEdicion"] button {
+  padding: 10px 15px;
+  border: none;
+  border-radius: 4px;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  margin-right: 10px;
+}
+
+div[style*="modoEdicion"] button[type="submit"] {
+  background-color: #2ecc71;
+}
+
+div[style*="modoEdicion"] button[type="button"] {
+  background-color: #f39c12;
+}
+
+div[style*="modoEdicion"] button:hover {
+  opacity: 0.9;
+}
+
+h2:last-of-type {
+  margin-top: 40px;
+}
+
+form:last-of-type {
+  margin-top: 20px;
+  padding: 20px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  animation: slideUp 0.3s ease-out forwards;
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+form:last-of-type div {
+  margin-bottom: 10px;
+}
+
+form:last-of-type label {
+  display: block;
+  margin-bottom: 5px;
+  color: #555;
+  font-weight: bold;
+}
+
+form:last-of-type input[type="text"],
+form:last-of-type input[type="password"],
+form:last-of-type input[type="checkbox"] {
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  width: calc(100% - 18px);
+  box-sizing: border-box;
+}
+
+form:last-of-type button[type="submit"] {
+  padding: 10px 15px;
+  border: none;
+  border-radius: 4px;
+  background-color: #3498db;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+form:last-of-type button[type="submit"]:hover {
+  background-color: #2980b9;
+}
+
+form:last-of-type div[style*="color: red;"] {
+  margin-top: 10px;
+  padding: 8px;
+  background-color: #ffebee;
+  border: 1px solid #ef9a9a;
+  border-radius: 4px;
+  font-weight: bold;
+  text-align: center;
+}
+
+table button {
+  padding: 8px 12px;
+  margin-bottom: 5px;
+  border: none;
+  border-radius: 4px;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+table button:first-child {
+  background-color: #f39c12;
+  margin-right: 5px;
+}
+
+table button:first-child:hover {
+  background-color: #e68a00;
+}
+
+table button:last-child {
+  background-color: #e74c3c;
+}
+
+table button:last-child:hover {
+  background-color: #c0392b;
 }

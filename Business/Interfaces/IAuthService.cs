@@ -10,5 +10,7 @@ namespace Business.Interfaces
     public interface IAuthService
     {
         Task<LoginResponse> AuthenticateAsync(string username, string password);
+        Task<Dictionary<string, string>> RegisterAsync(RegisterRequest request);
+        Task MigratePasswordsAsync();
     }
 }

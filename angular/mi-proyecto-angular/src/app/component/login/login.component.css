@@ -1,0 +1,153 @@
+h2 {
+    color: #374151; /* Texto gris oscuro */
+    margin-bottom: 30px;
+    text-align: center;
+    font-size: 2.5em;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+    animation: fadeIn 1s ease-out;
+  }
+  
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(-20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  form {
+    max-width: 400px;
+    margin: 50px auto;
+    padding: 30px;
+    border: none;
+    border-radius: 12px;
+    background: linear-gradient(145deg, #f0f0f0, #cacaca);
+    box-shadow: 15px 15px 30px #bebebe, -15px -15px 30px #ffffff;
+    animation: slideIn 0.8s ease-out;
+  }
+  
+  @keyframes slideIn {
+    from {
+      opacity: 0;
+      transform: translateX(-50px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+  
+  div {
+    margin-bottom: 25px;
+  }
+  
+  label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #4a5568; /* Gris más oscuro */
+    transition: transform 0.3s ease-in-out;
+  }
+  
+  label:hover {
+    transform: translateX(5px);
+  }
+  
+  input[type="text"],
+  input[type="password"] {
+    width: calc(100% - 22px);
+    padding: 12px;
+    border: 1px solid #d1d5db; /* Borde gris claro */
+    border-radius: 6px;
+    box-sizing: border-box;
+    font-size: 16px;
+    transition: border-color 0.3s ease;
+    box-shadow: inset 2px 2px 5px #e0e0e0, inset -2px -2px 5px #ffffff;
+  }
+  
+  input[type="text"]:focus,
+  input[type="password"]:focus {
+    outline: none;
+    border-color: #647eea; /* Azul más vibrante al enfocar */
+    box-shadow: 0 0 8px rgba(100, 126, 234, 0.5);
+  }
+  
+  button[type="submit"] {
+    background: linear-gradient(to right, #647eea, #7851a9); /* Degradado morado */
+    color: white;
+    padding: 14px 24px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 18px;
+    width: 100%;
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    box-shadow: 5px 5px 10px #b0b0b0, -5px -5px 10px #ffffff;
+  }
+  
+  button[type="submit"]:hover {
+    transform: scale(1.05);
+    box-shadow: 8px 8px 15px #b0b0b0, -8px -8px 15px #ffffff;
+  }
+  
+  button[type="submit"]:active {
+    transform: scale(0.95);
+    box-shadow: 2px 2px 5px #b0b0b0, -2px -2px 5px #ffffff;
+  }
+  
+  button[type="submit"]:disabled {
+    background: #a0aec0; /* Grisáceo para deshabilitado */
+    cursor: not-allowed;
+    box-shadow: none;
+    transform: none;
+  }
+  
+  .error-message {
+    color: #e53e3e; /* Rojo más vivo */
+    margin-top: 15px;
+    font-size: 16px;
+    font-weight: 500;
+    animation: shake 0.5s ease-in-out;
+  }
+  
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+    20%, 40%, 60%, 80% { transform: translateX(5px); }
+  }
+  
+  p {
+    margin-top: 20px;
+    font-size: 16px;
+    color: #718096; /* Gris más claro */
+    text-align: center;
+    animation: fadeInUp 1s ease-out;
+  }
+  
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  a {
+    color: #7851a9; /* Morado del degradado */
+    text-decoration: none;
+    font-weight: 600;
+    transition: color 0.3s ease-in-out, text-shadow 0.3s ease-in-out;
+  }
+  
+  a:hover {
+    color: #647eea; /* Otro color del degradado al pasar el ratón */
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+  }

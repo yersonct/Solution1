@@ -1,7 +1,7 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 import { HttpClientModule } from '@angular/common/http'; // Importa HttpClientModule
-
+import { AppRoutingModule } from '../app.routes';
 import { AppComponent } from '../app.component';
 import { CommonModule } from '@angular/common';
 import { FormComponent } from './apartados/form/form.component';
@@ -14,6 +14,8 @@ import { FormModuleComponent } from './apartados/form-module/form-module.compone
 import { PermissionComponent } from './apartados/permission/permission.component';
 import { ModuleComponent } from './apartados/module/module.component';
 import { MenuLateralComponent } from './menu-lateral/menu-lateral.component';
+import { LoginComponent } from './login/login.component'; // Importa LoginComponent
+import { RegisterComponent } from './registro/registro.component'; // Importa RegisterComponent
 // ... otros imports
 
 @NgModule({
@@ -28,12 +30,15 @@ import { MenuLateralComponent } from './menu-lateral/menu-lateral.component';
     FormRolPermissionComponent,
     FormModuleComponent,
     PermissionComponent,
-    ModuleComponent
+    ModuleComponent,
+    LoginComponent, // Declara LoginComponent
+    RegisterComponent // Declara RegisterComponent
   ],
   imports: [
     BrowserModule,
     HttpClientModule, // Agrega HttpClientModule a los imports
-    CommonModule
+    CommonModule,
+    AppRoutingModule  // Importa AppRoutingModule
   ],
   exports:[
     MenuLateralComponent,

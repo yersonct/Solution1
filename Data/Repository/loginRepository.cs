@@ -1,23 +1,17 @@
-﻿using Data.Interfaces;
-using Entity.Context;
-using Entity.Model;
-using Microsoft.EntityFrameworkCore;
+﻿using Entity.Model;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 
-namespace Data.Repositories
+namespace Data.Interfaces
 {
-    public class UserRepository : IloginRepository
+    public interface loginRepository
     {
-        private readonly ApplicationDbContext _context;
+        Task<User> GetUserByUsernameAsync(string username);
+        Task<IEnumerable<User>> GetAllUsersAsync();
+        Task<bool> UpdateAsync(User entity);
 
-        public UserRepository(ApplicationDbContext context)
-        {
-            _context = context;
-        }
-
-        public async Task<User> GetUserByUsernameAsync(string username)
-        {
-            return await _context.Users.FirstOrDefaultAsync(u => u.username == username);
-        }
     }
 }

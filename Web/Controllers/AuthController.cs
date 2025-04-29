@@ -1,35 +1,57 @@
 ﻿using Business.Interfaces;
+using Entity.DTOs;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
-using Business.Interfaces; // Asegúrate de ajustar el namespace
-using Entity.DTOs; // Asegúrate de ajustar el namespace
-[ApiController]
-[Route("api/auth")] // Define la ruta base para este controlador
-public class AuthController : ControllerBase
+
+namespace TuProyecto.Controllers
 {
-    private readonly IAuthService _authService;
-
-    // Inyecta la dependencia de IAuthService a través del constructor
-    public AuthController(IAuthService authService)
+    [ApiController]
+    [Route("api/auth")]
+    public class AuthController : ControllerBase
     {
-        _authService = authService;
-    }
+        private readonly IAuthService _authService;
 
-    [HttpPost("login")] // Endpoint específico para el login (api/auth/login)
-    public async Task<ActionResult<LoginResponse>> Login(LoginRequest request)
-    {
-        if (!ModelState.IsValid)
+        public AuthController(IAuthService authService)
         {
-            return BadRequest(ModelState); // Devuelve errores de validación si el modelo no es válido
+            _authService = authService;
         }
 
-        var response = await _authService.AuthenticateAsync(request.Username, request.Password);
-
-        if (response == null)
+        [HttpPost("login")]
+        public async Task<ActionResult<LoginResponse>> Login(LoginRequest request)
         {
-            return Unauthorized(new { message = "Credenciales inválidas" }); // Devuelve 401 si la autenticación falla
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var response = await _authService.AuthenticateAsync(request.Username, request.Password);
+
+            if (response == null)
+            {
+                return Unauthorized(new { message = "Credenciales inválidas" });
+            }
+
+            return Ok(response);
         }
 
-        return Ok(response); // Devuelve 200 OK con el token y la expiración
+        [HttpPost("register")]
+        public async Task<ActionResult> Register(RegisterRequest request)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var errors = await _authService.RegisterAsync(request);
+
+            if (errors == null)
+            {
+                return Ok(new { message = "Registro exitoso" });
+            }
+            else
+            {
+                return BadRequest(new { errors = errors }); // Devolver diccionario de errores
+            }
+        }
     }
 }

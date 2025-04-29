@@ -8,6 +8,18 @@ using Entity.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using Repository;
+using FluentValidation.AspNetCore;
+using Validators;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using Entity.DTOs;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,7 +28,6 @@ builder.Services.AddControllers();
 
 // 🔹 Configure CORS
 var origenesPermitidos = builder.Configuration.GetValue<string>("OrigenesPermitidos")?.Split(",");
-// 🔹 Configure CORS
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll",
@@ -26,13 +37,15 @@ builder.Services.AddCors(options =>
             .AllowAnyHeader());
 });
 
-
 // 🔹 Swagger Configuration
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "ANPR Vision API", Version = "v1" });
 });
+
+// 🔹 FluentValidation Configuration
+builder.Services.AddFluentValidation(fv => fv.RegisterValidatorsFromAssemblyContaining<Validators.RegisterRequestValidator>());
 
 // 🔹 PostgreSQL Database Context
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
@@ -85,21 +98,45 @@ builder.Services.AddScoped<IVehicleHistoryParkingRatesService, VehicleHistoryPar
 builder.Services.AddScoped<IVehicleHistoryParkingRatesRepository, VehicleHistoryParkingRatesRepository>();
 builder.Services.AddScoped<IInvoiceService, InvoiceService>();
 builder.Services.AddScoped<IInvoiceRepository, InvoiceRepository>();
+builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IloginRepository, UserRepository>();
+builder.Services.AddScoped<IPersonRepository, PersonRepository>();
+
+// ⚙️ Register ILoggerFactory (ILogger<> is already handled by .NET)
+builder.Services.AddSingleton<ILoggerFactory, LoggerFactory>();
+// builder.Services.AddScoped(typeof(ILogger<>), typeof(Logger<>));
 
 var app = builder.Build();
 
-// 🔹 Middlewares
+// ⚙️ Perform Password Migration on Startup (Development Environment)
 if (app.Environment.IsDevelopment())
 {
+    using (var scope = app.Services.CreateScope())
+    {
+        var services = scope.ServiceProvider;
+        try
+        {
+            var authService = services.GetRequiredService<IAuthService>();
+            var logger = services.GetRequiredService<ILogger<Program>>();
+
+            await authService.MigratePasswordsAsync();
+        }
+        catch (Exception ex)
+        {
+            var logger = services.GetRequiredService<ILogger<Program>>();
+            logger.LogError(ex, "Ocurrió un error durante la migración de contraseñas al inicio.");
+        }
+    }
+
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
-app.UseCors("AllowAll"); // 👈 Asegúrate de ponerlo aquí antes de Authorization
+app.UseCors("AllowAll");
 
 app.UseAuthorization();
 
 app.MapControllers();
 
-// 🔹 Run Application
+// ⚙️ Run Application
 app.Run();

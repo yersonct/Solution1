@@ -11,13 +11,15 @@ import { PermissionComponent } from './component/apartados/permission/permission
 import { ModuleComponent } from './component/apartados/module/module.component';
 import { HttpClientModule } from '@angular/common/http';
 import { MenuLateralComponent } from './component/menu-lateral/menu-lateral.component';
-import { CommonModule } from '@angular/common'; // Importa CommonModule
+import { CommonModule } from '@angular/common';
+import { AuthService } from './component/service/auth.service';
+import { LoginComponent } from './component/login/login.component'; // Importa LoginComponent
 
 @Component({
   selector: 'app-root',
   standalone: true,
   imports: [
-    CommonModule, // Asegúrate de que CommonModule esté aquí
+    CommonModule,
     MenuLateralComponent,
     RouterOutlet,
     FormComponent,
@@ -29,15 +31,26 @@ import { CommonModule } from '@angular/common'; // Importa CommonModule
     FormModuleComponent,
     PermissionComponent,
     ModuleComponent,
-    HttpClientModule],
+    HttpClientModule,
+    LoginComponent // Agrega LoginComponent a los imports
+  ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css',
 })
 export class AppComponent {
   title = 'registro';
   activeComponent: string | null = null;
-  
+  isLoggedIn: boolean = false;
+
+  constructor(private authService: AuthService) {
+    this.isLoggedIn = this.authService.isAuthenticated();
+  }
+
   onComponentToShow(componentName: string) {
     this.activeComponent = componentName;
+  }
+
+  onLoginSuccess() {
+    this.isLoggedIn = true;
   }
 }

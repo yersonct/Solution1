@@ -6,7 +6,6 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Data.Repository
@@ -102,6 +101,11 @@ namespace Data.Repository
                 _logger.LogError(ex, "Error al actualizar la persona con ID: {PersonId}", entity.id);
                 return false;
             }
+        }
+
+        public async Task<bool> PersonExistsAsync(string document, string email)
+        {
+            return await _context.Persons.AnyAsync(p => p.document == document || p.email == email);
         }
     }
 }

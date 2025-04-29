@@ -1,1 +1,24 @@
-<p>login works!</p>
+<h2>Inicio de Sesión</h2>
+<form (ngSubmit)="onSubmit()" #loginForm="ngForm">
+  <div>
+    <label for="username">Nombre de Usuario:</label>
+    <input type="text" id="username" name="username" [(ngModel)]="loginData.username" required>
+    <div *ngIf="loginForm.controls['username']?.invalid && (loginForm.controls['username']?.dirty || loginForm.controls['username']?.touched)" class="error-message">
+      <div *ngIf="loginForm.controls['username']?.errors?.['required']">El nombre de usuario es requerido.</div>
+    </div>
+  </div>
+
+  <div>
+    <label for="password">Contraseña:</label>
+    <input type="password" id="password" name="password" [(ngModel)]="loginData.password" required>
+    <div *ngIf="loginForm.controls['password']?.invalid && (loginForm.controls['password']?.dirty || loginForm.controls['password']?.touched)" class="error-message">
+      <div *ngIf="loginForm.controls['password']?.errors?.['required']">La contraseña es requerida.</div>
+    </div>
+  </div>
+
+  <button type="submit" [disabled]="!loginForm.form.valid">Iniciar Sesión</button>
+
+  <div *ngIf="loginError" class="error-message">{{ loginError }}</div>
+</form>
+
+<p>¿No tienes una cuenta? <a routerLink="/register">Regístrate aquí</a></p>

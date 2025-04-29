@@ -1,19 +1,19 @@
-﻿using System;
+﻿using Data.Interfaces;
+using Entity.Context;
+using Entity.Model;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
-using Data.Interfaces;
-using Entity.Context;
-using Entity.Model;
-using Dapper;
+using BCrypt.Net;
 
 namespace Data.Repository
 {
-    public class UserRepository : IUserRepository
+    public class UserRepository : IUserRepository, IloginRepository
     {
-        protected readonly ApplicationDbContext _context;
+        private readonly ApplicationDbContext _context;
         private readonly ILogger<UserRepository> _logger;
 
         public UserRepository(ApplicationDbContext context, ILogger<UserRepository> logger)
@@ -26,6 +26,12 @@ namespace Data.Repository
         {
             try
             {
+                // Trunca el nombre de usuario antes de agregarlo al contexto
+                if (entity.username.Length > 20)
+                {
+                    entity.username = entity.username.Substring(0, 20);
+                    _logger.LogWarning("AddAsync: Nombre de usuario truncado a: {Username}", entity.username);
+                }
                 await _context.Set<User>().AddAsync(entity);
                 await _context.SaveChangesAsync();
                 return entity;
@@ -44,9 +50,7 @@ namespace Data.Repository
                 var userToDelete = await _context.Set<User>().FindAsync(id);
                 if (userToDelete != null)
                 {
-                    // Implementación del borrado lógico: marcar como inactivo (asumiendo que tienes un campo 'Active')
-                    // Si no tienes un campo 'Active' en tu entidad User, deberías agregarlo.
-                     userToDelete.active = false;
+                    userToDelete.active = false; // Asumiendo que tienes un campo 'active'
                     _context.Entry(userToDelete).State = EntityState.Modified;
                     await _context.SaveChangesAsync();
                     return true;
@@ -66,8 +70,6 @@ namespace Data.Repository
             {
                 return await _context.Set<User>()
                     .Include(u => u.person)
-                    // .Include(u => u.RolUsers)
-                    // .Where(u => u.Active) // Filtrar solo usuarios activos (si tienes el campo Active)
                     .ToListAsync();
             }
             catch (Exception ex)
@@ -77,14 +79,17 @@ namespace Data.Repository
             }
         }
 
+        public async Task<IEnumerable<User>> GetAllUsersAsync()
+        {
+            return await GetAllAsync();
+        }
+
         public async Task<User?> GetByIdAsync(int id)
         {
             try
             {
                 return await _context.Set<User>()
                     .Include(u => u.person)
-                    // .Include(u => u.rolusers)
-                    // .FirstOrDefaultAsync(u => u.id == id && u.Active); // Filtrar solo usuarios activos (si tienes el campo Active)
                     .FirstOrDefaultAsync(u => u.id == id);
             }
             catch (Exception ex)
@@ -98,6 +103,12 @@ namespace Data.Repository
         {
             try
             {
+                // Trunca el nombre de usuario antes de actualizar la entidad
+                if (entity.username.Length > 20)
+                {
+                    entity.username = entity.username.Substring(0, 20);
+                    _logger.LogWarning("UpdateAsync: Nombre de usuario truncado a: {Username}", entity.username);
+                }
                 _context.Entry(entity).State = EntityState.Modified;
                 await _context.SaveChangesAsync();
                 return true;
@@ -113,5 +124,11 @@ namespace Data.Repository
                 return false;
             }
         }
+
+        public async Task<User> GetUserByUsernameAsync(string username)
+        {
+            return await _context.Users.FirstOrDefaultAsync(u => u.username == username);
+        }
     }
 }
+

@@ -15,6 +15,6 @@ namespace Data.Interfaces
         Task<User?> GetByIdAsync(int id);
         Task<bool> UpdateAsync(User entity);
 
-       
+
     }
 }

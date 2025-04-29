@@ -10,5 +10,8 @@ namespace Data.Interfaces
     public interface IloginRepository
     {
         Task<User> GetUserByUsernameAsync(string username);
+        Task<IEnumerable<User>> GetAllUsersAsync();
+        Task<bool> UpdateAsync(User entity);
+
     }
 }

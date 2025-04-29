@@ -7,3 +7,10 @@ export interface IPerson {
     email: string,
     active: boolean
 }
+
+export interface IRegisterRequest {
+    username: string;
+    email: string;
+    password: string;
+    person: IPerson;
+}

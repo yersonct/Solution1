@@ -1,4 +1,8 @@
-<div style="display: flex;">
+<ng-container *ngIf="!isLoggedIn">
+  <app-login (loginSuccess)="onLoginSuccess()"></app-login>
+</ng-container>
+
+<div *ngIf="isLoggedIn" style="display: flex;">
   <app-menu-lateral (componentToShow)="onComponentToShow($event)" style="width: 200px;"></app-menu-lateral>
   <div style="flex-grow: 1; padding: 20px;">
     <ng-container *ngIf="activeComponent === 'FormComponent'">

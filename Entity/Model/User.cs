@@ -19,8 +19,8 @@ namespace Entity.Model
             public bool active { get; set; }
             public Person person { get; set; }
         
+
+
             public  List<RolUser> RolUsers { get; set; } = new List<RolUser>();
-
-
     }
 }

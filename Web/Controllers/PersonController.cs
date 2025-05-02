@@ -5,7 +5,8 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Business.Interfaces;
 using Entity.Model;
-using Entity.DTOs; // Asegúrate de tener el namespace de tus DTOs
+using Entity.DTOs;
+using Microsoft.AspNetCore.Authorization; // Asegúrate de tener el namespace de tus DTOs
 
 namespace API.Controllers
 {

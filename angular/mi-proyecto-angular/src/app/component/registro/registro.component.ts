@@ -1,21 +1,21 @@
+// component/registro/registro.component.ts
 import { Component, OnInit } from '@angular/core';
-import { AuthService } from '../service/auth.service';
+import { AuthService } from './../service/auth.service';
 import { Router } from '@angular/router';
-import { IRegisterRequest } from '../Interfaces/iperson';
+import { IRegisterRequest } from './../Interfaces/iperson';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-register',
   standalone: true,
-  imports: [FormsModule, CommonModule], // Agrega CommonModule a los imports
-  templateUrl: './register.component.html',
-  styleUrls: ['./register.component.css'], // O .css
+  imports: [FormsModule, CommonModule],
+  templateUrl: './registro.component.html',
+  styleUrls: ['./registro.component.css'],
 })
 export class RegisterComponent implements OnInit {
   registerData: IRegisterRequest = {
     username: '',
-    email: '',
     password: '',
     person: {
       name: '',
@@ -32,7 +32,11 @@ export class RegisterComponent implements OnInit {
 
   constructor(private authService: AuthService, private router: Router) {}
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    if (this.authService.isAuthenticated()) {
+      this.router.navigate(['/app']);
+    }
+  }
 
   onSubmit(): void {
     this.registrationError = '';
@@ -42,7 +46,6 @@ export class RegisterComponent implements OnInit {
       next: (response) => {
         console.log('Registro exitoso:', response);
         this.registrationSuccess = 'Registro exitoso. ¡Puedes iniciar sesión ahora!';
-        // Opcional: Redirigir al login después de un breve tiempo
         setTimeout(() => {
           this.router.navigate(['/login']);
         }, 2000);
@@ -50,7 +53,6 @@ export class RegisterComponent implements OnInit {
       error: (error) => {
         console.error('Error de registro:', error);
         if (error?.error?.errors) {
-          // Manejar errores específicos del backend (FluentValidation, duplicados, etc.)
           this.registrationError = Object.values(error.error.errors).flat().join(' ');
         } else if (error?.error?.message) {
           this.registrationError = error.error.message;
@@ -59,5 +61,9 @@ export class RegisterComponent implements OnInit {
         }
       },
     });
+  }
+
+  navigateToLogin(): void {
+    this.router.navigate(['/login']);
   }
 }

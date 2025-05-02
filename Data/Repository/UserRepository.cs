@@ -32,6 +32,14 @@ namespace Data.Repository
                     entity.username = entity.username.Substring(0, 20);
                     _logger.LogWarning("AddAsync: Nombre de usuario truncado a: {Username}", entity.username);
                 }
+
+                // Trunca la contraseña antes de agregarla al contexto
+                //if (entity.password.Length > 20)
+                //{
+                //    entity.password = entity.password.Substring(0, 20);
+                //    _logger.LogWarning("AddAsync: Contraseña truncada a: {Password}", entity.password);
+                //}
+
                 await _context.Set<User>().AddAsync(entity);
                 await _context.SaveChangesAsync();
                 return entity;
@@ -109,6 +117,14 @@ namespace Data.Repository
                     entity.username = entity.username.Substring(0, 20);
                     _logger.LogWarning("UpdateAsync: Nombre de usuario truncado a: {Username}", entity.username);
                 }
+
+                // Trunca la contraseña antes de actualizar la entidad
+                //if (entity.password.Length > 20)
+                //{
+                //    entity.password = entity.password.Substring(0, 20);
+                //    _logger.LogWarning("UpdateAsync: Contraseña truncada a: {Password}", entity.password);
+                //}
+
                 _context.Entry(entity).State = EntityState.Modified;
                 await _context.SaveChangesAsync();
                 return true;
@@ -131,4 +147,3 @@ namespace Data.Repository
         }
     }
 }
-

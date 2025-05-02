@@ -21,4 +21,4 @@
   <div *ngIf="loginError" class="error-message">{{ loginError }}</div>
 </form>
 
-<p>¿No tienes una cuenta? <a routerLink="/register">Regístrate aquí</a></p>
+<p>¿No tienes una cuenta? <button type="button" (click)="navigateToRegister()">Regístrate aquí</button></p>

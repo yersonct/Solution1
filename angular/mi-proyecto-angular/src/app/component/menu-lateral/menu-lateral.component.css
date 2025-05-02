@@ -1,15 +1,15 @@
 .menu-lateral {
-  width: 13vw; /* Ancho del menú */
-  background-color: #054068; /* Color de fondo (gris oscuro) */
-  color: #fff; /* Color del texto (blanco) */
+  width: 13vw;
+  background-color: #054068;
+  color: #fff;
   padding: 20px;
   box-sizing: border-box;
-  height: 100vh; /* Fijo al alto de la ventana */
-  overflow-y: auto; /* Para el scroll si el menú es muy largo */
-  position: fixed; /* Lo fija en la pantalla */
+  height: 100vh; 
+  overflow-y: auto; 
+  position: fixed; 
   top: 0;
   left: 0;
-  z-index: 1000; /* Asegura que esté por encima de otros elementos */
+  z-index: 1000; 
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
@@ -69,4 +69,14 @@
 
 .menu-lateral .submenu li:hover {
   background-color: #555;
+}
+
+.component-container{
+  margin-left: 13vw; /* Adjust this value to match the width of the menu */
+  padding: 20px;
+  box-sizing: border-box;
+  height: 100vh; 
+  position: relative; 
+  z-index: 1; 
+  overflow: hidden;
 }

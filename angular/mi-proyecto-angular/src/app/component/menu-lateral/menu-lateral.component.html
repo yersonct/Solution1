@@ -9,40 +9,21 @@
         {{ item.label }}
       </div>
       <ul *ngIf="item.expanded && item.subItems" class="submenu">
-        <li *ngFor="let subItem of item.subItems" (click)="showComponent(subItem.componentName)">
-          {{ subItem.label }}
+        <li *ngFor="let subItem of item.subItems">
+          <a [routerLink]="['./', subItem.label.toLowerCase().replace('component', '')]" routerLinkActive="active">
+            {{ subItem.label }}
+          </a>
         </li>
       </ul>
+    </li>
+    <li class="menu-item logout">
+      <div class="menu-item-header" (click)="logout()">
+        Cerrar Sesión
+      </div>
     </li>
   </ul>
 </div>
 
 <div class="component-container">
-  <ng-container *ngIf="activeComponent === 'FormComponent'">
-    <app-form></app-form>
-  </ng-container>
-  <ng-container *ngIf="activeComponent === 'FormModuleComponent'">
-    <app-form-module></app-form-module>
-  </ng-container>
-  <ng-container *ngIf="activeComponent === 'FormRolPermissionComponent'">
-    <app-form-rol-permission></app-form-rol-permission>
-  </ng-container>
-  <ng-container *ngIf="activeComponent === 'ModuleComponent'">
-    <app-module></app-module>
-  </ng-container>
-  <ng-container *ngIf="activeComponent === 'PermissionComponent'">
-    <app-permission></app-permission>
-  </ng-container>
-  <ng-container *ngIf="activeComponent === 'PersonComponent'">
-    <app-person></app-person>
-  </ng-container>
-  <ng-container *ngIf="activeComponent === 'RolComponent'">
-    <app-rol></app-rol>
-  </ng-container>
-  <ng-container *ngIf="activeComponent === 'RolUserComponent'">
-    <app-rol-user></app-rol-user>
-  </ng-container>
-  <ng-container *ngIf="activeComponent === 'UserComponent'">
-    <app-user></app-user>
-  </ng-container>
+  <router-outlet></router-outlet>
 </div>

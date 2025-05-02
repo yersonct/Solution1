@@ -1,153 +1,164 @@
 h2 {
-    color: #374151; /* Texto gris oscuro */
-    margin-bottom: 30px;
-    text-align: center;
-    font-size: 2.5em;
-    font-weight: 700;
-    letter-spacing: 0.05em;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
-    animation: fadeIn 1s ease-out;
-  }
-  
-  @keyframes fadeIn {
-    from {
+  color: #2c3e50; /* Un azul oscuro elegante */
+  margin-bottom: 40px;
+  text-align: center;
+  font-size: 2.8em;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.15);
+  animation: pulse 1.5s infinite alternate, fadeInDown 1s ease-out;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  100% { transform: scale(1.03); }
+}
+
+@keyframes fadeInDown {
+  from {
       opacity: 0;
-      transform: translateY(-20px);
-    }
-    to {
+      transform: translateY(-30px);
+  }
+  to {
       opacity: 1;
       transform: translateY(0);
-    }
   }
-  
-  form {
-    max-width: 400px;
-    margin: 50px auto;
-    padding: 30px;
-    border: none;
-    border-radius: 12px;
-    background: linear-gradient(145deg, #f0f0f0, #cacaca);
-    box-shadow: 15px 15px 30px #bebebe, -15px -15px 30px #ffffff;
-    animation: slideIn 0.8s ease-out;
-  }
-  
-  @keyframes slideIn {
-    from {
+}
+
+form {
+  max-width: 450px;
+  margin: 60px auto;
+  padding: 40px;
+  border: none;
+  border-radius: 15px;
+  background: #ecf0f1; /* Un gris muy claro */
+  box-shadow: 20px 20px 60px #d1d1d1, -20px -20px 60px #ffffff;
+  animation: zoomIn 0.8s ease-out;
+}
+
+@keyframes zoomIn {
+  from {
       opacity: 0;
-      transform: translateX(-50px);
-    }
-    to {
+      transform: scale(0.9);
+  }
+  to {
       opacity: 1;
-      transform: translateX(0);
-    }
+      transform: scale(1);
   }
-  
-  div {
-    margin-bottom: 25px;
-  }
-  
-  label {
-    display: block;
-    margin-bottom: 8px;
-    font-weight: 600;
-    color: #4a5568; /* Gris más oscuro */
-    transition: transform 0.3s ease-in-out;
-  }
-  
-  label:hover {
-    transform: translateX(5px);
-  }
-  
-  input[type="text"],
-  input[type="password"] {
-    width: calc(100% - 22px);
-    padding: 12px;
-    border: 1px solid #d1d5db; /* Borde gris claro */
-    border-radius: 6px;
-    box-sizing: border-box;
-    font-size: 16px;
-    transition: border-color 0.3s ease;
-    box-shadow: inset 2px 2px 5px #e0e0e0, inset -2px -2px 5px #ffffff;
-  }
-  
-  input[type="text"]:focus,
-  input[type="password"]:focus {
-    outline: none;
-    border-color: #647eea; /* Azul más vibrante al enfocar */
-    box-shadow: 0 0 8px rgba(100, 126, 234, 0.5);
-  }
-  
-  button[type="submit"] {
-    background: linear-gradient(to right, #647eea, #7851a9); /* Degradado morado */
-    color: white;
-    padding: 14px 24px;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 18px;
-    width: 100%;
-    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-    box-shadow: 5px 5px 10px #b0b0b0, -5px -5px 10px #ffffff;
-  }
-  
-  button[type="submit"]:hover {
-    transform: scale(1.05);
-    box-shadow: 8px 8px 15px #b0b0b0, -8px -8px 15px #ffffff;
-  }
-  
-  button[type="submit"]:active {
-    transform: scale(0.95);
-    box-shadow: 2px 2px 5px #b0b0b0, -2px -2px 5px #ffffff;
-  }
-  
-  button[type="submit"]:disabled {
-    background: #a0aec0; /* Grisáceo para deshabilitado */
-    cursor: not-allowed;
-    box-shadow: none;
-    transform: none;
-  }
-  
-  .error-message {
-    color: #e53e3e; /* Rojo más vivo */
-    margin-top: 15px;
-    font-size: 16px;
-    font-weight: 500;
-    animation: shake 0.5s ease-in-out;
-  }
-  
-  @keyframes shake {
-    0%, 100% { transform: translateX(0); }
-    10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
-    20%, 40%, 60%, 80% { transform: translateX(5px); }
-  }
-  
-  p {
-    margin-top: 20px;
-    font-size: 16px;
-    color: #718096; /* Gris más claro */
-    text-align: center;
-    animation: fadeInUp 1s ease-out;
-  }
-  
-  @keyframes fadeInUp {
-    from {
-      opacity: 0;
-      transform: translateY(20px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-  
-  a {
-    color: #7851a9; /* Morado del degradado */
-    text-decoration: none;
-    font-weight: 600;
-    transition: color 0.3s ease-in-out, text-shadow 0.3s ease-in-out;
-  }
-  
-  a:hover {
-    color: #647eea; /* Otro color del degradado al pasar el ratón */
-    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
-  }
+}
+
+div {
+  margin-bottom: 30px;
+}
+
+label {
+  display: block;
+  margin-bottom: 10px;
+  font-weight: 600;
+  color: #34495e; /* Otro azul oscuro */
+  transition: transform 0.3s ease-in-out, color 0.3s ease-in-out;
+}
+
+label:hover {
+  transform: translateX(8px);
+  color: #5dade2; /* Un azul más claro al pasar el ratón */
+}
+
+input[type="text"],
+input[type="password"] {
+  width: calc(100% - 24px);
+  padding: 14px;
+  border: 1px solid #bdc3c7; /* Grisáceo */
+  border-radius: 8px;
+  box-sizing: border-box;
+  font-size: 17px;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  box-shadow: inset 3px 3px 7px #cacaca, inset -3px -3px 7px #f0f0f0;
+}
+
+input[type="text"]:focus,
+input[type="password"]:focus {
+  outline: none;
+  border-color: #3498db; /* Azul brillante al enfocar */
+  box-shadow: 0 0 10px rgba(52, 152, 219, 0.6);
+}
+
+button[type="submit"] {
+  background: linear-gradient(to right, #2980b9, #6dd5ed); /* Degradado azul */
+  color: white;
+  padding: 16px 28px;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 20px;
+  width: 100%;
+  transition: transform 0.2s cubic-bezier(0.4, 0.0, 0.2, 1), box-shadow 0.2s cubic-bezier(0.4, 0.0, 0.2, 1);
+  box-shadow: 8px 8px 15px #b8b8b8, -8px -8px 15px #ffffff;
+}
+
+button[type="submit"]:hover {
+  transform: translateY(-3px);
+  box-shadow: 10px 10px 20px #b8b8b8, -10px -10px 20px #ffffff;
+}
+
+button[type="submit"]:active {
+  transform: translateY(1px);
+  box-shadow: 5px 5px 10px #b8b8b8, -5px -5px 10px #ffffff;
+}
+
+button[type="submit"]:disabled {
+  background: #95a5a6; /* Gris más oscuro para deshabilitado */
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+}
+
+.error-message {
+  color: #c0392b; /* Rojo intenso */
+  margin-top: 18px;
+  font-size: 17px;
+  font-weight: 500;
+  animation: swing 0.6s ease-in-out;
+}
+
+@keyframes swing {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(8px); }
+  40%, 80% { transform: translateX(-8px); }
+}
+
+p {
+  margin-top: 25px;
+  font-size: 17px;
+  color: #7f8c8d; /* Otro gris */
+  text-align: center;
+  animation: fadeInUp 1.2s ease-out;
+}
+
+a {
+  color: #3498db; /* Azul brillante */
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.3s ease-in-out, text-shadow 0.3s ease-in-out;
+}
+
+a:hover {
+  color: #2980b9; /* Azul más oscuro al pasar el ratón */
+  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.25);
+}
+
+button[type="button"] {
+  background: none;
+  color: #3498db;
+  border: none;
+  padding: 0;
+  font-size: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  transition: color 0.3s ease-in-out, transform 0.2s ease-in-out;
+}
+
+button[type="button"]:hover {
+  color: #2980b9;
+  transform: scale(1.05);
+}

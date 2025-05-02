@@ -15,27 +15,27 @@ export class ApiRolService {
   // GET: Obtiene todos los elementos
   getData(): Observable<any> {
     console.log(`URL: ${this.apiUrl}Roles`);
-    return this.https.get<any>('/api/Roles'); // 👈 Aquí corriges
+    return this.https.get<any>('/Roles'); // 👈 Aquí corriges
   }
 
   // GET: Obtiene un elemento por su ID
   getById(id: number): Observable<any> {
-    return this.https.get<any>(`/api/Roles/${id}`); // 👈 Corrige aquí también
+    return this.https.get<any>(`/Roles/${id}`); // 👈 Corrige aquí también
   }
 
   // POST: Crea un nuevo elemento
   postData(data: any): Observable<any> {
-    return this.https.post<any>('/api/Roles', data); // 👈 Corrige aquí
+    return this.https.post<any>('/Roles', data); // 👈 Corrige aquí
   }
 
   // PUT: Actualiza un elemento
   putData(id: number, data: any): Observable<any> {
-    return this.https.put<any>(`/api/Roles/${id}`, data); // 👈 Corrige aquí
+    return this.https.put<any>(`/Roles/${id}`, data); // 👈 Corrige aquí
   }
 
   // DELETE: Elimina un elemento
   deleteData(id: number): Observable<any> {
-    return this.https.delete<any>(`/api/Roles/${id}`); // 👈 Corrige aquí
+    return this.https.delete<any>(`/Roles/${id}`); // 👈 Corrige aquí
   }
 
   // GET: Obtiene datos con parámetros
@@ -46,6 +46,6 @@ export class ApiRolService {
         httpParams = httpParams.set(key, params[key]);
       }
     }
-    return this.https.get<any>('/api/users', { params: httpParams }); // 👈 Corrige aquí
+    return this.https.get<any>('/users', { params: httpParams }); // 👈 Corrige aquí
   }
 }

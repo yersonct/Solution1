@@ -49,8 +49,11 @@ namespace Business.Services
         {
             var errors = new Dictionary<string, string>();
 
-            // 1. Verificar si el nombre de usuario, documento o email ya existen
-            // Truncar el nombre de usuario para la verificación
+            if (request.Password.Length > 100) // Ejemplo de límite de longitud
+            {
+                errors.Add("Password", "La contraseña es demasiado larga.");
+            }
+
             string truncatedUsernameForCheck = request.Username.Length > 19 ? request.Username.Substring(0, 19) : request.Username;
             var existingUser = await _userRepository.GetUserByUsernameAsync(truncatedUsernameForCheck);
             var personExistsByDocument = await _personRepository.PersonExistsAsync(request.Person.Document, "");
@@ -76,7 +79,6 @@ namespace Business.Services
                 return errors;
             }
 
-            // 2. Crear la entidad Person
             var person = new Person
             {
                 name = request.Person.Name,
@@ -89,13 +91,11 @@ namespace Business.Services
 
             await _personRepository.AddAsync(person);
 
-            // 3. Crear la entidad User
-            // Truncar el nombre de usuario si es demasiado largo
             string truncatedUsername = request.Username.Length > 19 ? request.Username.Substring(0, 19) : request.Username;
             var user = new User
             {
-                username = truncatedUsername, // Usar el nombre de usuario truncado
-                password = HashPassword(request.Password),
+                username = truncatedUsername,
+                password = HashPassword(request.Password), // Hash la contraseña completa
                 id_person = person.id,
                 active = true
             };
@@ -106,51 +106,26 @@ namespace Business.Services
             return result ? null : new Dictionary<string, string>() { { "General", "Error al registrar el usuario." } };
         }
 
+
         private string HashPassword(string password)
         {
             return BCrypt.Net.BCrypt.HashPassword(password);
         }
 
-        private bool VerifyPassword(string password, string hashedPassword)
+        private bool VerifyPassword(string inputPassword, string storedPassword)
         {
             try
             {
-                // Intenta verificar con la configuración predeterminada de BCrypt
-                if (BCrypt.Net.BCrypt.Verify(password, hashedPassword))
+                if (string.IsNullOrWhiteSpace(storedPassword))
+                    return false;
+
+                if (!storedPassword.StartsWith("$2a$") && !storedPassword.StartsWith("$2b$") && !storedPassword.StartsWith("$2y$"))
                 {
-                    return true;
+                    _logger.LogWarning("Comparando contraseña en texto plano. Esto es inseguro y debe corregirse tras la migración.");
+                    return inputPassword == storedPassword;
                 }
 
-                // **SOLUCIÓN TEMPORAL (Solo si sabes que tus hashes antiguos usaban SHA1)**
-                // Intenta verificar con SHA1 (menos seguro, ¡planifica la migración!)
-                // **¡CUIDADO!** La forma de verificar hashes SHA1 con BCrypt.Net puede no ser directa.
-                // Es posible que necesites una lógica separada si tus hashes antiguos realmente eran SHA1 sin "salting" de BCrypt.
-                // Si tus hashes antiguos fueron creados *por* BCrypt.Net pero con un HashType específico,
-                // entonces la verificación con la configuración predeterminada *debería* manejarlos si la librería es reciente.
-                // Si aún necesitas intentarlo explícitamente (dependiendo de tu versión de BCrypt.Net):
-                try
-                {
-                    if (BCrypt.Net.BCrypt.Verify(password, hashedPassword, enhancedEntropy: false))
-                    {
-                        _logger.LogWarning($"Usuario intentó iniciar sesión con un hash de contraseña antiguo (posiblemente SHA1). Usuario: ...");
-                        return true;
-                    }
-                }
-                catch (BCrypt.Net.SaltParseException) { /* Ignorar si no es un hash de BCrypt */ }
-
-                // **SOLUCIÓN TEMPORAL (Solo si sabes que tus hashes antiguos usaban SHA256)**
-                // Intenta verificar con SHA256 (menos seguro que el predeterminado)
-                try
-                {
-                    if (BCrypt.Net.BCrypt.Verify(password, hashedPassword, enhancedEntropy: false))
-                    {
-                        _logger.LogWarning($"Usuario intentó iniciar sesión con un hash de contraseña antiguo (posiblemente SHA256). Usuario: ...");
-                        return true;
-                    }
-                }
-                catch (BCrypt.Net.SaltParseException) { /* Ignorar si no es un hash de BCrypt */ }
-
-                return false;
+                return BCrypt.Net.BCrypt.Verify(inputPassword, storedPassword);
             }
             catch (BCrypt.Net.SaltParseException ex)
             {
@@ -164,21 +139,23 @@ namespace Business.Services
             }
         }
 
+
         private string GenerateJwtToken(User user)
         {
-            var secretKey = _configuration.GetSection("JwtSettings:SecretKey").Value;
-            var issuer = _configuration.GetSection("JwtSettings:Issuer").Value;
-            var audience = _configuration.GetSection("JwtSettings:Audience").Value;
+            var secretKey = _configuration.GetSection("Jwt:Key").Value;
+            var issuer = _configuration.GetSection("Jwt:Issuer").Value;
+            var audience = _configuration.GetSection("Jwt:Audience").Value;
             var key = Encoding.ASCII.GetBytes(secretKey);
 
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(new[]
                 {
-                    new Claim(ClaimTypes.Name, user.username),
-                    new Claim(ClaimTypes.NameIdentifier, user.id.ToString()),
-                }),
-                Expires = DateTime.UtcNow.AddHours(8),
+            new Claim(ClaimTypes.Name, user.username),
+            new Claim(ClaimTypes.NameIdentifier, user.id.ToString()),
+        }),
+                // Cambia la línea de la expiración a 3 minutos
+                Expires = DateTime.UtcNow.AddMinutes(3),
                 Issuer = issuer,
                 Audience = audience,
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
@@ -189,7 +166,6 @@ namespace Business.Services
             return tokenHandler.WriteToken(token);
         }
 
-        // **FUNCIÓN DE MIGRACIÓN (Ejecutar una sola vez para re-hashear contraseñas)**
         public async Task MigratePasswordsAsync()
         {
             _logger.LogInformation("Iniciando la migración FORZADA de contraseñas...");
@@ -199,9 +175,8 @@ namespace Business.Services
             foreach (var user in users)
             {
                 _logger.LogInformation($"Re-hasheando contraseña para el usuario: {user.username} (ID: {user.id})");
-                user.password = HashPassword(user.password); // Fuerza el re-hasheo con la configuración actual
-                // Truncar el nombre de usuario antes de actualizarlo
-                user.username = user.username.Length > 19 ? user.username.Substring(0, 19) : user.username;
+                user.password = HashPassword(user.password);
+                user.username = user.username.Length > 20 ? user.username.Substring(0, 19) : user.username;
                 await _userRepository.UpdateAsync(user);
                 migratedCount++;
             }

@@ -13,7 +13,7 @@ export class ApiFormModuleService {
   // GET: Obtiene todos los elementos
   getData(): Observable<any> {
     console.log(`URL: ${this.apiUrl}FormModules`);
-    return this.https.get<any>('/api/FormModules'); // 👈 Aquí corriges
+    return this.https.get<any>('/FormModules'); // 👈 Aquí corriges
   }
   // getByNombre(nombre: string): Observable<any[]> {
   //   const params = new HttpParams().set('name', nombre);
@@ -21,25 +21,25 @@ export class ApiFormModuleService {
   // }
   // GET: Obtiene un elemento por su ID
   getById(id: number): Observable<any> {
-    return this.https.get<any>(`/api/FormModules/${id}`); // 👈 Corrige aquí también
+    return this.https.get<any>(`/FormModules/${id}`); // 👈 Corrige aquí también
   }
 
   // POST: Crea un nuevo elemento
   postData(data: any): Observable<any> {
-    return this.https.post<any>('/api/FormModules', data); // 👈 Corrige aquí
+    return this.https.post<any>('/FormModules', data); // 👈 Corrige aquí
   }
 
   // PUT: Actualiza un elemento
   putData(id: number, data: any): Observable<any> {
-    return this.https.put<any>(`/api/FormModules/${id}`, data); // 👈 Corrige aquí
+    return this.https.put<any>(`/FormModules/${id}`, data); // 👈 Corrige aquí
   }
 
   createUser(userData: any): Observable<any> {
-    return this.https.post<any>('/api/users', userData); // O la ruta correcta para crear usuarios
+    return this.https.post<any>('/users', userData); // O la ruta correcta para crear usuarios
   }
   // DELETE: Elimina un elemento
   deleteData(id: number): Observable<any> {
-    return this.https.delete<any>(`/api/FormModules/${id}`); // 👈 Corrige aquí
+    return this.https.delete<any>(`/FormModules/${id}`); // 👈 Corrige aquí
   }
 
 
@@ -51,6 +51,6 @@ export class ApiFormModuleService {
         httpParams = httpParams.set(key, params[key]);
       }
     }
-    return this.https.get<any>('/api/users', { params: httpParams }); // 👈 Corrige aquí
+    return this.https.get<any>('/users', { params: httpParams }); // 👈 Corrige aquí
   }
 }

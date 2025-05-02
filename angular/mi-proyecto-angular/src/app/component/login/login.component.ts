@@ -1,16 +1,17 @@
+// component/login/login.component.ts
 import { Component, OnInit, Output, EventEmitter } from '@angular/core';
-import { AuthService } from '../service/auth.service';
+import { AuthService } from './../service/auth.service';
 import { Router } from '@angular/router';
-import { ILoginRequest } from '../Interfaces/i-login-request';
-import { FormsModule } from '@angular/forms'; // Importa FormsModule
+import { ILoginRequest } from './../Interfaces/i-login-request';
+import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-login',
-  standalone: true, // Asegúrate de que esto esté aquí
-  imports: [FormsModule, CommonModule], // Agrega FormsModule a los imports
+  standalone: true,
+  imports: [FormsModule, CommonModule],
   templateUrl: './login.component.html',
-  styleUrls: ['./login.component.css'], // O .css
+  styleUrls: ['./login.component.css'],
 })
 export class LoginComponent implements OnInit {
   loginData: ILoginRequest = {
@@ -23,7 +24,11 @@ export class LoginComponent implements OnInit {
 
   constructor(private authService: AuthService, private router: Router) {}
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    if (this.authService.isAuthenticated()) {
+      this.router.navigate(['/app']);
+    }
+  }
 
   onSubmit(): void {
     this.loginError = '';
@@ -32,7 +37,8 @@ export class LoginComponent implements OnInit {
       next: (response) => {
         console.log('Inicio de sesión exitoso:', response);
         this.authService.saveToken(response.token);
-        this.loginSuccess.emit();
+        this.loginSuccess.emit(); // Emite el evento de inicio de sesión exitoso
+        this.router.navigate(['/app']); // Redirige directamente al '/app' después del login
       },
       error: (error) => {
         console.error('Error de inicio de sesión:', error);
@@ -43,5 +49,9 @@ export class LoginComponent implements OnInit {
         }
       },
     });
+  }
+
+  navigateToRegister(): void {
+    this.router.navigate(['/registro']);
   }
 }

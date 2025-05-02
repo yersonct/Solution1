@@ -5,7 +5,8 @@ using Microsoft.AspNetCore.Mvc;
 using Business.Interfaces; // Asegúrate de que esta interfaz exista
 using Entity.DTOs; // Asegúrate de que estos DTOs existan
 using Microsoft.Extensions.Logging;
-using Entity.Model; // Asegúrate de que este namespace exista
+using Entity.Model;
+using Microsoft.AspNetCore.Authorization; // Asegúrate de que este namespace exista
 
 namespace API.Controllers
 {

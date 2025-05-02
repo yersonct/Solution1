@@ -6,6 +6,7 @@ using Business.Interfaces;
 using Entity.Model;
 using Entity.DTOs; // Asegúrate de tener el namespace de tus DTOs
 using System.Linq;
+using Microsoft.AspNetCore.Authorization;
 
 namespace API.Controllers
 {

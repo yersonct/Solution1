@@ -49,7 +49,7 @@ namespace Business.Services
         {
             var errors = new Dictionary<string, string>();
 
-            if (request.Password.Length > 100) // Ejemplo de límite de longitud
+            if (request.Password.Length > 100)
             {
                 errors.Add("Password", "La contraseña es demasiado larga.");
             }
@@ -89,21 +89,36 @@ namespace Business.Services
                 active = true
             };
 
-            await _personRepository.AddAsync(person);
+            try
+            {
+                await _personRepository.AddAsync(person);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al guardar la información de la persona durante el registro.");
+                return new Dictionary<string, string>() { { "General", "Error al registrar la información de la persona." } };
+            }
 
             string truncatedUsername = request.Username.Length > 19 ? request.Username.Substring(0, 19) : request.Username;
             var user = new User
             {
                 username = truncatedUsername,
-                password = HashPassword(request.Password), // Hash la contraseña completa
+                password = HashPassword(request.Password),
                 id_person = person.id,
                 active = true
             };
 
-            _context.Users.Add(user);
-            var result = await _context.SaveChangesAsync() > 0;
-
-            return result ? null : new Dictionary<string, string>() { { "General", "Error al registrar el usuario." } };
+            try
+            {
+                _context.Users.Add(user);
+                var result = await _context.SaveChangesAsync() > 0;
+                return result ? null : new Dictionary<string, string>() { { "General", "Error al registrar el usuario." } };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al guardar la información del usuario durante el registro.");
+                return new Dictionary<string, string>() { { "General", "Error al registrar el usuario." } };
+            }
         }
 
 
@@ -151,10 +166,9 @@ namespace Business.Services
             {
                 Subject = new ClaimsIdentity(new[]
                 {
-            new Claim(ClaimTypes.Name, user.username),
-            new Claim(ClaimTypes.NameIdentifier, user.id.ToString()),
-        }),
-                // Cambia la línea de la expiración a 3 minutos
+                    new Claim(ClaimTypes.Name, user.username),
+                    new Claim(ClaimTypes.NameIdentifier, user.id.ToString()),
+                }),
                 Expires = DateTime.UtcNow.AddMinutes(3),
                 Issuer = issuer,
                 Audience = audience,

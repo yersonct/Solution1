@@ -1,4 +1,5 @@
 ﻿using Business.Interfaces;
+using Business.Validations;
 using Data.Interfaces;
 using Entity.Model;
 using Microsoft.Extensions.Logging;
@@ -34,11 +35,17 @@ namespace Business.Services
         public async Task<Permission> CreatePermissionAsync(Permission permission)
         {
             // You can add business logic before creating the permission
+            LogicValidations.ValidatePermissionName(permission.name, _logger);
             return await _permissionRepository.AddAsync(permission);
         }
 
         public async Task<bool> UpdatePermissionAsync(Permission permission)
         {
+            var existingPermission = await _permissionRepository.GetByIdAsync(permission.id);
+            LogicValidations.ValidateExistingPermission(existingPermission, permission.id, _logger);
+
+            // Validaciones usando la clase LogicValidations
+            LogicValidations.ValidatePermissionName(permission.name, _logger);
             // You can add business logic before updating the permission
             return await _permissionRepository.UpdateAsync(permission);
         }
@@ -46,6 +53,8 @@ namespace Business.Services
         public async Task<bool> DeletePermissionAsync(int id)
         {
             // You can add business logic before deleting the permission
+            var existingPermission = await _permissionRepository.GetByIdAsync(id);
+            LogicValidations.ValidateExistingPermission(existingPermission, id, _logger);
             return await _permissionRepository.DeleteAsync(id);
         }
     }

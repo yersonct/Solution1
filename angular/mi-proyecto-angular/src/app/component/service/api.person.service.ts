@@ -12,28 +12,28 @@ export class ApiPersonService {
 
   // GET: Obtiene todos los elementos
   getData(): Observable<any> {
-    console.log(`URL: ${this.apiUrl}Persons`);
-    return this.https.get<any>('/Persons'); // 👈 Aquí corriges
+    console.log(`URL: ${this.apiUrl}/Persons`);
+    return this.https.get<any>(`${this.apiUrl}/Persons`); // 👈 Aquí corriges
   }
 
   // GET: Obtiene un elemento por su ID
   getById(id: number): Observable<any> {
-    return this.https.get<any>(`/Persons/${id}`); // 👈 Corrige aquí también
+    return this.https.get<any>(`${this.apiUrl}/Persons/${id}`); // 👈 Corrige aquí también
   }
 
   // POST: Crea un nuevo elemento
   postData(data: any): Observable<any> {
-    return this.https.post<any>('/Persons', data); // 👈 Corrige aquí
+    return this.https.post<any>(`${this.apiUrl}/Persons`, data); // 👈 Corrige aquí
   }
 
   // PUT: Actualiza un elemento
   putData(id: number, data: any): Observable<any> {
-    return this.https.put<any>(`/Persons/${id}`, data); // 👈 Corrige aquí
+    return this.https.put<any>(`${this.apiUrl}/Persons/${id}`, data); // 👈 Corrige aquí
   }
 
   // DELETE: Elimina un elemento
   deleteData(id: number): Observable<any> {
-    return this.https.delete<any>(`/Persons/${id}`); // 👈 Corrige aquí
+    return this.https.delete<any>(`${this.apiUrl}/Persons/${id}`); // 👈 Corrige aquí
   }
 
   // GET: Obtiene datos con parámetros
@@ -44,6 +44,6 @@ export class ApiPersonService {
         httpParams = httpParams.set(key, params[key]);
       }
     }
-    return this.https.get<any>('/users', { params: httpParams }); // 👈 Corrige aquí
+    return this.https.get<any>(`${this.apiUrl}/Users`, { params: httpParams }); // 👈 Corrige aquí
   }
 }

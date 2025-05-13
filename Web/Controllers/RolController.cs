@@ -10,8 +10,10 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace API.Controllers
 {
+
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public class RolesController : ControllerBase
     {
         private readonly IRolService _rolService;

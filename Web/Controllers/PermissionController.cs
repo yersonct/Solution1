@@ -12,6 +12,7 @@ namespace API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public class PermissionsController : ControllerBase
     {
         private readonly IPermissionService _permissionService;

@@ -1,4 +1,5 @@
 ﻿using Business.Interfaces;
+using Business.Validations;
 using Data.Interfaces;
 using Entity.Model;
 using Microsoft.Extensions.Logging;
@@ -35,17 +36,26 @@ namespace Business.Services
         {
             // Aquí podrías agregar lógica de negocio antes de crear el módulo
             // No es necesario establecer active a true aquí si ya lo haces en el repositorio
+            LogicValidations.ValidateModuleName(module.name, _logger);
             return await _moduleRepository.AddAsync(module);
         }
 
         public async Task<bool> UpdateModuleAsync(Modules module)
         {
+            // Validación: El módulo debe existir para actualizarlo
+            var existingModule = await _moduleRepository.GetByIdAsync(module.id);
+            LogicValidations.ValidateExistingModule(existingModule, module.id, _logger);
+
+            // Validaciones usando la clase LogicValidations
+            LogicValidations.ValidateModuleName(module.name, _logger);
             // Aquí podrías agregar lógica de negocio antes de actualizar el módulo
             return await _moduleRepository.UpdateAsync(module);
         }
 
         public async Task<bool> DeleteModuleAsync(int id)
         {
+            var existingModule = await _moduleRepository.GetByIdAsync(id);
+            LogicValidations.ValidateExistingModule(existingModule, id, _logger);
             // Aquí podrías agregar lógica de negocio antes de eliminar el módulo
             return await _moduleRepository.DeleteAsync(id);
         }

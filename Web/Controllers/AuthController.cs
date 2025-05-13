@@ -51,7 +51,7 @@ namespace TuProyecto.Controllers
             }
             else
             {
-                return BadRequest(new { errors = errors }); // Devolver diccionario de errores
+                return BadRequest(new { errors = errors });
             }
         }
     }

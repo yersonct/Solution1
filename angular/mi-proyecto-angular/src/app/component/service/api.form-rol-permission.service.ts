@@ -13,28 +13,28 @@ export class ApiFormRolPermissionService {
 
   // GET: Obtiene todos los elementos
   getData(): Observable<any> {
-    console.log(`URL: ${this.apiUrl}FormRolPermissions`);
-    return this.https.get<any>('/FormRolPermissions'); // 👈 Aquí corriges
+    console.log(`URL: ${this.apiUrl}/FormRolPermissions`);
+    return this.https.get<any>(`${this.apiUrl}/FormRolPermissions`); // 👈 Aquí corriges
   }
 
   // GET: Obtiene un elemento por su ID
   getById(id: number): Observable<any> {
-    return this.https.get<any>(`/FormRolPermissions/${id}`); // 👈 Corrige aquí también
+    return this.https.get<any>(`${this.apiUrl}/FormRolPermissions/${id}`); // 👈 Corrige aquí también
   }
 
   // POST: Crea un nuevo elemento
   postData(data: any): Observable<any> {
-    return this.https.post<any>('/FormRolPermissions', data); // 👈 Corrige aquí
+    return this.https.post<any>(`${this.apiUrl}/FormRolPermissions`, data); // 👈 Corrige aquí
   }
 
   // PUT: Actualiza un elemento
   putData(id: number, data: any): Observable<any> {
-    return this.https.put<any>(`/FormRolPermissions/${id}`, data); // 👈 Corrige aquí
+    return this.https.put<any>(`${this.apiUrl}/FormRolPermissions/${id}`, data); // 👈 Corrige aquí
   }
 
   // DELETE: Elimina un elemento
   deleteData(id: number): Observable<any> {
-    return this.https.delete<any>(`/FormRolPermissions/${id}`); // 👈 Corrige aquí
+    return this.https.delete<any>(`${this.apiUrl}/FormRolPermissions/${id}`); // 👈 Corrige aquí
   }
 
   // GET: Obtiene datos con parámetros
@@ -45,7 +45,7 @@ export class ApiFormRolPermissionService {
         httpParams = httpParams.set(key, params[key]);
       }
     }
-    return this.https.get<any>('/users', { params: httpParams }); // 👈 Corrige aquí
+    return this.https.get<any>(`${this.apiUrl}/Users`, { params: httpParams }); // 👈 Corrige aquí
   }
 }
 

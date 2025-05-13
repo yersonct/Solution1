@@ -1,4 +1,5 @@
 ﻿using Business.Interfaces;
+using Business.Validations;
 using Data.Interfaces;
 using Entity.Model;
 using Microsoft.Extensions.Logging;
@@ -35,13 +36,18 @@ namespace Business.Services
         {
             // Aquí podrías agregar lógica de negocio antes de crear el usuario
             // Asegúrate de que la propiedad 'Active' (si la agregaste a la entidad User) se inicialice en true
-             user.active = true;
+            var existingUsers = await _userRepository.GetAllAsync();
+            LogicValidations.EnsureUserNameIsUnique(existingUsers, user.username);
+
+            user.active = true;
             return await _userRepository.AddAsync(user);
         }
 
         public async Task<bool> UpdateUserAsync(User user)
         {
             // Aquí podrías agregar lógica de negocio antes de actualizar el usuario
+            var existingUser = await _userRepository.GetByIdAsync(user.id);
+            LogicValidations.EnsureUserExists(existingUser);
             return await _userRepository.UpdateAsync(user);
         }
 

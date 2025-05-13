@@ -23,6 +23,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication.JwtBearer; // Importa el esquema de autenticación JWT
 using Microsoft.IdentityModel.Tokens;             // Importa las opciones de validación
 
+
 var builder = WebApplication.CreateBuilder(args);
 
 // 🔹 Add Controllers
@@ -82,19 +83,40 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
+        options.Events = new JwtBearerEvents
+        {
+            OnAuthenticationFailed = context =>
+            {
+                var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<Program>>();
+                logger.LogError(context.Exception, "Autenticación JWT fallida.");
+                return Task.CompletedTask;
+            },
+            OnTokenValidated = context =>
+            {
+                var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<Program>>();
+                logger.LogInformation("Token JWT validado exitosamente.");
+                return Task.CompletedTask;
+            },
+            OnChallenge = context =>
+            {
+                var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<Program>>();
+                logger.LogWarning("Desafío de autenticación JWT.");
+                return Task.CompletedTask;
+            }
+        };
         options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuer = true,
             ValidateAudience = true,
             ValidateLifetime = true,
             ValidateIssuerSigningKey = true,
-            ValidIssuer = builder.Configuration["Jwt:Issuer"],
-            ValidAudience = builder.Configuration["Jwt:Audience"],
+            ValidIssuer = builder.Configuration["Jwt:Issuer"], // Debe ser "ANPRVisionAPI"
+            ValidAudience = builder.Configuration["Jwt:Audience"], // Debe ser "ANPRVisionClient"
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
         };
     });
-
-// 🔹 Dependency Injection (Services and Repositories)
+builder.Services.AddAuthorization();
+//🔹 Dependency Injection(Services and Repositories)
 builder.Services.AddScoped<IFormService, FormService>();
 builder.Services.AddScoped<IFormRepository, FormRepository>();
 builder.Services.AddScoped<IParkingService, ParkingService>();

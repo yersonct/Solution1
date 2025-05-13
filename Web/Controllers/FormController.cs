@@ -12,6 +12,7 @@ namespace API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public class FormsController : ControllerBase
     {
         private readonly IFormService _formService;

@@ -40,12 +40,17 @@ export class AuthService {
 
   // Método para obtener el token JWT del almacenamiento local
   getToken(): string | null {
-    return localStorage.getItem('authToken');
+     if (typeof window !== 'undefined') {
+      return localStorage.getItem('authToken');
+    }
+    return null;
   }
 
   // Método para eliminar el token JWT del almacenamiento local (al cerrar sesión)
   removeToken(): void {
-    localStorage.removeItem('authToken');
+       if (typeof window !== 'undefined') {
+      localStorage.removeItem('authToken');
+    }
     this.router.navigate(['/login']);
   }
 
@@ -73,7 +78,7 @@ export class AuthService {
       const decodedToken: any = jwtDecode(token);
       const expirationTime = decodedToken.exp * 1000; // Convertir a milisegundos
       const currentTime = Date.now();
-      return (expirationTime - currentTime) < (thresholdSeconds * 1000);
+      return expirationTime - currentTime < thresholdSeconds * 1000;
     } catch (error) {
       return true; // Si el token es inválido, se considera expirado
     }

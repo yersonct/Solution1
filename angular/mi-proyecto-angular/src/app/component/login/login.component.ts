@@ -1,5 +1,4 @@
-// component/login/login.component.ts
-import { Component, OnInit, Output, EventEmitter } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { AuthService } from './../service/auth.service';
 import { Router } from '@angular/router';
 import { ILoginRequest } from './../Interfaces/i-login-request';
@@ -20,8 +19,6 @@ export class LoginComponent implements OnInit {
   };
   loginError: string = '';
 
-  @Output() loginSuccess = new EventEmitter<void>();
-
   constructor(private authService: AuthService, private router: Router) {}
 
   ngOnInit(): void {
@@ -37,8 +34,7 @@ export class LoginComponent implements OnInit {
       next: (response) => {
         console.log('Inicio de sesión exitoso:', response);
         this.authService.saveToken(response.token);
-        this.loginSuccess.emit(); // Emite el evento de inicio de sesión exitoso
-        this.router.navigate(['/app']); // Redirige directamente al '/app' después del login
+        this.router.navigate(['/app']); // Redirige a la ruta protegida
       },
       error: (error) => {
         console.error('Error de inicio de sesión:', error);

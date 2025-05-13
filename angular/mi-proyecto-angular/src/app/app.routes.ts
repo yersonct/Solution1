@@ -1,4 +1,4 @@
-    import { Routes } from '@angular/router';
+    import { RouterModule, Routes } from '@angular/router';
     import { LoginComponent } from './component/login/login.component';
     import { RegisterComponent } from './component/registro/registro.component';
     import { MenuLateralComponent } from './component/menu-lateral/menu-lateral.component';
@@ -12,8 +12,9 @@
     import { FormModuleComponent } from './component/apartados/form-module/form-module.component';
     import { PermissionComponent } from './component/apartados/permission/permission.component';
     import { ModuleComponent } from './component/apartados/module/module.component';
+import { NgModule } from '@angular/core';
 
-    export const routes: Routes = [
+  export const routes: Routes = [
       { path: 'login', component: LoginComponent },
       { path: 'registro', component: RegisterComponent },
       {
@@ -36,3 +37,9 @@
       { path: '', redirectTo: '/login', pathMatch: 'full' },
       { path: '**', redirectTo: '/login' },
     ];
+
+  @NgModule({
+  imports: [RouterModule.forRoot(routes)],
+  exports: [RouterModule],
+})
+export class AppRoutingModule {}

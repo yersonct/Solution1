@@ -2,11 +2,11 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { IFormModule } from '../../Interfaces/iform-module';
 import { ApiFormModuleService } from '../../service/api.form-module.service'; // Ajusta la ruta a tu ApiService
-import { FormsModule } from '@angular/forms'; // Importa FormsModule si vas a agregar formularios
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-form-module',
-  imports: [CommonModule, FormsModule], // Asegúrate de incluir FormsModule si lo necesitas
+  imports: [CommonModule,FormsModule], // Asegúrate de incluir FormsModule si lo necesitas
   templateUrl: './form-module.component.html',
   styleUrl: './form-module.component.css',
   standalone: true

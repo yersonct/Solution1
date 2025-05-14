@@ -12,7 +12,7 @@ namespace API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize]
+    [Authorize(Policy = "AuthenticatedWithAny")]
     public class PersonsController : ControllerBase
     {
         private readonly IPersonService _personService;

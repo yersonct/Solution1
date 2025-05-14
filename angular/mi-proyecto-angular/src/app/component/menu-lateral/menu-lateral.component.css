@@ -4,13 +4,13 @@
   color: #fff;
   padding: 20px;
   box-sizing: border-box;
-  height: 100vh; 
-  overflow-y: auto; 
-  position: fixed; 
+  height: 100vh;
+  overflow-y: auto;
+  position: fixed;
   top: 0;
   left: 0;
-  z-index: 1000; 
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  z-index: 1000;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
 }
 
 .menu-lateral ul {
@@ -71,12 +71,11 @@
   background-color: #555;
 }
 
-.component-container{
+.component-container {
   margin-left: 13vw; /* Adjust this value to match the width of the menu */
   padding: 20px;
   box-sizing: border-box;
-  height: 100vh; 
-  position: relative; 
-  z-index: 1; 
-  overflow: hidden;
+  height: 100vh;
+  position: relative;
+  z-index: 1;
 }

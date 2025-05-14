@@ -12,7 +12,7 @@ namespace API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize]
+    [Authorize(Policy = "AuthenticatedWithAny")]
     public class FormRolPermissionsController : ControllerBase
     {
         private readonly IFormRolPermissionService _formRolPermissionService;

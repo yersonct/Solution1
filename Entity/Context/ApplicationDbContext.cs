@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using Dapper;
+using Dapper; // Add this
 using Entity.Model;
 using System.Data;
 
@@ -60,9 +60,9 @@ namespace Entity.Context
                 entity.ToTable("client");
                 // Configuración de la relación con User
                 entity.HasOne(c => c.user)
-                      .WithMany()
-                      .HasForeignKey(c => c.id_user)
-                      .IsRequired(false); // <--- Esto es clave: indica que la columna puede ser nula
+                    .WithMany()
+                    .HasForeignKey(c => c.id_user)
+                    .IsRequired(false); // <--- Esto es clave: indica que la columna puede ser nula
             });
             modelBuilder.Entity<Forms>(entity =>
             {

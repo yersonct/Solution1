@@ -14,11 +14,11 @@ export class AuthGuard implements CanActivate {
     | Promise<boolean | UrlTree>
     | boolean
     | UrlTree {
-    if (this.authService.isAuthenticated()) {
-      return true;
-    } else {
-      this.authService.removeToken(); // Limpia el token si no está autenticado
-      return this.router.parseUrl('/login');
-    }
-  }
+        if (this.authService.isAuthenticated()) {
+          return true;
+        } else {
+          this.authService.removeToken(); // Limpia el token si no está autenticado
+          return this.router.parseUrl('/login');
+        }
+   }
 }

@@ -2,11 +2,11 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { IFormRolPermission } from '../../Interfaces/iform-rol-permission';
 import { ApiFormRolPermissionService } from '../../service/api.form-rol-permission.service'; // Ajusta la ruta a tu ApiService
-import { FormsModule } from '@angular/forms'; // Importa FormsModule si vas a agregar formularios
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-form-rol-permission',
-  imports: [CommonModule, FormsModule], // Asegúrate de incluir FormsModule si lo necesitas
+  imports: [CommonModule,FormsModule], // Asegúrate de incluir FormsModule si lo necesitas
   templateUrl: './form-rol-permission.component.html',
   styleUrl: './form-rol-permission.component.css',
   standalone: true

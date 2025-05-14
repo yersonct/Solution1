@@ -1,11 +1,12 @@
 ﻿using ANPRVisionAPI.Extensions;
-using Business.Interfaces;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Threading.Tasks;
+using Business.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -24,8 +25,12 @@ builder.Services.AddFluentValidationConfiguration();
 // 🔹 PostgreSQL Database Context
 builder.Services.AddDatabaseContext(builder.Configuration);
 
-// ⚙️ Configure JWT Authentication
+// ⚙️ Configure Authentication (Both JWT and OAuth 2.0)
 builder.Services.AddJwtAuthentication(builder.Configuration);
+builder.Services.AddOAuth2Authentication(builder.Configuration);
+
+// ⚙️ Configure Authorization Policies
+builder.Services.AddApplicationAuthorizationPolicies();
 
 //🔹 Dependency Injection(Services and Repositories)
 builder.Services.AddApplicationServices();
@@ -36,29 +41,8 @@ builder.Services.AddSingleton<ILoggerFactory, LoggerFactory>();
 
 var app = builder.Build();
 
-// ⚙️ Perform Password Migration on Startup (Development Environment)
-if (app.Environment.IsDevelopment())
-{
-    using (var scope = app.Services.CreateScope())
-    {
-        var services = scope.ServiceProvider;
-        try
-        {
-            var authService = services.GetRequiredService<IAuthService>();
-            var logger = services.GetRequiredService<ILogger<Program>>();
-
-            await authService.MigratePasswordsAsync();
-        }
-        catch (Exception ex)
-        {
-            var logger = services.GetRequiredService<ILogger<Program>>();
-            logger.LogError(ex, "Ocurrió un error durante la migración de contraseñas al inicio.");
-        }
-    }
-
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+// ⚙️ Configure Environment-Specific Settings
+app.ConfigureDevelopmentEnvironment(app.Environment);
 
 app.UseCors("AllowAll");
 

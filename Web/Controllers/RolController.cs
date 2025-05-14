@@ -13,7 +13,7 @@ namespace API.Controllers
 
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize]
+    [Authorize(Policy = "AuthenticatedWithAny")]
     public class RolesController : ControllerBase
     {
         private readonly IRolService _rolService;

@@ -1,21 +1,21 @@
 ﻿using Data.Interfaces;
-using Entity.Context;
+using Entity.Context; // Asegúrate de que esta línea es correcta
 using Entity.DTOs;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 
 namespace Data.Repository
 {
     public class VehicleHistoryRepository : IVehicleHistoryRepository
     {
-        protected readonly ApplicationDbContext _context;
+        protected readonly IApplicationDbContext _context;
         private readonly ILogger<VehicleHistoryRepository> _logger;
 
-        public VehicleHistoryRepository(ApplicationDbContext context, ILogger<VehicleHistoryRepository> logger)
+        public VehicleHistoryRepository(IApplicationDbContext context, ILogger<VehicleHistoryRepository> logger)
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
@@ -25,10 +25,16 @@ namespace Data.Repository
         {
             try
             {
-                string query = @"INSERT INTO vehiclehistory (totaltime, id_registeredvehicle, id_typevehicle)
-                                VALUES (@TotalTime, @RegisteredVehicleId, @TypeVehicleId)
-                                RETURNING id;";
-                return await _context.QuerySingleAsync<int>(query, entity);
+                var vehicleHistory = new Entity.Model.VehicleHistory // Asumiendo que VehicleHistory está en Entity.Model
+                {
+                    totaltime = entity.TotalTime,
+                    id_registeredvehicle = entity.RegisteredVehicleId,
+                    id_typevehicle = entity.TypeVehicleId
+                };
+
+                _context.VehicleHistories.Add(vehicleHistory); // Usa Add, no AddAsync
+                await _context.SaveChangesAsync();
+                return vehicleHistory.id;
             }
             catch (Exception ex)
             {
@@ -41,8 +47,14 @@ namespace Data.Repository
         {
             try
             {
-                string query = @"DELETE FROM vehiclehistory WHERE id = @Id; SELECT changes() > 0;";
-                return await _context.QuerySingleAsync<bool>(query, new { Id = id });
+                var vehicleHistoryToDelete = await _context.VehicleHistories.FindAsync(id);
+                if (vehicleHistoryToDelete != null)
+                {
+                    _context.VehicleHistories.Remove(vehicleHistoryToDelete);
+                    await _context.SaveChangesAsync();
+                    return true;
+                }
+                return false;
             }
             catch (Exception ex)
             {
@@ -55,8 +67,15 @@ namespace Data.Repository
         {
             try
             {
-                string query = @"SELECT id, totaltime, id_registeredvehicle, id_typevehicle FROM vehiclehistory;";
-                return await _context.QueryAsync<VehicleHistoryDTO>(query);
+                return await _context.VehicleHistories
+                    .Select(vh => new VehicleHistoryDTO
+                    {
+                        id = vh.id,
+                        totaltime = vh.totaltime,
+                        id_registeredvehicle = vh.id_registeredvehicle,
+                        id_typevehicle = vh.id_typevehicle
+                    })
+                    .ToListAsync();
             }
             catch (Exception ex)
             {
@@ -69,8 +88,16 @@ namespace Data.Repository
         {
             try
             {
-                string query = @"SELECT id, totaltime, id_registeredvehicle, id_typevehicle FROM vehiclehistory WHERE id = @Id;";
-                return await _context.QueryFirstOrDefaultAsync<VehicleHistoryDTO>(query, new { Id = id });
+                return await _context.VehicleHistories
+                    .Where(vh => vh.id == id)
+                    .Select(vh => new VehicleHistoryDTO
+                    {
+                        id = vh.id,
+                        totaltime = vh.totaltime,
+                        id_registeredvehicle = vh.id_registeredvehicle,
+                        id_typevehicle = vh.id_typevehicle
+                    })
+                    .FirstOrDefaultAsync();
             }
             catch (Exception ex)
             {
@@ -83,13 +110,18 @@ namespace Data.Repository
         {
             try
             {
-                string query = @"UPDATE vehiclehistory
-                                SET totaltime = @TotalTime,
-                                    id_registeredvehicle = @RegisteredVehicleId,
-                                    id_typevehicle = @TypeVehicleId
-                                WHERE id = @Id;
-                                SELECT changes() > 0;";
-                return await _context.QuerySingleAsync<bool>(query, new { Id = id, entity.TotalTime, entity.RegisteredVehicleId, entity.TypeVehicleId });
+                var vehicleHistoryToUpdate = await _context.VehicleHistories.FindAsync(id);
+                if (vehicleHistoryToUpdate != null)
+                {
+                    vehicleHistoryToUpdate.totaltime = entity.TotalTime;
+                    vehicleHistoryToUpdate.id_registeredvehicle = entity.RegisteredVehicleId;
+                    vehicleHistoryToUpdate.id_typevehicle = entity.TypeVehicleId;
+
+                    _context.Entry(vehicleHistoryToUpdate).State = EntityState.Modified;
+                    await _context.SaveChangesAsync();
+                    return true;
+                }
+                return false;
             }
             catch (Exception ex)
             {
@@ -99,3 +131,4 @@ namespace Data.Repository
         }
     }
 }
+

@@ -1,22 +1,21 @@
-﻿using System;
+﻿using Data.Interfaces;
+using Entity.Context;
+using Entity.Model;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
-using Data.Interfaces;
-using Entity.Context;
-using Entity.Model;
-using Dapper;
 
 namespace Data.Repository
 {
     public class MembershipsVehicleRepository : IMembershipsVehicleRepository
     {
-        protected readonly ApplicationDbContext _context;
+        private readonly IApplicationDbContext _context; // Cambiado a IApplicationDbContext
         private readonly ILogger<MembershipsVehicleRepository> _logger;
 
-        public MembershipsVehicleRepository(ApplicationDbContext context, ILogger<MembershipsVehicleRepository> logger)
+        public MembershipsVehicleRepository(IApplicationDbContext context, ILogger<MembershipsVehicleRepository> logger) // Cambiado a IApplicationDbContext
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
@@ -27,7 +26,7 @@ namespace Data.Repository
             try
             {
                 entity.active = true; // Establecer como activo al crear
-                await _context.Set<MembershipsVehicle>().AddAsync(entity);
+                await _context.Set<MembershipsVehicle>().AddAsync(entity); // Usar _context.Set<MembershipsVehicle>()
                 await _context.SaveChangesAsync();
                 return entity;
             }
@@ -42,7 +41,7 @@ namespace Data.Repository
         {
             try
             {
-                var membershipsVehicleToDelete = await _context.Set<MembershipsVehicle>().FindAsync(id);
+                var membershipsVehicleToDelete = await _context.Set<MembershipsVehicle>().FindAsync(id); // Usar _context.Set<MembershipsVehicle>()
                 if (membershipsVehicleToDelete != null)
                 {
                     membershipsVehicleToDelete.active = false; // Eliminación lógica
@@ -63,7 +62,7 @@ namespace Data.Repository
         {
             try
             {
-                return await _context.Set<MembershipsVehicle>()
+                return await _context.Set<MembershipsVehicle>() // Usar _context.Set<MembershipsVehicle>()
                     .Include(mv => mv.vehicle)
                     .Include(mv => mv.memberships)
                     .Where(mv => mv.active) // Filtrar solo los activos
@@ -80,7 +79,7 @@ namespace Data.Repository
         {
             try
             {
-                return await _context.Set<MembershipsVehicle>()
+                return await _context.Set<MembershipsVehicle>() // Usar _context.Set<MembershipsVehicle>()
                     .Include(mv => mv.vehicle)
                     .Include(mv => mv.memberships)
                     .FirstOrDefaultAsync(mv => mv.id == id && mv.active); // Filtrar solo los activos

@@ -13,10 +13,10 @@ namespace Data.Repository
 {
     public class RolUserRepository : IRolUserRepository
     {
-        protected readonly ApplicationDbContext _context;
+        private readonly IApplicationDbContext _context; // Cambiado a IApplicationDbContext
         private readonly ILogger<RolUserRepository> _logger;
 
-        public RolUserRepository(ApplicationDbContext context, ILogger<RolUserRepository> logger)
+        public RolUserRepository(IApplicationDbContext context, ILogger<RolUserRepository> logger) // Cambiado a IApplicationDbContext
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));

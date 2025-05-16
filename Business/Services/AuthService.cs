@@ -14,6 +14,7 @@ using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 
 namespace Business.Services
 {
@@ -22,7 +23,7 @@ namespace Business.Services
         private readonly IloginRepository _userRepository;
         private readonly IPersonRepository _personRepository;
         private readonly IConfiguration _configuration;
-        private readonly ApplicationDbContext _context;
+        private readonly IApplicationDbContext _context;    
         private readonly ILogger<AuthService> _logger;
 
         public AuthService(IloginRepository userRepository, IPersonRepository personRepository, IConfiguration configuration, ApplicationDbContext context, ILogger<AuthService> logger)
@@ -30,7 +31,7 @@ namespace Business.Services
             _userRepository = userRepository;
             _personRepository = personRepository;
             _configuration = configuration;
-            _context = context;
+            _context = context ?? throw new ArgumentNullException(nameof(context));
             _logger = logger;
         }
 
@@ -91,7 +92,8 @@ namespace Business.Services
 
             try
             {
-                await _personRepository.AddAsync(person);
+                _context.Persons.Add(person);
+                await _context.SaveChangesAsync();
             }
             catch (Exception ex)
             {
@@ -111,8 +113,8 @@ namespace Business.Services
             try
             {
                 _context.Users.Add(user);
-                var result = await _context.SaveChangesAsync() > 0;
-                return result ? null : new Dictionary<string, string>() { { "General", "Error al registrar el usuario." } };
+                await _context.SaveChangesAsync();
+                return null;
             }
             catch (Exception ex)
             {
@@ -139,7 +141,6 @@ namespace Business.Services
                     _logger.LogWarning("Comparando contraseña en texto plano. Esto es inseguro y debe corregirse tras la migración.");
                     return inputPassword == storedPassword;
                 }
-
                 return BCrypt.Net.BCrypt.Verify(inputPassword, storedPassword);
             }
             catch (BCrypt.Net.SaltParseException ex)
@@ -153,7 +154,6 @@ namespace Business.Services
                 return false;
             }
         }
-
 
         private string GenerateJwtToken(User user)
         {
@@ -199,3 +199,4 @@ namespace Business.Services
         }
     }
 }
+

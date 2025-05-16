@@ -9,8 +9,9 @@ namespace ANPRVisionAPI.Extensions
     {
         public static IServiceCollection AddDatabaseContext(this IServiceCollection services, IConfiguration configuration)
         {
-            services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseNpgsql(configuration.GetConnectionString("DefaultConnection")));
+            services.AddDbContext<PostgreSqlDbContext>(options =>  options.UseNpgsql(configuration.GetConnectionString("LocalPostgres")));
+            services.AddDbContext<MySqlDbContext>(options => options.UseMySql(configuration.GetConnectionString("MySqlConnection"), ServerVersion.AutoDetect(configuration.GetConnectionString("MySqlConnection"))));
+            services.AddDbContext<SqlServerDbContext>(options => options.UseSqlServer(configuration.GetConnectionString("SqlServerConnection")));
             return services;
         }
     }

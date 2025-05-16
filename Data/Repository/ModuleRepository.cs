@@ -13,10 +13,10 @@ namespace Data.Repository
 {
     public class ModuleRepository : IModuleRepository
     {
-        protected readonly ApplicationDbContext _context;
+        private readonly IApplicationDbContext _context; // Cambiado a IApplicationDbContext
         private readonly ILogger<ModuleRepository> _logger;
 
-        public ModuleRepository(ApplicationDbContext context, ILogger<ModuleRepository> logger)
+        public ModuleRepository(IApplicationDbContext context, ILogger<ModuleRepository> logger) // Cambiado a IApplicationDbContext
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
@@ -27,7 +27,7 @@ namespace Data.Repository
             try
             {
                 entity.active = true; // Establecer active en true al agregar
-                await _context.Set<Modules>().AddAsync(entity);
+                await _context.Set<Modules>().AddAsync(entity); // Usar _context.Set<Modules>()
                 await _context.SaveChangesAsync();
                 return entity;
             }
@@ -42,7 +42,7 @@ namespace Data.Repository
         {
             try
             {
-                var moduleToDelete = await _context.Set<Modules>().FindAsync(id);
+                var moduleToDelete = await _context.Set<Modules>().FindAsync(id); // Usar _context.Set<Modules>()
                 if (moduleToDelete != null)
                 {
                     moduleToDelete.active = false; // Marcar como inactivo en lugar de eliminar
@@ -63,7 +63,7 @@ namespace Data.Repository
         {
             try
             {
-                return await _context.Set<Modules>()
+                return await _context.Set<Modules>() // Usar _context.Set<Modules>()
                     .Include(u => u.FormModules)
                     .Where(m => m.active) // Filtrar solo módulos activos
                     .ToListAsync();
@@ -79,7 +79,7 @@ namespace Data.Repository
         {
             try
             {
-                return await _context.Set<Modules>()
+                return await _context.Set<Modules>() // Usar _context.Set<Modules>()
                     .Include(u => u.FormModules)
                     .FirstOrDefaultAsync(u => u.id == id && u.active); // Filtrar solo módulos activos
             }

@@ -13,10 +13,10 @@ namespace Data.Repository
 {
     public class RegisteredVehicleRepository : IRegisteredVehicleRepository
     {
-        protected readonly ApplicationDbContext _context;
+        private readonly IApplicationDbContext _context; // Cambiado a IApplicationDbContext
         private readonly ILogger<RegisteredVehicleRepository> _logger;
 
-        public RegisteredVehicleRepository(ApplicationDbContext context, ILogger<RegisteredVehicleRepository> logger)
+        public RegisteredVehicleRepository(IApplicationDbContext context, ILogger<RegisteredVehicleRepository> logger) // Cambiado a IApplicationDbContext
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
@@ -26,7 +26,7 @@ namespace Data.Repository
         {
             try
             {
-                return await _context.Database.CanConnectAsync();
+                return await _context.Database.CanConnectAsync(); // Usar _context.Database
             }
             catch (Exception ex)
             {
@@ -39,7 +39,7 @@ namespace Data.Repository
         {
             try
             {
-                await _context.RegisteredVehicle.AddAsync(entity);
+                await _context.Set<RegisteredVehicle>().AddAsync(entity); // Usar _context.Set<RegisteredVehicle>()
                 await _context.SaveChangesAsync();
                 return entity;
             }
@@ -54,10 +54,10 @@ namespace Data.Repository
         {
             try
             {
-                var registeredVehicleToDelete = await _context.RegisteredVehicle.FindAsync(id);
+                var registeredVehicleToDelete = await _context.Set<RegisteredVehicle>().FindAsync(id); // Usar _context.Set<RegisteredVehicle>()
                 if (registeredVehicleToDelete != null)
                 {
-                    _context.RegisteredVehicle.Remove(registeredVehicleToDelete);
+                    _context.Set<RegisteredVehicle>().Remove(registeredVehicleToDelete); // Usar _context.Set<RegisteredVehicle>()
                     await _context.SaveChangesAsync();
                     return true;
                 }
@@ -74,10 +74,10 @@ namespace Data.Repository
         {
             try
             {
-                return await _context.RegisteredVehicle
-                       .Include(rv => rv.vehicle) // Make sure to include navigation properties if needed
-                       .Include(rv => rv.vehiclehistory)
-                       .ToListAsync();
+                return await _context.Set<RegisteredVehicle>() // Usar _context.Set<RegisteredVehicle>()
+                    .Include(rv => rv.vehicle) // Make sure to include navigation properties if needed
+                    .Include(rv => rv.vehiclehistory)
+                    .ToListAsync();
             }
             catch (Exception ex)
             {
@@ -90,10 +90,10 @@ namespace Data.Repository
         {
             try
             {
-                return await _context.RegisteredVehicle
-                       .Include(rv => rv.vehicle) // Make sure to include navigation properties if needed
-                       .Include(rv => rv.vehiclehistory)
-                       .FirstOrDefaultAsync(rv => rv.id == id);
+                return await _context.Set<RegisteredVehicle>() // Usar _context.Set<RegisteredVehicle>()
+                    .Include(rv => rv.vehicle) // Make sure to include navigation properties if needed
+                    .Include(rv => rv.vehiclehistory)
+                    .FirstOrDefaultAsync(rv => rv.id == id);
             }
             catch (Exception ex)
             {

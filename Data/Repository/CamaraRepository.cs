@@ -10,10 +10,10 @@ namespace Data.Repository
 {
     public class CamaraRepository : ICamaraRepository
     {
-        private readonly ApplicationDbContext _context;
+        private readonly IApplicationDbContext _context; // Cambiado a IApplicationDbContext
         private readonly ILogger<CamaraRepository> _logger;
 
-        public CamaraRepository(ApplicationDbContext context, ILogger<CamaraRepository> logger)
+        public CamaraRepository(IApplicationDbContext context, ILogger<CamaraRepository> logger) // Cambiado a IApplicationDbContext
         {
             _context = context;
             _logger = logger;
@@ -56,18 +56,16 @@ namespace Data.Repository
         {
             try
             {
-                var trackedEntity = await _context.Camara
+                var trackedEntity = await _context.Set<Camara>() // Usamos _context.Set<Camara>()
                     .FirstOrDefaultAsync(c => c.id == camara.id);
 
                 if (trackedEntity != null)
                 {
-                    // Copiamos los valores del nuevo objeto sobre el objeto ya trackeado
                     _context.Entry(trackedEntity).CurrentValues.SetValues(camara);
                 }
                 else
                 {
-                    // Si no está siendo rastreado, entonces sí podemos actualizarlo directamente
-                    _context.Camara.Update(camara);
+                    _context.Set<Camara>().Update(camara); // Usamos _context.Set<Camara>()
                 }
 
                 await _context.SaveChangesAsync();
@@ -85,7 +83,7 @@ namespace Data.Repository
         {
             try
             {
-                var entity = await GetByIdAsync(id);
+                var entity = await _context.Set<Camara>().FindAsync(id); // Usamos _context.Set<Camara>().FindAsync(id)
                 if (entity == null) return false;
 
                 _context.Set<Camara>().Remove(entity);

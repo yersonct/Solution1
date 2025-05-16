@@ -1,5 +1,4 @@
-﻿// Data.Repository/ClientRepository.cs
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -13,10 +12,10 @@ namespace Data.Repository
 {
     public class ClientRepository : IClientRepository
     {
-        protected readonly ApplicationDbContext _context;
+        private readonly IApplicationDbContext _context; // Cambiado a IApplicationDbContext
         private readonly ILogger<ClientRepository> _logger;
 
-        public ClientRepository(ApplicationDbContext context, ILogger<ClientRepository> logger)
+        public ClientRepository(IApplicationDbContext context, ILogger<ClientRepository> logger) // Cambiado a IApplicationDbContext
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));

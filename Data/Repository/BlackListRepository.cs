@@ -11,7 +11,12 @@ namespace Repository
 {
     public class BlacklistRepository : Repository<BlackList>, IBlacklistRepository
     {
-        public BlacklistRepository(ApplicationDbContext context) : base(context) { }
+        private readonly IApplicationDbContext _context; // Cambiado a IApplicationDbContext
+
+        public BlacklistRepository(IApplicationDbContext context) : base(context) // Cambiado a IApplicationDbContext
+        {
+            _context = context;
+        }
 
         public async Task AddBlacklistAsync(BlackList entity)
         {
@@ -27,29 +32,29 @@ namespace Repository
         public async Task<IEnumerable<BlackList>> GetAllAsync()
         {
             return await _context.Set<BlackList>()
-                                 .Where(b => b.active)
-                                 .ToListAsync();
+                                     .Where(b => b.active)
+                                     .ToListAsync();
         }
 
         public async Task<BlackList> GetByIdAsync(int id)
         {
             return await _context.Set<BlackList>()
-                                 .FirstOrDefaultAsync(b => b.id == id && b.active);
+                                     .FirstOrDefaultAsync(b => b.id == id && b.active);
         }
 
         public async Task<IEnumerable<BlackList>> GetAllWithClientAsync()
         {
             return await _context.Set<BlackList>()
-                                 .Include(b => b.client)
-                                 .Where(b => b.active)
-                                 .ToListAsync();
+                                     .Include(b => b.client)
+                                     .Where(b => b.active)
+                                     .ToListAsync();
         }
 
         public async Task<BlackList> GetByIdWithClientAsync(int id)
         {
             return await _context.Set<BlackList>()
-                                 .Include(b => b.client)
-                                 .FirstOrDefaultAsync(b => b.id == id && b.active);
+                                     .Include(b => b.client)
+                                     .FirstOrDefaultAsync(b => b.id == id && b.active);
         }
 
         public void Update(BlackList entity)
@@ -67,7 +72,6 @@ namespace Repository
             var existingEntity = await _context.Set<BlackList>().FindAsync(entityToDelete.id);
             if (existingEntity != null)
             {
-                // Asegurar que la fecha sea UTC antes de la actualización
                 if (existingEntity.restrictiondate.Kind != DateTimeKind.Utc)
                 {
                     existingEntity.restrictiondate = existingEntity.restrictiondate.ToUniversalTime();

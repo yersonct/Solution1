@@ -12,10 +12,10 @@ namespace Data.Repository
 {
     public class PersonRepository : IPersonRepository
     {
-        protected readonly ApplicationDbContext _context;
+        private readonly IApplicationDbContext _context; // Cambiado a IApplicationDbContext
         private readonly ILogger<PersonRepository> _logger;
 
-        public PersonRepository(ApplicationDbContext context, ILogger<PersonRepository> logger)
+        public PersonRepository(IApplicationDbContext context, ILogger<PersonRepository> logger) // Cambiado a IApplicationDbContext
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
@@ -25,7 +25,7 @@ namespace Data.Repository
         {
             try
             {
-                await _context.Set<Person>().AddAsync(entity);
+                await _context.Set<Person>().AddAsync(entity); // Usar _context.Set<Person>()
                 await _context.SaveChangesAsync();
                 return entity;
             }
@@ -40,7 +40,7 @@ namespace Data.Repository
         {
             try
             {
-                var personToDelete = await _context.Set<Person>().FindAsync(id);
+                var personToDelete = await _context.Set<Person>().FindAsync(id); // Usar _context.Set<Person>()
                 if (personToDelete != null)
                 {
                     personToDelete.active = false; // Implementación del borrado lógico
@@ -61,7 +61,7 @@ namespace Data.Repository
         {
             try
             {
-                return await _context.Set<Person>().Include(u => u.user).Where(p => p.active).ToListAsync(); // Solo trae los activos
+                return await _context.Set<Person>().Include(u => u.user).Where(p => p.active).ToListAsync(); // Solo trae los activos // Usar _context.Set<Person>()
             }
             catch (Exception ex)
             {
@@ -74,7 +74,7 @@ namespace Data.Repository
         {
             try
             {
-                return await _context.Set<Person>().Include(u => u.user).FirstOrDefaultAsync(u => u.id == id && u.active); // Solo trae los activos
+                return await _context.Set<Person>().Include(u => u.user).FirstOrDefaultAsync(u => u.id == id && u.active); // Solo trae los activos // Usar _context.Set<Person>()
             }
             catch (Exception ex)
             {
@@ -105,7 +105,7 @@ namespace Data.Repository
 
         public async Task<bool> PersonExistsAsync(string document, string email)
         {
-            return await _context.Persons.AnyAsync(p => p.document == document || p.email == email);
+            return await _context.Set<Person>().AnyAsync(p => p.document == document || p.email == email); // Usar _context.Set<Person>()
         }
     }
 }

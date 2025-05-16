@@ -1,22 +1,21 @@
-﻿using System;
+﻿using Data.Interfaces;
+using Entity.Context;
+using Entity.Model;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
-using Data.Interfaces;
-using Entity.Context;
-using Entity.Model;
-using Dapper;
 
 namespace Data.Repository
 {
     public class MembershipsRepository : IMembershipsRepository
     {
-        protected readonly ApplicationDbContext _context;
+        private readonly IApplicationDbContext _context; // Cambiado a IApplicationDbContext
         private readonly ILogger<MembershipsRepository> _logger;
 
-        public MembershipsRepository(ApplicationDbContext context, ILogger<MembershipsRepository> logger)
+        public MembershipsRepository(IApplicationDbContext context, ILogger<MembershipsRepository> logger) // Cambiado a IApplicationDbContext
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
@@ -33,7 +32,7 @@ namespace Data.Repository
                 if (entity.enddate.Kind != DateTimeKind.Utc)
                     entity.enddate = entity.enddate.ToUniversalTime();
 
-                await _context.Set<MemberShips>().AddAsync(entity);
+                await _context.Set<MemberShips>().AddAsync(entity); // Usar _context.Set<MemberShips>()
                 await _context.SaveChangesAsync();
                 return entity;
             }
@@ -48,7 +47,7 @@ namespace Data.Repository
         {
             try
             {
-                var membershipToDelete = await _context.Set<MemberShips>().FindAsync(id);
+                var membershipToDelete = await _context.Set<MemberShips>().FindAsync(id); // Usar _context.Set<MemberShips>()
                 if (membershipToDelete != null)
                 {
                     // Asegurar que las fechas sean UTC antes de la actualización para la eliminación lógica
@@ -75,7 +74,7 @@ namespace Data.Repository
         {
             try
             {
-                return await _context.Set<MemberShips>()
+                return await _context.Set<MemberShips>() // Usar _context.Set<MemberShips>()
                     .Include(u => u.membershipsvehicles)
                     .Where(m => m.active) // Filtrar solo las activas
                     .ToListAsync();
@@ -91,7 +90,7 @@ namespace Data.Repository
         {
             try
             {
-                return await _context.Set<MemberShips>()
+                return await _context.Set<MemberShips>() // Usar _context.Set<MemberShips>()
                     .Include(u => u.membershipsvehicles)
                     .FirstOrDefaultAsync(u => u.id == id && u.active); // Filtrar solo las activas
             }

@@ -1,23 +1,22 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
-using Data.Interfaces;
+﻿using Data.Interfaces;
 using Entity.Context;
 using Entity.DTOs;
 using Entity.Model;
-using Dapper;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Data.Repository
 {
     public class FormRolPermissionRepository : IFormRolPermissionRepository
     {
-        protected readonly ApplicationDbContext _context;
+        private readonly IApplicationDbContext _context; // Cambiado a IApplicationDbContext
         private readonly ILogger<FormRolPermissionRepository> _logger;
 
-        public FormRolPermissionRepository(ApplicationDbContext context, ILogger<FormRolPermissionRepository> logger)
+        public FormRolPermissionRepository(IApplicationDbContext context, ILogger<FormRolPermissionRepository> logger) // Cambiado a IApplicationDbContext
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
@@ -27,7 +26,7 @@ namespace Data.Repository
         {
             try
             {
-                return await _context.FormRolPermission
+                return await _context.Set<FormRolPermission>()
                     .Include(x => x.Forms)
                     .Include(x => x.Rol)
                     .Include(x => x.Permission)
@@ -53,7 +52,7 @@ namespace Data.Repository
         {
             try
             {
-                return await _context.FormRolPermission
+                return await _context.Set<FormRolPermission>()
                     .Include(x => x.Forms)
                     .Include(x => x.Rol)
                     .Include(x => x.Permission)
@@ -87,11 +86,11 @@ namespace Data.Repository
                     active = true // Set active to true on creation
                 };
 
-                _context.FormRolPermission.Add(entity);
+                _context.Set<FormRolPermission>().Add(entity);
                 await _context.SaveChangesAsync();
 
                 return await GetByIdAsync(entity.id)
-                           ?? throw new Exception("Could not retrieve the created FormRolPermission.");
+                       ?? throw new Exception("Could not retrieve the created FormRolPermission.");
             }
             catch (Exception ex)
             {
@@ -104,12 +103,13 @@ namespace Data.Repository
         {
             try
             {
-                var entity = await _context.FormRolPermission.FindAsync(dto.id);
+                var entity = await _context.Set<FormRolPermission>().FindAsync(dto.id);
                 if (entity == null) return false;
 
-                entity.id_forms = _context.Forms.SingleOrDefault(f => f.name == dto.formName)?.id ?? 0;
-                entity.id_rol = _context.Rol.SingleOrDefault(r => r.Name == dto.rolName)?.id ?? 0;
-                entity.id_permission = _context.Permission.SingleOrDefault(p => p.name == dto.permissionName)?.id ?? 0;
+                // Assuming you have DbSet properties for Forms, Rol, and Permission in IApplicationDbContext
+                entity.id_forms = await _context.Set<Forms>().Where(f => f.name == dto.formName).Select(f => f.id).SingleOrDefaultAsync();
+                entity.id_rol = await _context.Set<Rol>().Where(r => r.Name == dto.rolName).Select(r => r.id).SingleOrDefaultAsync();
+                entity.id_permission = await _context.Set<Permission>().Where(p => p.name == dto.permissionName).Select(p => p.id).SingleOrDefaultAsync();
                 entity.active = dto.active;
 
                 if (entity.id_forms == 0 || entity.id_rol == 0 || entity.id_permission == 0)
@@ -118,7 +118,7 @@ namespace Data.Repository
                     return false;
                 }
 
-                _context.FormRolPermission.Update(entity);
+                _context.Set<FormRolPermission>().Update(entity);
                 await _context.SaveChangesAsync();
                 return true;
             }
@@ -133,11 +133,11 @@ namespace Data.Repository
         {
             try
             {
-                var entity = await _context.FormRolPermission.FindAsync(id);
+                var entity = await _context.Set<FormRolPermission>().FindAsync(id);
                 if (entity == null) return false;
 
                 entity.active = false; // Set active to false for logical delete
-                _context.FormRolPermission.Update(entity);
+                _context.Set<FormRolPermission>().Update(entity);
                 await _context.SaveChangesAsync();
                 return true;
             }

@@ -13,10 +13,10 @@ namespace Data.Repository
 {
     public class InvoiceRepository : IInvoiceRepository
     {
-        protected readonly ApplicationDbContext _context;
+        private readonly IApplicationDbContext _context; // Cambiado a IApplicationDbContext
         private readonly ILogger<InvoiceRepository> _logger;
 
-        public InvoiceRepository(ApplicationDbContext context, ILogger<InvoiceRepository> logger)
+        public InvoiceRepository(IApplicationDbContext context, ILogger<InvoiceRepository> logger) // Cambiado a IApplicationDbContext
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
@@ -26,7 +26,7 @@ namespace Data.Repository
         {
             try
             {
-                await _context.Invoice.AddAsync(entity);
+                await _context.Set<Invoice>().AddAsync(entity); // Usar _context.Set<Invoice>()
                 await _context.SaveChangesAsync();
                 return entity;
             }
@@ -41,10 +41,10 @@ namespace Data.Repository
         {
             try
             {
-                var invoiceToDelete = await _context.Invoice.FindAsync(id);
+                var invoiceToDelete = await _context.Set<Invoice>().FindAsync(id); // Usar _context.Set<Invoice>()
                 if (invoiceToDelete != null)
                 {
-                    _context.Invoice.Remove(invoiceToDelete);
+                    _context.Set<Invoice>().Remove(invoiceToDelete); // Usar _context.Set<Invoice>()
                     await _context.SaveChangesAsync();
                     return true;
                 }
@@ -61,7 +61,7 @@ namespace Data.Repository
         {
             try
             {
-                return await _context.Invoice
+                return await _context.Set<Invoice>() // Usar _context.Set<Invoice>()
                     .Include(i => i.vehiclehistory) // Asumo que tienes esta relación
                     .ToListAsync();
             }
@@ -76,9 +76,8 @@ namespace Data.Repository
         {
             try
             {
-                return await _context.Invoice
-                    .Include(i => i.vehiclehistory
-                    ) // Asumo que tienes esta relación
+                return await _context.Set<Invoice>() // Usar _context.Set<Invoice>()
+                    .Include(i => i.vehiclehistory) // Asumo que tienes esta relación
                     .FirstOrDefaultAsync(i => i.id == id);
             }
             catch (Exception ex)

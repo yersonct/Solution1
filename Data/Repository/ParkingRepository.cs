@@ -13,10 +13,10 @@ namespace Data.Repository
 {
     public class ParkingRepository : IParkingRepository
     {
-        protected readonly ApplicationDbContext _context;
+        private readonly IApplicationDbContext _context; // Cambiado a IApplicationDbContext
         private readonly ILogger<ParkingRepository> _logger;
 
-        public ParkingRepository(ApplicationDbContext context, ILogger<ParkingRepository> logger)
+        public ParkingRepository(IApplicationDbContext context, ILogger<ParkingRepository> logger) // Cambiado a IApplicationDbContext
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
@@ -26,7 +26,7 @@ namespace Data.Repository
         {
             try
             {
-                await _context.Parkings.AddAsync(entity);
+                await _context.Set<Parking>().AddAsync(entity); // Usar _context.Set<Parking>()
                 await _context.SaveChangesAsync();
                 return entity;
             }
@@ -41,10 +41,10 @@ namespace Data.Repository
         {
             try
             {
-                var parkingToDelete = await _context.Parkings.FindAsync(id);
+                var parkingToDelete = await _context.Set<Parking>().FindAsync(id); // Usar _context.Set<Parking>()
                 if (parkingToDelete != null)
                 {
-                    _context.Parkings.Remove(parkingToDelete);
+                    _context.Set<Parking>().Remove(parkingToDelete); // Usar _context.Set<Parking>()
                     await _context.SaveChangesAsync();
                     return true;
                 }
@@ -61,7 +61,7 @@ namespace Data.Repository
         {
             try
             {
-                return await _context.Parkings
+                return await _context.Set<Parking>() // Usar _context.Set<Parking>()
                     .Include(p => p.camara) // Solo si tienes esta propiedad configurada
                     .Include(p => p.VehicleHistoryParkingRates)
                     .ToListAsync();
@@ -77,7 +77,7 @@ namespace Data.Repository
         {
             try
             {
-                return await _context.Parkings
+                return await _context.Set<Parking>() // Usar _context.Set<Parking>()
                     .Include(p => p.camara) // Solo si tienes esta propiedad configurada
                     .Include(p => p.VehicleHistoryParkingRates)
                     .FirstOrDefaultAsync(p => p.id == id);

@@ -13,10 +13,10 @@ namespace Data.Repository
 {
     public class PermissionRepository : IPermissionRepository
     {
-        protected readonly ApplicationDbContext _context;
+        private readonly IApplicationDbContext _context; // Cambiado a IApplicationDbContext
         private readonly ILogger<PermissionRepository> _logger;
 
-        public PermissionRepository(ApplicationDbContext context, ILogger<PermissionRepository> logger)
+        public PermissionRepository(IApplicationDbContext context, ILogger<PermissionRepository> logger) // Cambiado a IApplicationDbContext
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
@@ -27,7 +27,7 @@ namespace Data.Repository
             try
             {
                 entity.active = true; // Set active to true on add
-                await _context.Set<Permission>().AddAsync(entity);
+                await _context.Set<Permission>().AddAsync(entity); // Usar _context.Set<Permission>()
                 await _context.SaveChangesAsync();
                 return entity;
             }
@@ -42,7 +42,7 @@ namespace Data.Repository
         {
             try
             {
-                var permissionToDelete = await _context.Set<Permission>().FindAsync(id);
+                var permissionToDelete = await _context.Set<Permission>().FindAsync(id); // Usar _context.Set<Permission>()
                 if (permissionToDelete != null)
                 {
                     permissionToDelete.active = false; // Set active to false for logical delete
@@ -63,7 +63,7 @@ namespace Data.Repository
         {
             try
             {
-                return await _context.Set<Permission>()
+                return await _context.Set<Permission>() // Usar _context.Set<Permission>()
                     .Include(p => p.FormRolPermissions)
                         .ThenInclude(frp => frp.Forms)
                     .Where(p => p.active) // Filter for active permissions
@@ -80,7 +80,7 @@ namespace Data.Repository
         {
             try
             {
-                return await _context.Set<Permission>()
+                return await _context.Set<Permission>() // Usar _context.Set<Permission>()
                     .Include(p => p.FormRolPermissions)
                         .ThenInclude(frp => frp.Forms)
                     .FirstOrDefaultAsync(u => u.id == id && u.active); // Get only active permission

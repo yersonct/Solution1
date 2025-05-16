@@ -13,10 +13,10 @@ namespace Data.Repository
 {
     public class RatesRepository : IRatesRepository
     {
-        protected readonly ApplicationDbContext _context;
+        private readonly IApplicationDbContext _context; // Cambiado a IApplicationDbContext
         private readonly ILogger<RatesRepository> _logger;
 
-        public RatesRepository(ApplicationDbContext context, ILogger<RatesRepository> logger)
+        public RatesRepository(IApplicationDbContext context, ILogger<RatesRepository> logger) // Cambiado a IApplicationDbContext
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
@@ -26,7 +26,7 @@ namespace Data.Repository
         {
             try
             {
-                await _context.Set<Rates>().AddAsync(entity);
+                await _context.Set<Rates>().AddAsync(entity); // Usar _context.Set<Rates>()
                 await _context.SaveChangesAsync();
                 return entity;
             }
@@ -41,10 +41,10 @@ namespace Data.Repository
         {
             try
             {
-                var ratesToDelete = await _context.Set<Rates>().FindAsync(id);
+                var ratesToDelete = await _context.Set<Rates>().FindAsync(id); // Usar _context.Set<Rates>()
                 if (ratesToDelete != null)
                 {
-                    _context.Set<Rates>().Remove(ratesToDelete);
+                    _context.Set<Rates>().Remove(ratesToDelete); // Usar _context.Set<Rates>()
                     await _context.SaveChangesAsync();
                     return true;
                 }
@@ -61,7 +61,7 @@ namespace Data.Repository
         {
             try
             {
-                return await _context.Set<Rates>()
+                return await _context.Set<Rates>() // Usar _context.Set<Rates>()
                     .Include(r => r.TypeRates) // Assuming you have a navigation property to TypeRates
                     .ToListAsync();
             }
@@ -76,7 +76,7 @@ namespace Data.Repository
         {
             try
             {
-                return await _context.Set<Rates>()
+                return await _context.Set<Rates>() // Usar _context.Set<Rates>()
                     .Include(r => r.TypeRates) // Assuming you have a navigation property to TypeRates
                     .FirstOrDefaultAsync(r => r.id == id);
             }

@@ -13,10 +13,10 @@ namespace Data.Repository
 {
     public class VehicleHistoryParkingRatesRepository : IVehicleHistoryParkingRatesRepository
     {
-        protected readonly ApplicationDbContext _context;
+        private readonly IApplicationDbContext _context; // Cambiado a IApplicationDbContext
         private readonly ILogger<VehicleHistoryParkingRatesRepository> _logger;
 
-        public VehicleHistoryParkingRatesRepository(ApplicationDbContext context, ILogger<VehicleHistoryParkingRatesRepository> logger)
+        public VehicleHistoryParkingRatesRepository(IApplicationDbContext context, ILogger<VehicleHistoryParkingRatesRepository> logger) // Cambiado a IApplicationDbContext
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
@@ -26,7 +26,7 @@ namespace Data.Repository
         {
             try
             {
-                await _context.VehicleHistoryParkingRates.AddAsync(entity);
+                await _context.Set<VehicleHistoryParkingRates>().AddAsync(entity);
                 await _context.SaveChangesAsync();
                 return entity;
             }
@@ -41,10 +41,10 @@ namespace Data.Repository
         {
             try
             {
-                var toDelete = await _context.VehicleHistoryParkingRates.FindAsync(id);
+                var toDelete = await _context.Set<VehicleHistoryParkingRates>().FindAsync(id);
                 if (toDelete != null)
                 {
-                    _context.VehicleHistoryParkingRates.Remove(toDelete);
+                    _context.Set<VehicleHistoryParkingRates>().Remove(toDelete);
                     await _context.SaveChangesAsync();
                     return true;
                 }
@@ -61,7 +61,7 @@ namespace Data.Repository
         {
             try
             {
-                return await _context.VehicleHistoryParkingRates.ToListAsync();
+                return await _context.Set<VehicleHistoryParkingRates>().ToListAsync();
             }
             catch (Exception ex)
             {
@@ -74,7 +74,7 @@ namespace Data.Repository
         {
             try
             {
-                return await _context.VehicleHistoryParkingRates.FindAsync(id);
+                return await _context.Set<VehicleHistoryParkingRates>().FindAsync(id);
             }
             catch (Exception ex)
             {

@@ -13,10 +13,10 @@ namespace Data.Repository
 {
     public class UserRepository : IUserRepository, IloginRepository
     {
-        private readonly ApplicationDbContext _context;
+        private readonly IApplicationDbContext _context; // Cambiado a IApplicationDbContext
         private readonly ILogger<UserRepository> _logger;
 
-        public UserRepository(ApplicationDbContext context, ILogger<UserRepository> logger)
+        public UserRepository(IApplicationDbContext context, ILogger<UserRepository> logger) // Cambiado a IApplicationDbContext
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
@@ -143,7 +143,7 @@ namespace Data.Repository
 
         public async Task<User> GetUserByUsernameAsync(string username)
         {
-            return await _context.Users.FirstOrDefaultAsync(u => u.username == username);
+            return await _context.Set<User>().FirstOrDefaultAsync(u => u.username == username);
         }
     }
 }

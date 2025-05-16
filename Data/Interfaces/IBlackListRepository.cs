@@ -11,6 +11,7 @@ namespace Data.Interfaces
     {
         Task AddBlacklistAsync(BlackList entity);
         Task DeleteAsync(BlackList entity);
+        Task<IEnumerable<BlackList>> GetAllAsync();
         Task<IEnumerable<BlackList>> GetAllWithClientAsync();
         Task<BlackList> GetByIdWithClientAsync(int id);
     }

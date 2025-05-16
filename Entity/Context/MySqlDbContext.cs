@@ -7,10 +7,11 @@ using System.Text;
 using System.Threading.Tasks;
 using Data.Interfaces;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 
 namespace Entity.Context
 {
-    public class MySqlDbContext : DbContext, IApplicationDbContext
+    public class MySqlDbContext : DbContext, IApplicationDbContextWithEntry
     {
         public MySqlDbContext(DbContextOptions<MySqlDbContext> options) : base(options) { }
 
@@ -24,12 +25,18 @@ namespace Entity.Context
         public DbSet<Rol> Rol { get; set; }
         public DbSet<FormModule> FormModule { get; set; }
         public DbSet<FormRolPermission> FormRolPermission { get; set; }
+        public DbSet<VehicleHistory> VehicleHistories { get; set; }
+
 
         public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         {
             return await base.SaveChangesAsync(cancellationToken);
         }
 
+        public EntityEntry Entry(object entity)
+        {
+            return base.Entry(entity);
+        }
         public DatabaseFacade Database => base.Database;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

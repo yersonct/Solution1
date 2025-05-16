@@ -13,10 +13,10 @@ namespace Data.Repository
 {
     public class ParkingRepository : IParkingRepository
     {
-        private readonly IApplicationDbContext _context; // Cambiado a IApplicationDbContext
+        private readonly IApplicationDbContextWithEntry _context; // Cambiado a IApplicationDbContext
         private readonly ILogger<ParkingRepository> _logger;
 
-        public ParkingRepository(IApplicationDbContext context, ILogger<ParkingRepository> logger) // Cambiado a IApplicationDbContext
+        public ParkingRepository(IApplicationDbContextWithEntry context, ILogger<ParkingRepository> logger) // Cambiado a IApplicationDbContext
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));

@@ -7,10 +7,11 @@ using System.Text;
 using System.Threading.Tasks;
 using Data.Interfaces;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 
 namespace Entity.Context
 {
-    public class PostgreSqlDbContext : DbContext, IApplicationDbContext
+    public class PostgreSqlDbContext : DbContext, IApplicationDbContextWithEntry
     {
         public PostgreSqlDbContext(DbContextOptions<PostgreSqlDbContext> options) : base(options) { }
 
@@ -24,6 +25,8 @@ namespace Entity.Context
         public DbSet<Rol> Rol { get; set; }
         public DbSet<FormModule> FormModule { get; set; }
         public DbSet<FormRolPermission> FormRolPermission { get; set; }
+        public DbSet<VehicleHistory> VehicleHistories { get; set; }
+
 
         public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         {
@@ -32,6 +35,10 @@ namespace Entity.Context
 
         public DatabaseFacade Database => base.Database;
 
+        public EntityEntry Entry(object entity)
+        {
+            return base.Entry(entity);
+        }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);

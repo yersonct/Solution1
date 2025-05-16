@@ -13,10 +13,10 @@ namespace Data.Repository
 {
     public class TypeVehicleRepository : ITypeVehicleRepository
     {
-        private readonly IApplicationDbContext _context; // Cambiado a IApplicationDbContext
+        private readonly IApplicationDbContextWithEntry _context; // Cambiado a IApplicationDbContext
         private readonly ILogger<TypeVehicleRepository> _logger;
 
-        public TypeVehicleRepository(IApplicationDbContext context, ILogger<TypeVehicleRepository> logger) // Cambiado a IApplicationDbContext
+        public TypeVehicleRepository(IApplicationDbContextWithEntry context, ILogger<TypeVehicleRepository> logger) // Cambiado a IApplicationDbContext
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));

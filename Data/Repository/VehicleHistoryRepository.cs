@@ -12,10 +12,10 @@ namespace Data.Repository
 {
     public class VehicleHistoryRepository : IVehicleHistoryRepository
     {
-        protected readonly IApplicationDbContext _context;
+        protected readonly IApplicationDbContextWithEntry _context;
         private readonly ILogger<VehicleHistoryRepository> _logger;
 
-        public VehicleHistoryRepository(IApplicationDbContext context, ILogger<VehicleHistoryRepository> logger)
+        public VehicleHistoryRepository(IApplicationDbContextWithEntry context, ILogger<VehicleHistoryRepository> logger)
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
@@ -71,9 +71,9 @@ namespace Data.Repository
                     .Select(vh => new VehicleHistoryDTO
                     {
                         id = vh.id,
-                        totaltime = vh.totaltime,
-                        id_registeredvehicle = vh.id_registeredvehicle,
-                        id_typevehicle = vh.id_typevehicle
+                        TotalTime = vh.totaltime,
+                        RegisteredVehicleId = vh.id_registeredvehicle,
+                        TypeVehicleId = vh.id_typevehicle
                     })
                     .ToListAsync();
             }
@@ -93,9 +93,9 @@ namespace Data.Repository
                     .Select(vh => new VehicleHistoryDTO
                     {
                         id = vh.id,
-                        totaltime = vh.totaltime,
-                        id_registeredvehicle = vh.id_registeredvehicle,
-                        id_typevehicle = vh.id_typevehicle
+                        TotalTime = vh.totaltime,
+                        RegisteredVehicleId = vh.id_registeredvehicle,
+                        TypeVehicleId = vh.id_typevehicle
                     })
                     .FirstOrDefaultAsync();
             }

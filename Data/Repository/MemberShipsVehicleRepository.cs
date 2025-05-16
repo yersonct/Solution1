@@ -12,10 +12,10 @@ namespace Data.Repository
 {
     public class MembershipsVehicleRepository : IMembershipsVehicleRepository
     {
-        private readonly IApplicationDbContext _context; // Cambiado a IApplicationDbContext
+        private readonly IApplicationDbContextWithEntry _context; // Cambiado a IApplicationDbContext
         private readonly ILogger<MembershipsVehicleRepository> _logger;
 
-        public MembershipsVehicleRepository(IApplicationDbContext context, ILogger<MembershipsVehicleRepository> logger) // Cambiado a IApplicationDbContext
+        public MembershipsVehicleRepository(IApplicationDbContextWithEntry context, ILogger<MembershipsVehicleRepository> logger) // Cambiado a IApplicationDbContext
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));

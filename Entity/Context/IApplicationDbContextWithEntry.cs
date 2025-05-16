@@ -1,13 +1,18 @@
-﻿using Entity.Model;
+﻿using Data.Interfaces;
+using Entity.Model;
 using Microsoft.EntityFrameworkCore;
-using System.Threading;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore.Infrastructure;
 
-namespace Data.Interfaces
+namespace Entity.Context
 {
-    public interface IApplicationDbContext
+    public interface IApplicationDbContextWithEntry : IApplicationDbContext
     {
+        EntityEntry Entry(object entity);
         DbSet<Camara> Camara { get; set; }
         DbSet<User> Users { get; set; }
         DbSet<Person> Persons { get; set; }
@@ -19,8 +24,5 @@ namespace Data.Interfaces
         DbSet<FormModule> FormModule { get; set; }
         DbSet<FormRolPermission> FormRolPermission { get; set; }
         DbSet<VehicleHistory> VehicleHistories { get; set; }
-        DbSet<TEntity> Set<TEntity>() where TEntity : class;
-        Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
-        DatabaseFacade Database { get; }
     }
 }

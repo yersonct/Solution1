@@ -11,9 +11,9 @@ namespace Repository
 {
     public class Repository<T> : IRepository<T> where T : class
     {
-        protected readonly IApplicationDbContext _context; // Cambiado a IApplicationDbContext
+        protected readonly IApplicationDbContextWithEntry _context; // Cambiado a IApplicationDbContext
 
-        public Repository(IApplicationDbContext context) // Cambiado a IApplicationDbContext
+        public Repository(IApplicationDbContextWithEntry context) // Cambiado a IApplicationDbContext
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));
         }
@@ -37,7 +37,7 @@ namespace Repository
             try
             {
                 _context.Set<T>().Remove(entity);  // Elimina la entidad
-                _context.SaveChanges();           // Guarda los cambios
+                _context.SaveChangesAsync();           // Guarda los cambios
             }
             catch (Exception ex)
             {
@@ -94,7 +94,7 @@ namespace Repository
             try
             {
                 _context.Set<T>().Update(entity);  // Actualiza la entidad
-                _context.SaveChanges();           // Guarda los cambios
+                _context.SaveChangesAsync();           // Guarda los cambios
             }
             catch (Exception ex)
             {

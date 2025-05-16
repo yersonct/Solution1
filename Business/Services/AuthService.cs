@@ -26,7 +26,7 @@ namespace Business.Services
         private readonly IApplicationDbContext _context;    
         private readonly ILogger<AuthService> _logger;
 
-        public AuthService(IloginRepository userRepository, IPersonRepository personRepository, IConfiguration configuration, ApplicationDbContext context, ILogger<AuthService> logger)
+        public AuthService(IloginRepository userRepository, IPersonRepository personRepository, IConfiguration configuration, IApplicationDbContext context, ILogger<AuthService> logger)
         {
             _userRepository = userRepository;
             _personRepository = personRepository;

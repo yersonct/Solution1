@@ -12,10 +12,10 @@ namespace Data.Repository
 {
     public class PersonRepository : IPersonRepository
     {
-        private readonly IApplicationDbContext _context; // Cambiado a IApplicationDbContext
+        private readonly IApplicationDbContextWithEntry _context; // Cambiado a IApplicationDbContext
         private readonly ILogger<PersonRepository> _logger;
 
-        public PersonRepository(IApplicationDbContext context, ILogger<PersonRepository> logger) // Cambiado a IApplicationDbContext
+        public PersonRepository(IApplicationDbContextWithEntry context, ILogger<PersonRepository> logger) // Cambiado a IApplicationDbContext
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));

@@ -10,10 +10,10 @@ namespace Data.Repository
 {
     public class CamaraRepository : ICamaraRepository
     {
-        private readonly IApplicationDbContext _context; // Cambiado a IApplicationDbContext
+        private readonly IApplicationDbContextWithEntry _context; // Cambiado a IApplicationDbContext
         private readonly ILogger<CamaraRepository> _logger;
 
-        public CamaraRepository(IApplicationDbContext context, ILogger<CamaraRepository> logger) // Cambiado a IApplicationDbContext
+        public CamaraRepository(IApplicationDbContextWithEntry context, ILogger<CamaraRepository> logger) // Cambiado a IApplicationDbContext
         {
             _context = context;
             _logger = logger;

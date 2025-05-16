@@ -13,10 +13,10 @@ namespace Data.Repository
 {
     public class PermissionRepository : IPermissionRepository
     {
-        private readonly IApplicationDbContext _context; // Cambiado a IApplicationDbContext
+        private readonly IApplicationDbContextWithEntry _context; // Cambiado a IApplicationDbContext
         private readonly ILogger<PermissionRepository> _logger;
 
-        public PermissionRepository(IApplicationDbContext context, ILogger<PermissionRepository> logger) // Cambiado a IApplicationDbContext
+        public PermissionRepository(IApplicationDbContextWithEntry context, ILogger<PermissionRepository> logger) // Cambiado a IApplicationDbContext
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));

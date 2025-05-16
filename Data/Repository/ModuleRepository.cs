@@ -13,10 +13,10 @@ namespace Data.Repository
 {
     public class ModuleRepository : IModuleRepository
     {
-        private readonly IApplicationDbContext _context; // Cambiado a IApplicationDbContext
+        private readonly IApplicationDbContextWithEntry _context; // Cambiado a IApplicationDbContext
         private readonly ILogger<ModuleRepository> _logger;
 
-        public ModuleRepository(IApplicationDbContext context, ILogger<ModuleRepository> logger) // Cambiado a IApplicationDbContext
+        public ModuleRepository(IApplicationDbContextWithEntry context, ILogger<ModuleRepository> logger) // Cambiado a IApplicationDbContext
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));

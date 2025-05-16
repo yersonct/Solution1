@@ -11,9 +11,9 @@ namespace Repository
 {
     public class BlacklistRepository : Repository<BlackList>, IBlacklistRepository
     {
-        private readonly IApplicationDbContext _context; // Cambiado a IApplicationDbContext
+        private readonly IApplicationDbContextWithEntry _context; // Cambiado a IApplicationDbContext
 
-        public BlacklistRepository(IApplicationDbContext context) : base(context) // Cambiado a IApplicationDbContext
+        public BlacklistRepository(IApplicationDbContextWithEntry context) : base(context) // Cambiado a IApplicationDbContext
         {
             _context = context;
         }

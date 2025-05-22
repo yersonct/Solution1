@@ -13,10 +13,10 @@ namespace Data.Repository
 {
     public class FormRolPermissionRepository : IFormRolPermissionRepository
     {
-        private readonly IApplicationDbContext _context; // Cambiado a IApplicationDbContext
+        private readonly IApplicationDbContextWithEntry _context; // Cambiado a IApplicationDbContext
         private readonly ILogger<FormRolPermissionRepository> _logger;
 
-        public FormRolPermissionRepository(IApplicationDbContext context, ILogger<FormRolPermissionRepository> logger) // Cambiado a IApplicationDbContext
+        public FormRolPermissionRepository(IApplicationDbContextWithEntry context, ILogger<FormRolPermissionRepository> logger) // Cambiado a IApplicationDbContext
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
@@ -35,7 +35,7 @@ namespace Data.Repository
                     {
                         id = x.id,
                         formName = x.Forms.name,
-                        rolName = x.Rol.Name,
+                        rolName = x.Rol.name,
                         permissionName = x.Permission.name,
                         active = x.active
                     })
@@ -61,7 +61,7 @@ namespace Data.Repository
                     {
                         id = x.id,
                         formName = x.Forms.name,
-                        rolName = x.Rol.Name,
+                        rolName = x.Rol.name,
                         permissionName = x.Permission.name,
                         active = x.active
                     })
@@ -108,7 +108,7 @@ namespace Data.Repository
 
                 // Assuming you have DbSet properties for Forms, Rol, and Permission in IApplicationDbContext
                 entity.id_forms = await _context.Set<Forms>().Where(f => f.name == dto.formName).Select(f => f.id).SingleOrDefaultAsync();
-                entity.id_rol = await _context.Set<Rol>().Where(r => r.Name == dto.rolName).Select(r => r.id).SingleOrDefaultAsync();
+                entity.id_rol = await _context.Set<Rol>().Where(r => r.name == dto.rolName).Select(r => r.id).SingleOrDefaultAsync();
                 entity.id_permission = await _context.Set<Permission>().Where(p => p.name == dto.permissionName).Select(p => p.id).SingleOrDefaultAsync();
                 entity.active = dto.active;
 

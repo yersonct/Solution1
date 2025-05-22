@@ -1,4 +1,5 @@
-﻿using ANPRVisionAPI.Extensions;
+﻿// Program.cs
+using ANPRVisionAPI.Extensions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
@@ -22,7 +23,7 @@ builder.Services.AddSwaggerConfiguration();
 // 🔹 FluentValidation Configuration
 builder.Services.AddFluentValidationConfiguration();
 
-// 🔹 PostgreSQL Database Context
+// 🔹 Database Context
 builder.Services.AddDatabaseContext(builder.Configuration);
 
 // ⚙️ Configure Authentication (Both JWT and OAuth 2.0)
@@ -50,6 +51,9 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+// ⚙️ Aplicar Migraciones al iniciar la aplicación (una vez) de forma limpia
+await app.Services.UseMigrations();
 
 // ⚙️ Run Application
 app.Run();

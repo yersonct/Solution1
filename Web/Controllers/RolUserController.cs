@@ -38,7 +38,7 @@ namespace API.Controllers
                 var results = rolUsers
                     .Select(ru => new
                     {
-                        RolName = ru.Rol?.Name,
+                        RolName = ru.Rol?.name,
                         UserName = ru.User?.username,
                         Active = ru.active
                     })
@@ -64,7 +64,7 @@ namespace API.Controllers
 
                 return Ok(new
                 {
-                    RolName = rolUser.Rol?.Name,
+                    RolName = rolUser.Rol?.name,
                     UserName = rolUser.User?.username,
                     Active = rolUser.active
                 });
@@ -99,7 +99,7 @@ namespace API.Controllers
 
                 return CreatedAtAction(nameof(GetRolUserById), new { id = createdRolUser.id }, new
                 {
-                    RolName = rol?.Name,
+                    RolName = rol?.name,
                     UserName = user?.username,
                     Active = createdRolUser.active
                 });

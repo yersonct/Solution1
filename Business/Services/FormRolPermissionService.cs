@@ -89,7 +89,7 @@ namespace Business.Services
                 {
                     id = entity.id,
                     formName = entity.Forms?.name ?? "",
-                    rolName = entity.Rol?.Name ?? "",
+                    rolName = entity.Rol?.name ?? "",
                     permissionName = entity.Permission?.name ?? "",
                     active = entity.active
                 };

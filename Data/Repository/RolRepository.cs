@@ -26,7 +26,7 @@ namespace Data.Repository
         {
             try
             {
-                entity.Active = true; // Establecer Active en true al agregar
+                entity.active = true; // Establecer Active en true al agregar
                 await _context.Set<Rol>().AddAsync(entity);
                 await _context.SaveChangesAsync();
                 return entity;
@@ -45,7 +45,7 @@ namespace Data.Repository
                 var rolToDelete = await _context.Set<Rol>().FindAsync(id);
                 if (rolToDelete != null)
                 {
-                    rolToDelete.Active = false; // Marcar como inactivo en lugar de eliminar
+                    rolToDelete.active = false; // Marcar como inactivo en lugar de eliminar
                     _context.Entry(rolToDelete).State = EntityState.Modified;
                     await _context.SaveChangesAsync();
                     return true;
@@ -67,7 +67,7 @@ namespace Data.Repository
                     .Include(r => r.FormRolPermissions)
                         .ThenInclude(frp => frp.Forms)
                     .Include(r => r.RolUsers)
-                    .Where(r => r.Active) // Filtrar solo roles activos
+                    .Where(r => r.active) // Filtrar solo roles activos
                     .ToListAsync();
             }
             catch (Exception ex)
@@ -85,7 +85,7 @@ namespace Data.Repository
                     .Include(r => r.FormRolPermissions)
                         .ThenInclude(frp => frp.Forms)
                     .Include(r => r.RolUsers)
-                    .FirstOrDefaultAsync(r => r.id == id && r.Active); // Filtrar solo roles activos
+                    .FirstOrDefaultAsync(r => r.id == id && r.active); // Filtrar solo roles activos
             }
             catch (Exception ex)
             {

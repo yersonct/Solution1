@@ -1,8 +1,12 @@
-﻿using Data.Interfaces;
+﻿// ANPRVisionAPI.Extensions/DatabaseCollectionExtensions.cs
+using Data.Interfaces; // Asegúrate de que esta interfaz exista y contenga lo que esperas
 using Entity.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using System;
+using System.Threading.Tasks;
 
 namespace ANPRVisionAPI.Extensions
 {
@@ -10,35 +14,65 @@ namespace ANPRVisionAPI.Extensions
     {
         public static IServiceCollection AddDatabaseContext(this IServiceCollection services, IConfiguration configuration)
         {
-            // Determina el tipo de base de datos desde la configuración
             var databaseType = configuration.GetSection("DatabaseSettings")["DatabaseType"]?.ToLower();
+            string connectionString;
 
-            // Registra la fábrica de DbContext
-            services.AddScoped<IDbContextFactory>(provider =>
+            switch (databaseType)
             {
-                switch (databaseType)
-                {
-                    case "mysql":
-                        return new MySqlDbContextFactory(configuration);
-                    case "postgresql":
-                        return new PostgreSqlDbContextFactory(configuration);
-                    case "sqlserver":
-                        return new SqlServerDbContextFactory(configuration);
-                    default:
-                        throw new ArgumentException($"Unsupported database type: {databaseType}");
-                }
-            });
-
-            // Registra los DbContext con un alcance más corto (Transient)
-            // La fábrica se encargará de crear las instancias.
-            services.AddTransient(provider => provider.GetRequiredService<IDbContextFactory>().CreateDbContext());
-
-            // Registra las interfaces IApplicationDbContext e IApplicationDbContextWithEntry
-            // para que usen el DbContext creado por la fábrica.  Esto es CRUCIAL.
-            services.AddScoped<IApplicationDbContext>(provider => provider.GetRequiredService<DbContext>() as IApplicationDbContext);
-            services.AddScoped<IApplicationDbContextWithEntry>(provider => provider.GetRequiredService<DbContext>() as IApplicationDbContextWithEntry);
+                case "mysql":
+                    connectionString = configuration.GetConnectionString("MySqlConnection");
+                    services.AddDbContext<MySqlDbContext>(options =>
+                        options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
+                    // Registra MySqlDbContext como la implementación de IApplicationDbContextWithEntry
+                    services.AddScoped<IApplicationDbContextWithEntry, MySqlDbContext>();
+                    break;
+                case "postgresql":
+                    connectionString = configuration.GetConnectionString("LocalPostgres");
+                    services.AddDbContext<PostgreSqlDbContext>(options =>
+                        options.UseNpgsql(connectionString));
+                    // Registra PostgreSqlDbContext como la implementación de IApplicationDbContextWithEntry
+                    services.AddScoped<IApplicationDbContextWithEntry, PostgreSqlDbContext>();
+                    break;
+                case "sqlserver":
+                    connectionString = configuration.GetConnectionString("SqlServerConnection");
+                    services.AddDbContext<SqlServerDbContext>(options =>
+                        options.UseSqlServer(connectionString));
+                    // Registra SqlServerDbContext como la implementación de IApplicationDbContextWithEntry
+                    services.AddScoped<IApplicationDbContextWithEntry, SqlServerDbContext>();
+                    break;
+                default:
+                    throw new InvalidOperationException($"Unsupported database type: {databaseType}");
+            }
 
             return services;
+        }
+
+        public static async Task UseMigrations(this IServiceProvider serviceProvider)
+        {
+            using (var scope = serviceProvider.CreateScope())
+            {
+                var services = scope.ServiceProvider;
+                try
+                {
+                    // CAMBIO CLAVE: Se resuelve IApplicationDbContextWithEntry, que es la interfaz que tus DbContexts específicos implementan y que estás registrando.
+                    var context = services.GetRequiredService<IApplicationDbContextWithEntry>() as DbContext;
+
+                    if (context != null)
+                    {
+                        await context.Database.MigrateAsync(); // Usar MigrateAsync para ser asíncrono
+                        Console.WriteLine("Migraciones aplicadas exitosamente.");
+                    }
+                    else
+                    {
+                        Console.WriteLine("Error: No se pudo resolver la implementación de IApplicationDbContextWithEntry para la migración.");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    var logger = services.GetRequiredService<ILogger<Program>>();
+                    logger.LogError(ex, "Ocurrió un error al migrar o inicializar la base de datos.");
+                }
+            }
         }
     }
 }

@@ -23,10 +23,10 @@ namespace Business.Services
         private readonly IloginRepository _userRepository;
         private readonly IPersonRepository _personRepository;
         private readonly IConfiguration _configuration;
-        private readonly IApplicationDbContext _context;    
+        private readonly IApplicationDbContextWithEntry _context;    
         private readonly ILogger<AuthService> _logger;
 
-        public AuthService(IloginRepository userRepository, IPersonRepository personRepository, IConfiguration configuration, IApplicationDbContext context, ILogger<AuthService> logger)
+        public AuthService(IloginRepository userRepository, IPersonRepository personRepository, IConfiguration configuration, IApplicationDbContextWithEntry context, ILogger<AuthService> logger)
         {
             _userRepository = userRepository;
             _personRepository = personRepository;

@@ -34,8 +34,8 @@ namespace Business.Services
 
         public async Task<Rol> CreateRolAsync(Rol rol)
         {
-            LogicValidations.ValidateRolName(rol.Name, _logger);
-            LogicValidations.ValidateRolDescription(rol.Description, _logger);
+            LogicValidations.ValidateRolName(rol.name, _logger);
+            LogicValidations.ValidateRolDescription(rol.description, _logger);
             // Aquí podrías agregar lógica de negocio antes de crear el rol
             // No es necesario establecer Active a true aquí si ya lo haces en el repositorio
             return await _rolRepository.AddAsync(rol);
@@ -48,8 +48,8 @@ namespace Business.Services
             LogicValidations.ValidateExistingRol(existingRol, rol.id, _logger);
 
             // Validaciones usando la clase LogicValidations
-            LogicValidations.ValidateRolName(rol.Name, _logger);
-            LogicValidations.ValidateRolDescription(rol.Description, _logger);
+            LogicValidations.ValidateRolName(rol.name, _logger);
+            LogicValidations.ValidateRolDescription(rol.description, _logger);
             return await _rolRepository.UpdateAsync(rol);
         }
 

@@ -106,7 +106,7 @@ namespace API.Controllers
             {
                 id = formRolPermissionDto.id,
                 Forms = new Forms { name = formRolPermissionDto.formName },
-                Rol = new Rol { Name = formRolPermissionDto.rolName },
+                Rol = new Rol { name = formRolPermissionDto.rolName },
                 Permission = new Permission { name = formRolPermissionDto.permissionName },
                 active = formRolPermissionDto.active
             };

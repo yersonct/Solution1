@@ -1,7 +1,7 @@
-﻿using Data.Interfaces;
-using Entity.Model;
+﻿using Entity.Model;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace Entity.Context
 {
-    public interface IApplicationDbContextWithEntry : IApplicationDbContext
+    public interface IApplicationDbContextWithEntry 
     {
         EntityEntry Entry(object entity);
         DbSet<Camara> Camara { get; set; }
@@ -24,5 +24,8 @@ namespace Entity.Context
         DbSet<FormModule> FormModule { get; set; }
         DbSet<FormRolPermission> FormRolPermission { get; set; }
         DbSet<VehicleHistory> VehicleHistories { get; set; }
+        DbSet<TEntity> Set<TEntity>() where TEntity : class;
+        Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
+        DatabaseFacade Database { get; }
     }
 }

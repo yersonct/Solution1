@@ -9,9 +9,9 @@ namespace Entity.Model
     public class Rol
     {
         public int id { get; set; }
-        public string Name { get; set; }
-        public string Description { get; set; }
-        public bool Active { get; set; }
+        public string name { get; set; }
+        public string description { get; set; }
+        public bool active { get; set; }
         public List<RolUser> RolUsers { get; set; } = new List<RolUser>();
         public List<FormRolPermission> FormRolPermissions { get; set; } = new List<FormRolPermission>();
     }

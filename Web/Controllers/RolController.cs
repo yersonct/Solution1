@@ -30,9 +30,9 @@ namespace API.Controllers
             var rolDtos = roles.Select(r => new RolDTO
             {
                 id = r.id,
-                Name = r.Name,
-                Description = r.Description,
-                Active = r.Active
+                Name = r.name,
+                Description = r.description,
+                Active = r.active
             }).ToList();
             return Ok(rolDtos);
         }
@@ -49,9 +49,9 @@ namespace API.Controllers
             var rolDto = new RolDTO
             {
                 id = rol.id,
-                Name = rol.Name,
-                Description = rol.Description,
-                Active = rol.Active
+                Name = rol.name,
+                Description = rol.description,
+                Active = rol.active
             };
             return Ok(rolDto);
         }
@@ -66,9 +66,9 @@ namespace API.Controllers
 
             var rol = new Rol
             {
-                Name = rolDto.Name,
-                Description = rolDto.Description,
-                Active = true // Asegúrate de que se cree como activo
+                name = rolDto.Name,
+                description = rolDto.Description,
+                active = true // Asegúrate de que se cree como activo
             };
 
             var createdRol = await _rolService.CreateRolAsync(rol);
@@ -94,9 +94,9 @@ namespace API.Controllers
                 return NotFound();
             }
 
-            existingRol.Name = rolDto.Name;
-            existingRol.Description = rolDto.Description;
-            existingRol.Active = rolDto.Active; // Permite actualizar el estado activo
+            existingRol.name = rolDto.Name;
+            existingRol.description = rolDto.Description;
+            existingRol.active = rolDto.Active; // Permite actualizar el estado activo
 
             var result = await _rolService.UpdateRolAsync(existingRol);
             if (!result)

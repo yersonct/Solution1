@@ -1,12 +1,14 @@
-﻿using System;
+﻿// API/Controllers/UsersController.cs
+
+using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.Linq; // Mantener si usas LINQ para algo más, aunque aquí ya no es crítico
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging; // Importar para logging
 using Business.Interfaces;
-using Entity.Model;
-using Entity.DTOs;
-using Microsoft.AspNetCore.Authorization; // Asegúrate de tener el namespace de tus DTOs
+using Entity.DTOs; // Usar DTOs para el controlador
+using Microsoft.AspNetCore.Authorization;
 
 namespace API.Controllers
 {
@@ -16,115 +18,100 @@ namespace API.Controllers
     public class UsersController : ControllerBase
     {
         private readonly IUserService _userService;
-        private readonly IPersonService _personService; // Necesitas el servicio de Person para obtener el nombre
+        private readonly ILogger<UsersController> _logger;
 
-        public UsersController(IUserService userService, IPersonService personService)
+        public UsersController(
+            IUserService userService,
+            ILogger<UsersController> logger)
         {
             _userService = userService ?? throw new ArgumentNullException(nameof(userService));
-            _personService = personService ?? throw new ArgumentNullException(nameof(personService));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            // IPersonService fue eliminada de aquí, su uso se delega a UserService
         }
 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<UserDTO>>> GetAllUsers()
         {
-            var users = await _userService.GetAllUsersAsync();
-            var userDtos = await Task.WhenAll(users.Select(async u =>
-            {
-                var person = await _personService.GetPersonByIdAsync(u.id_person);
-                return new UserDTO
-                {
-                    Id = u.id,
-                    UserName = u.username,
-                    PersonId = u.id_person,
-                    Password = u.password,
-                    PersonName = person?.name,
-                    active = u.active
-                };
-            }));
+            _logger.LogInformation("Inicio de GetAllUsers.");
+            // El servicio ahora devuelve los DTOs ya completos con PersonName
+            var userDtos = await _userService.GetAllUsersWithPersonNameAsync();
+            _logger.LogInformation("Se recuperaron {Count} usuarios.", userDtos?.Count() ?? 0);
             return Ok(userDtos);
         }
 
         [HttpGet("{id}")]
         public async Task<ActionResult<UserDTO>> GetUserById(int id)
         {
-            var user = await _userService.GetUserByIdAsync(id);
-            if (user == null)
+            _logger.LogInformation("Inicio de GetUserById para ID: {Id}.", id);
+            // El servicio ahora devuelve el DTO ya completo con PersonName
+            var userDto = await _userService.GetUserWithPersonNameByIdAsync(id);
+            if (userDto == null)
             {
+                _logger.LogWarning("Usuario con ID {Id} no encontrado.", id);
                 return NotFound();
             }
-
-            var person = await _personService.GetPersonByIdAsync(user.id_person);
-            var userDto = new UserDTO
-            {
-                Id = user.id,
-                UserName = user.username,
-                PersonId = user.id_person,
-                PersonName = person?.name,
-                active = user.active
-            };
+            _logger.LogInformation("Usuario con ID {Id} encontrado exitosamente.", id);
             return Ok(userDto);
         }
 
         [HttpPost]
-        public async Task<ActionResult<User>> CreateUser([FromBody] UserCreateDTO userCreateDTO)
+        public async Task<ActionResult<UserDTO>> CreateUser([FromBody] UserCreateDTO userCreateDTO)
         {
+            _logger.LogInformation("Inicio de CreateUser.");
+
             if (!ModelState.IsValid)
             {
+                _logger.LogWarning("Solicitud de creación de usuario inválida. Errores: {Errors}", ModelState);
                 return BadRequest(ModelState);
             }
 
-            var user = new User
-            {
-                username = userCreateDTO.UserName,
-                password = userCreateDTO.Password,
-                id_person = userCreateDTO.PersonId,
-                // Si agregaste el campo Active en User, podrías inicializarlo aquí:
-                 active = true
-            };
+            // El servicio recibe el DTO y devuelve el DTO creado (con ID y PersonName)
+            var createdUserDto = await _userService.CreateUserAsync(userCreateDTO);
+            _logger.LogInformation("Usuario con ID {Id} creado exitosamente.", createdUserDto.Id);
 
-            var createdUser = await _userService.CreateUserAsync(user);
-            return CreatedAtAction(nameof(GetUserById), new { id = createdUser.id }, createdUser);
+            return CreatedAtAction(nameof(GetUserById), new { id = createdUserDto.Id }, createdUserDto);
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateUser(int id, [FromBody] UserCreateDTO userUpdateDTO)
+        public async Task<IActionResult> UpdateUser(int id, [FromBody] UserUpdateDTO userUpdateDTO) // Usamos UserUpdateDTO
         {
-            if (id != userUpdateDTO.id) // Ahora comparamos el id de la ruta con el id del usuario en el DTO
-            {
-                return BadRequest("El ID del usuario en la ruta no coincide con el ID del usuario en el cuerpo de la petición.");
-            }
+            _logger.LogInformation("Inicio de UpdateUser para ID: {Id}.", id);
+
+            // Si decides validar que el ID en el DTO (si lo incluyes) coincida con el ID de la ruta
+            // if (userUpdateDTO.Id != id) {
+            //     _logger.LogWarning("ID de ruta ({RouteId}) no coincide con ID de DTO ({DtoId}) para actualización.", id, userUpdateDTO.Id);
+            //     return BadRequest("El ID del usuario en la ruta no coincide con el ID del usuario en el cuerpo de la petición.");
+            // }
 
             if (!ModelState.IsValid)
             {
+                _logger.LogWarning("Solicitud de actualización de usuario inválida para ID {Id}. Errores: {Errors}", id, ModelState);
                 return BadRequest(ModelState);
             }
 
-            var existingUser = await _userService.GetUserByIdAsync(id);
-            if (existingUser == null)
-            {
-                return NotFound();
-            }
-
-            existingUser.username = userUpdateDTO.UserName;
-            existingUser.password = userUpdateDTO.Password;
-            existingUser.id_person = userUpdateDTO.PersonId;
-
-            var result = await _userService.UpdateUserAsync(existingUser);
+            // El servicio se encarga de buscar el usuario y actualizarlo
+            var result = await _userService.UpdateUserAsync(id, userUpdateDTO);
             if (!result)
             {
-                return StatusCode(500, "Ocurrió un error al actualizar el usuario.");
+                _logger.LogWarning("Usuario con ID {Id} no encontrado o no se pudo actualizar.", id);
+                return NotFound();
             }
+            _logger.LogInformation("Usuario con ID {Id} actualizado exitosamente.", id);
             return NoContent();
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteUser(int id)
         {
+            _logger.LogInformation("Inicio de DeleteUser (borrado lógico) para ID: {Id}.", id);
+            // El servicio se encarga del borrado lógico
             var result = await _userService.DeleteUserAsync(id);
             if (!result)
             {
+                _logger.LogWarning("Usuario con ID {Id} no encontrado o no se pudo eliminar lógicamente.", id);
                 return NotFound();
             }
+            _logger.LogInformation("Usuario con ID {Id} eliminado lógicamente exitosamente.", id);
             return NoContent();
         }
     }

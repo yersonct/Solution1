@@ -80,7 +80,7 @@ namespace Data.Repository
                 return await _context.Set<RolUser>()
                     .Include(r => r.Rol)
                     .Include(r => r.User)
-                    .FirstOrDefaultAsync(r => r.id == id);
+                    .FirstOrDefaultAsync(r => r.Id == id);
             }
             catch (Exception ex)
             {
@@ -99,12 +99,12 @@ namespace Data.Repository
             }
             catch (DbUpdateConcurrencyException ex)
             {
-                _logger.LogError(ex, "Error de concurrencia al actualizar la relación Rol-Usuario con ID: {Id}", entity.id);
+                _logger.LogError(ex, "Error de concurrencia al actualizar la relación Rol-Usuario con ID: {Id}", entity.Id);
                 return false;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error al actualizar la relación Rol-Usuario con ID: {Id}", entity.id);
+                _logger.LogError(ex, "Error al actualizar la relación Rol-Usuario con ID: {Id}", entity.Id);
                 return false;
             }
         }

@@ -38,7 +38,7 @@ namespace Business.Services
         public async Task<LoginResponse> AuthenticateAsync(string username, string password)
         {
             var user = await _userRepository.GetUserByUsernameAsync(username);
-            if (user == null || !VerifyPassword(password, user.password))
+            if (user == null || !VerifyPassword(password, user.Password))
             {
                 return null;
             }
@@ -82,12 +82,12 @@ namespace Business.Services
 
             var person = new Person
             {
-                name = request.Person.Name,
-                lastname = request.Person.LastName,
-                document = request.Person.Document,
-                phone = request.Person.Phone,
-                email = request.Person.Email,
-                active = true
+                Name = request.Person.Name,
+                Lastname = request.Person.LastName,
+                Document = request.Person.Document,
+                Phone = request.Person.Phone,
+                Email = request.Person.Email,
+                Active = true
             };
 
             try
@@ -104,10 +104,10 @@ namespace Business.Services
             string truncatedUsername = request.Username.Length > 19 ? request.Username.Substring(0, 19) : request.Username;
             var user = new User
             {
-                username = truncatedUsername,
-                password = HashPassword(request.Password),
-                id_person = person.id,
-                active = true
+                Username = truncatedUsername,
+                Password = HashPassword(request.Password),
+                PersonId = person.Id,
+                Active = true
             };
 
             try
@@ -166,8 +166,8 @@ namespace Business.Services
             {
                 Subject = new ClaimsIdentity(new[]
                 {
-                    new Claim(ClaimTypes.Name, user.username),
-                    new Claim(ClaimTypes.NameIdentifier, user.id.ToString()),
+                    new Claim(ClaimTypes.Name, user.Username),
+                    new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
                 }),
                 Expires = DateTime.UtcNow.AddMinutes(3),
                 Issuer = issuer,
@@ -188,9 +188,9 @@ namespace Business.Services
 
             foreach (var user in users)
             {
-                _logger.LogInformation($"Re-hasheando contraseña para el usuario: {user.username} (ID: {user.id})");
-                user.password = HashPassword(user.password);
-                user.username = user.username.Length > 20 ? user.username.Substring(0, 19) : user.username;
+                _logger.LogInformation($"Re-hasheando contraseña para el usuario: {user.Username} (ID: {user.Id})");
+                user.Password = HashPassword(user.Password);
+                user.Username = user.Username.Length > 20 ? user.Username.Substring(0, 19) : user.Username;
                 await _userRepository.UpdateAsync(user);
                 migratedCount++;
             }

@@ -1,15 +1,14 @@
-﻿using System;
+﻿// Entity/DTOs/ModuleDTO.cs (Para respuestas de lectura)
+
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Entity.DTOs
 {
     public class ModuleDTO
     {
-        public int id { get; set; }
-        public string name { get; set; }
-        public bool active { get; set; }
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public bool Active { get; set; }
     }
 }

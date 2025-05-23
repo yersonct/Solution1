@@ -26,7 +26,7 @@ namespace Data.Repository
         {
             try
             {
-                entity.active = true; // Set active to true on add
+                entity.Active = true; // Set active to true on add
                 await _context.Set<Permission>().AddAsync(entity); // Usar _context.Set<Permission>()
                 await _context.SaveChangesAsync();
                 return entity;
@@ -45,7 +45,7 @@ namespace Data.Repository
                 var permissionToDelete = await _context.Set<Permission>().FindAsync(id); // Usar _context.Set<Permission>()
                 if (permissionToDelete != null)
                 {
-                    permissionToDelete.active = false; // Set active to false for logical delete
+                    permissionToDelete.Active = false; // Set active to false for logical delete
                     _context.Entry(permissionToDelete).State = EntityState.Modified;
                     await _context.SaveChangesAsync();
                     return true;
@@ -66,7 +66,7 @@ namespace Data.Repository
                 return await _context.Set<Permission>() // Usar _context.Set<Permission>()
                     .Include(p => p.FormRolPermissions)
                         .ThenInclude(frp => frp.Forms)
-                    .Where(p => p.active) // Filter for active permissions
+                    .Where(p => p.Active) // Filter for active permissions
                     .ToListAsync();
             }
             catch (Exception ex)
@@ -83,7 +83,7 @@ namespace Data.Repository
                 return await _context.Set<Permission>() // Usar _context.Set<Permission>()
                     .Include(p => p.FormRolPermissions)
                         .ThenInclude(frp => frp.Forms)
-                    .FirstOrDefaultAsync(u => u.id == id && u.active); // Get only active permission
+                    .FirstOrDefaultAsync(u => u.Id == id && u.Active); // Get only active permission
             }
             catch (Exception ex)
             {
@@ -102,12 +102,12 @@ namespace Data.Repository
             }
             catch (DbUpdateConcurrencyException ex)
             {
-                _logger.LogError(ex, "Concurrency error updating permission with ID: {PermissionId}", entity.id);
+                _logger.LogError(ex, "Concurrency error updating permission with ID: {PermissionId}", entity.Id);
                 return false;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error updating permission with ID: {PermissionId}", entity.id);
+                _logger.LogError(ex, "Error updating permission with ID: {PermissionId}", entity.Id);
                 return false;
             }
         }

@@ -1,18 +1,29 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Entity.Model
 {
-    public class Modules
+    [Table("Modules")] // Cambiado de 'Modules' a 'Module' para seguir la convención de singular para el nombre de la clase
+    public class Modules // Considera renombrar esta clase a 'Module' para coherencia de singular/plural
     {
-        public int id { get; set; }
-        public string name { get; set; }
+        [Key]
+        [Column("id")]
+        public int Id { get; set; }
 
-        public bool active { get; set; }
-        public List<FormModule> FormModules { get; set; } = new List<FormModule>();
+        [Column("name")]
+        [Required]
+        [StringLength(100)]
+        public string Name { get; set; }
+
+        [Column("active")]
+        public bool Active { get; set; }
+
+        public virtual ICollection<FormModule> FormModules { get; set; } = new List<FormModule>();
+
+        public Modules()
+        {
+            // Inicialización de colecciones
+        }
     }
-
 }

@@ -14,7 +14,8 @@ namespace Data.Interfaces
         Task<IEnumerable<User>> GetAllAsync();
         Task<User?> GetByIdAsync(int id);
         Task<bool> UpdateAsync(User entity);
-
+        Task<bool> UsernameExistsAsync(string username);
+        Task<bool> PersonExistsAsync(int personId);
 
     }
 }

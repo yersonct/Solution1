@@ -26,7 +26,7 @@ namespace Data.Repository
         {
             try
             {
-                entity.active = true; // Establecer active en true al agregar
+                entity.Active = true; // Establecer active en true al agregar
                 await _context.Set<Modules>().AddAsync(entity); // Usar _context.Set<Modules>()
                 await _context.SaveChangesAsync();
                 return entity;
@@ -45,7 +45,7 @@ namespace Data.Repository
                 var moduleToDelete = await _context.Set<Modules>().FindAsync(id); // Usar _context.Set<Modules>()
                 if (moduleToDelete != null)
                 {
-                    moduleToDelete.active = false; // Marcar como inactivo en lugar de eliminar
+                    moduleToDelete.Active = false; // Marcar como inactivo en lugar de eliminar
                     _context.Entry(moduleToDelete).State = EntityState.Modified;
                     await _context.SaveChangesAsync();
                     return true;
@@ -65,7 +65,7 @@ namespace Data.Repository
             {
                 return await _context.Set<Modules>() // Usar _context.Set<Modules>()
                     .Include(u => u.FormModules)
-                    .Where(m => m.active) // Filtrar solo módulos activos
+                    .Where(m => m.Active) // Filtrar solo módulos activos
                     .ToListAsync();
             }
             catch (Exception ex)
@@ -81,7 +81,7 @@ namespace Data.Repository
             {
                 return await _context.Set<Modules>() // Usar _context.Set<Modules>()
                     .Include(u => u.FormModules)
-                    .FirstOrDefaultAsync(u => u.id == id && u.active); // Filtrar solo módulos activos
+                    .FirstOrDefaultAsync(u => u.Id == id && u.Active); // Filtrar solo módulos activos
             }
             catch (Exception ex)
             {
@@ -100,12 +100,12 @@ namespace Data.Repository
             }
             catch (DbUpdateConcurrencyException ex)
             {
-                _logger.LogError(ex, "Error de concurrencia al actualizar el módulo con ID: {ModuleId}", entity.id);
+                _logger.LogError(ex, "Error de concurrencia al actualizar el módulo con ID: {ModuleId}", entity.Id);
                 return false;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error al actualizar el módulo con ID: {ModuleId}", entity.id);
+                _logger.LogError(ex, "Error al actualizar el módulo con ID: {ModuleId}", entity.Id);
                 return false;
             }
         }

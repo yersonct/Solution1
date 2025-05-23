@@ -1,4 +1,5 @@
-﻿using Entity.DTOs;
+﻿using Business.Services;
+using Entity.DTOs;
 using Entity.Model;
 using Microsoft.Extensions.Logging;
 using SendGrid.Helpers.Errors.Model;
@@ -16,7 +17,7 @@ public class LogicValidations
     //Validación para el nombre de usuario
     public static void EnsureUserNameIsUnique(IEnumerable<User> users, string username)
     {
-        if (users.Any(u => u.username == username))
+        if (users.Any(u => u.Username == username))
             throw new ValidationException("El nombre de usuario ya está registrado.");
     }
 
@@ -99,16 +100,16 @@ public class LogicValidations
     // Validación para FormModule
     public static void ValidateFormModule(FormModuleCreateDTO formModule, ILogger logger)
     {
-        if (formModule.id_forms <= 0)
+        if (formModule.FormId <= 0)
         {
             logger.LogError("El ID del formulario debe ser mayor que cero.");
-            throw new ArgumentException("El ID del formulario debe ser mayor que cero.", nameof(formModule.id_forms));
+            throw new ArgumentException("El ID del formulario debe ser mayor que cero.", nameof(formModule.FormId));
         }
 
-        if (formModule.id_module <= 0)
+        if (formModule.ModuleId <= 0)
         {
             logger.LogError("El ID del módulo debe ser mayor que cero.");
-            throw new ArgumentException("El ID del módulo debe ser mayor que cero.", nameof(formModule.id_module));
+            throw new ArgumentException("El ID del módulo debe ser mayor que cero.", nameof(formModule.ModuleId));
         }
     }
 
@@ -121,28 +122,32 @@ public class LogicValidations
         }
     }
 
+    internal static void ValidateExistingFormModule(FormModule? existingFormModule, int id, ILogger<FormModuleService> logger)
+    {
+        throw new NotImplementedException();
+    }
 
     public static class PersonValidations
     {
         public static void ValidatePerson(Person person)
         {
-            if (!IsValidName(person.name))
+            if (!IsValidName(person.Name))
             {
                 throw new NotFoundException("El nombre no es válido.");
             }
-            if (!IsValidLastName(person.lastname))
+            if (!IsValidLastName(person.Lastname))
             {
                 throw new NotFoundException("El apellido no es válido.");
             }
-            if (!IsValidDocument(person.document))
+            if (!IsValidDocument(person.Document))
             {
                 throw new NotFoundException("El documento no es válido.");
             }
-            if (!IsValidPhone(person.phone))
+            if (!IsValidPhone(person.Phone))
             {
                 throw new NotFoundException("El teléfono no es válido.");
             }
-            if (!IsValidEmail(person.email))
+            if (!IsValidEmail(person.Email))
             {
                 throw new NotFoundException("El correo electrónico no es válido.");
             }
@@ -179,11 +184,11 @@ public class LogicValidations
     {
         public static void ValidateForm(Forms form)
         {
-            if (!IsValidFormName(form.name))
+            if (!IsValidFormName(form.Name))
             {
                 throw new ArgumentException("El nombre del formulario no es válido.");
             }
-            if (!IsValidFormUrl(form.url))
+            if (!IsValidFormUrl(form.Url))
             {
                 throw new ArgumentException("La URL del formulario no es válida.");
             }

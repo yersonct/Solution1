@@ -1,18 +1,20 @@
-﻿using Entity.Model;
-using System;
+﻿// Business/Interfaces/IModuleService.cs
+
+using Entity.DTOs; // Usar DTOs para la interfaz pública
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Business.Interfaces
 {
     public interface IModuleService
     {
-        Task<IEnumerable<Modules>> GetAllModulesAsync();
-        Task<Modules?> GetModuleByIdAsync(int id);
-        Task<Modules> CreateModuleAsync(Modules module);
-        Task<bool> UpdateModuleAsync(Modules module);
+        // Métodos de lectura que devuelven DTOs
+        Task<IEnumerable<ModuleDTO>> GetAllModulesAsync();
+        Task<ModuleDTO?> GetModuleByIdAsync(int id);
+
+        // Métodos de escritura que reciben DTOs y devuelven DTOs o booleanos
+        Task<ModuleDTO> CreateModuleAsync(ModuleCreateUpdateDTO moduleCreateDto);
+        Task<bool> UpdateModuleAsync(int id, ModuleCreateUpdateDTO moduleUpdateDto);
         Task<bool> DeleteModuleAsync(int id);
     }
 }

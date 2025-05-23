@@ -9,10 +9,10 @@ namespace Data.Interfaces
 {
     public interface IRolUserRepository
     {
-        Task<RolUser> AddAsync(RolUser entity);
-        Task<bool> DeleteAsync(int id);
-        Task<IEnumerable<RolUser>> GetAllAsync();
-        Task<RolUser?> GetByIdAsync(int id);
-        Task<bool> UpdateAsync(RolUser entity);
+        Task<IEnumerable<Entity.Model.RolUser>> GetAllAsync();
+        Task<Entity.Model.RolUser?> GetByIdAsync(int id);
+        Task<Entity.Model.RolUser> AddAsync(Entity.Model.RolUser entity);
+        Task<bool> UpdateAsync(Entity.Model.RolUser entity); // Recibe la entidad para actualizar
+        Task<bool> DeleteAsync(int id); // O si es borrado lógico, que reciba la entidad o el ID
     }
 }

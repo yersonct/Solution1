@@ -1,12 +1,14 @@
-﻿using System;
+﻿// API/Controllers/PersonsController.cs
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging; // Importar para logging
 using Business.Interfaces;
-using Entity.Model;
-using Entity.DTOs;
-using Microsoft.AspNetCore.Authorization; // Asegúrate de tener el namespace de tus DTOs
+using Entity.DTOs; // Usar DTOs para el controlador
+using Microsoft.AspNetCore.Authorization;
 
 namespace API.Controllers
 {
@@ -16,115 +18,92 @@ namespace API.Controllers
     public class PersonsController : ControllerBase
     {
         private readonly IPersonService _personService;
+        private readonly ILogger<PersonsController> _logger; // Inyectamos ILogger
 
-        public PersonsController(IPersonService personService)
+        public PersonsController(
+            IPersonService personService,
+            ILogger<PersonsController> logger) // Inyectamos ILogger
         {
             _personService = personService ?? throw new ArgumentNullException(nameof(personService));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<PersonDTO>>> GetAllPersons()
         {
-            var persons = await _personService.GetAllPersonsAsync();
-            var personDtos = persons.Select(p => new PersonDTO
-            {
-                Id = p.id,
-                Name = p.name,
-                LastName = p.lastname,
-                Document = p.document,
-                Phone = p.phone,
-                Email = p.email,
-                active = p.active
-            }).ToList();
+            _logger.LogInformation("Inicio de GetAllPersons.");
+            var personDtos = await _personService.GetAllPersonsAsync(); // El servicio devuelve directamente los DTOs
+            _logger.LogInformation("Se recuperaron {Count} personas.", personDtos?.Count() ?? 0);
             return Ok(personDtos);
         }
 
         [HttpGet("{id}")]
         public async Task<ActionResult<PersonDTO>> GetPersonById(int id)
         {
-            var person = await _personService.GetPersonByIdAsync(id);
-            if (person == null)
+            _logger.LogInformation("Inicio de GetPersonById para ID: {Id}.", id);
+            var personDto = await _personService.GetPersonByIdAsync(id); // El servicio devuelve directamente el DTO
+            if (personDto == null)
             {
+                _logger.LogWarning("Persona con ID {Id} no encontrada.", id);
                 return NotFound();
             }
-
-            var personDto = new PersonDTO
-            {
-                Id = person.id,
-                Name = person.name,
-                LastName = person.lastname,
-                Document = person.document,
-                Phone = person.phone,
-                Email = person.email,
-                active = person.active
-            };
+            _logger.LogInformation("Persona con ID {Id} encontrada exitosamente.", id);
             return Ok(personDto);
         }
 
         [HttpPost]
-        public async Task<ActionResult<Person>> CreatePerson([FromBody] PersonDTO createPersonDTO)
+        public async Task<ActionResult<PersonDTO>> CreatePerson([FromBody] PersonCreateUpdateDTO createPersonDTO) // Usamos PersonCreateUpdateDTO
         {
+            _logger.LogInformation("Inicio de CreatePerson.");
+
             if (!ModelState.IsValid)
             {
+                _logger.LogWarning("Solicitud de creación de persona inválida. Errores: {Errors}", ModelState);
                 return BadRequest(ModelState);
             }
 
-            var person = new Person
-            {
-                name = createPersonDTO.Name,
-                lastname = createPersonDTO.LastName,
-                document = createPersonDTO.Document,
-                phone = createPersonDTO.Phone,
-                email = createPersonDTO.Email,
-                active = true // Ensure new persons are active
-            };
+            var createdPersonDto = await _personService.CreatePersonAsync(createPersonDTO); // El servicio recibe y devuelve DTOs
+            _logger.LogInformation("Persona con ID {Id} creada exitosamente.", createdPersonDto.Id);
 
-            var createdPerson = await _personService.CreatePersonAsync(person);
-            return CreatedAtAction(nameof(GetPersonById), new { id = createdPerson.id }, createdPerson);
+            return CreatedAtAction(nameof(GetPersonById), new { id = createdPersonDto.Id }, createdPersonDto);
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdatePerson(int id, [FromBody] PersonDTO updatePersonDTO)
+        public async Task<IActionResult> UpdatePerson(int id, [FromBody] PersonCreateUpdateDTO updatePersonDTO) // Usamos PersonCreateUpdateDTO
         {
-            if (id != updatePersonDTO.Id)
-            {
-                return BadRequest("El ID de la persona no coincide con el ID de la ruta.");
-            }
+            _logger.LogInformation("Inicio de UpdatePerson para ID: {Id}.", id);
+
+            // La validación de que el ID del DTO coincida con el ID de la ruta se eliminó
+            // ya que el ID de la ruta es la fuente de verdad principal para la actualización.
+            // Si el ID del DTO es necesario para la validación interna del DTO, asegúrate de ello.
 
             if (!ModelState.IsValid)
             {
+                _logger.LogWarning("Solicitud de actualización de persona inválida para ID {Id}. Errores: {Errors}", id, ModelState);
                 return BadRequest(ModelState);
             }
 
-            var existingPerson = await _personService.GetPersonByIdAsync(id);
-            if (existingPerson == null)
-            {
-                return NotFound();
-            }
-
-            existingPerson.name = updatePersonDTO.Name;
-            existingPerson.lastname = updatePersonDTO.LastName;
-            existingPerson.document = updatePersonDTO.Document;
-            existingPerson.phone = updatePersonDTO.Phone;
-            existingPerson.email = updatePersonDTO.Email;
-            existingPerson.active = updatePersonDTO.active; // Allow updating the active status
-
-            var result = await _personService.UpdatePersonAsync(existingPerson);
+            var result = await _personService.UpdatePersonAsync(id, updatePersonDTO); // El servicio se encarga de la lógica
             if (!result)
             {
-                return StatusCode(500, "Ocurrió un error al actualizar la persona.");
+                _logger.LogWarning("Persona con ID {Id} no encontrada o no se pudo actualizar.", id);
+                return NotFound();
             }
+            _logger.LogInformation("Persona con ID {Id} actualizada exitosamente.", id);
             return NoContent();
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeletePerson(int id)
         {
-            var result = await _personService.DeletePersonAsync(id);
+            _logger.LogInformation("Inicio de DeletePerson (borrado lógico) para ID: {Id}.", id);
+            var result = await _personService.DeletePersonAsync(id); // El servicio se encarga del borrado lógico
             if (!result)
             {
+                _logger.LogWarning("Persona con ID {Id} no encontrada o no se pudo eliminar lógicamente.", id);
                 return NotFound();
             }
+            _logger.LogInformation("Persona con ID {Id} eliminada lógicamente exitosamente.", id);
             return NoContent();
         }
     }

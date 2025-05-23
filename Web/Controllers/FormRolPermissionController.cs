@@ -64,10 +64,10 @@ namespace API.Controllers
 
             var formRolPermission = new FormRolPermission
             {
-                id_forms = formRolPermissionDto.id_forms,
-                id_rol = formRolPermissionDto.id_rol,
-                id_permission = formRolPermissionDto.id_permission,
-                active = true // Set active on creation
+                FormId = formRolPermissionDto.FormId,
+                RolId = formRolPermissionDto.RolId,
+                PermissionId = formRolPermissionDto.PermissionId,
+                Active = true // Set active on creation
                 // You might need to fetch the related entities (Forms, Rol, Permission) here
                 // if you want to ensure they exist before creating the FormRolPermission.
             };
@@ -75,7 +75,7 @@ namespace API.Controllers
             try
             {
                 var createdFormRolPermission = await _formRolPermissionService.CreateFormRolPermissionAsync(formRolPermission);
-                return CreatedAtAction(nameof(GetFormRolPermissionById), new { id = createdFormRolPermission.id }, createdFormRolPermission);
+                return CreatedAtAction(nameof(GetFormRolPermissionById), new { id = createdFormRolPermission.Id }, createdFormRolPermission);
             }
             catch (Exception)
             {
@@ -84,14 +84,14 @@ namespace API.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateFormRolPermission(int id, [FromBody] FormRolPermissionUpdateDTO formRolPermissionDto)
+        public async Task<IActionResult> UpdateFormRolPermission(int id, [FromBody] FormRolPermissionDTO formRolPermissionDto)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            if (id != formRolPermissionDto.id)
+            if (id != formRolPermissionDto.Id)
             {
                 return BadRequest("The ID in the request body does not match the route ID.");
             }
@@ -104,11 +104,11 @@ namespace API.Controllers
 
             var formRolPermissionToUpdate = new FormRolPermission
             {
-                id = formRolPermissionDto.id,
-                Forms = new Forms { name = formRolPermissionDto.formName },
-                Rol = new Rol { name = formRolPermissionDto.rolName },
-                Permission = new Permission { name = formRolPermissionDto.permissionName },
-                active = formRolPermissionDto.active
+                Id = formRolPermissionDto.Id,
+                Forms = new Forms { Name = formRolPermissionDto.FormName },
+                Rol = new Rol { Name = formRolPermissionDto.RolName },
+                Permission = new Permission { Name = formRolPermissionDto.PermissionName },
+                Active = formRolPermissionDto.Active
             };
 
             try
@@ -145,12 +145,5 @@ namespace API.Controllers
         }
     }
 
-    public class FormRolPermissionUpdateDTO
-    {
-        public int id { get; set; }
-        public string formName { get; set; }
-        public string rolName { get; set; }
-        public string permissionName { get; set; }
-        public bool active { get; set; }
-    }
+
 }

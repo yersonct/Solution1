@@ -1,15 +1,28 @@
-﻿// Program.cs
-using ANPRVisionAPI.Extensions;
+﻿using ANPRVisionAPI.Extensions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Configuration; // Necesario para context.Configuration
 using Microsoft.Extensions.Logging;
 using System;
 using System.Threading.Tasks;
-using Business.Interfaces;
+
+// Importante para Serilog
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// 🔹 Configurar Serilog para logging dinámico en base de datos
+// Esto debe ir al principio para que capture logs del inicio de la aplicación
+builder.Host.UseSerilog((context, services, configurationBuilder) =>
+{
+    configurationBuilder
+        .ReadFrom.Configuration(context.Configuration) // Lee la configuración base de Serilog desde appsettings.json
+        .ReadFrom.Services(services) // Permite a Serilog acceder a servicios (ej. opciones)
+        .AddDatabaseLogging(context.Configuration); // Llama a nuestra extensión para añadir el sink de DB
+});
+
 
 // 🔹 Add Controllers
 builder.Services.AddControllers();
@@ -37,10 +50,10 @@ builder.Services.AddApplicationAuthorizationPolicies();
 builder.Services.AddApplicationServices();
 builder.Services.AddApplicationRepositories();
 
-// ⚙️ Register ILoggerFactory (ILogger<> is already handled by .NET)
-builder.Services.AddSingleton<ILoggerFactory, LoggerFactory>();
-
 var app = builder.Build();
+
+// ⚙️ Use Serilog Request Logging (captura información de las solicitudes HTTP)
+app.UseSerilogRequestLogging();
 
 // ⚙️ Configure Environment-Specific Settings
 app.ConfigureDevelopmentEnvironment(app.Environment);

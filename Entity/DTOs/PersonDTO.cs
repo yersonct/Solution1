@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Entity.DTOs
+﻿namespace Entity.DTOs
 {
     public class PersonDTO
     {
@@ -13,8 +7,7 @@ namespace Entity.DTOs
         public string LastName { get; set; }
         public string Document { get; set; }
         public string Phone { get; set; }
-        //public int Age { get; set; }
         public string Email { get; set; }
-        public bool active { get; set; }
+        public bool Active { get; set; }
     }
 }

@@ -1,18 +1,20 @@
-﻿using Entity.Model;
-using System;
+﻿// Business/Interfaces/IPersonService.cs
+
+using Entity.DTOs; // Usar DTOs para la interfaz pública
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Business.Interfaces
 {
     public interface IPersonService
     {
-        Task<IEnumerable<Person>> GetAllPersonsAsync();
-        Task<Person?> GetPersonByIdAsync(int id);
-        Task<Person> CreatePersonAsync(Person person);
-        Task<bool> UpdatePersonAsync(Person person);
-        Task<bool> DeletePersonAsync(int id);
+        // Métodos de lectura que devuelven DTOs
+        Task<IEnumerable<PersonDTO>> GetAllPersonsAsync();
+        Task<PersonDTO?> GetPersonByIdAsync(int id);
+
+        // Métodos de escritura que reciben DTOs y devuelven DTOs o booleanos
+        Task<PersonDTO> CreatePersonAsync(PersonCreateUpdateDTO personCreateDto);
+        Task<bool> UpdatePersonAsync(int id, PersonCreateUpdateDTO personUpdateDto); // Recibe el ID y el DTO de actualización
+        Task<bool> DeletePersonAsync(int id); // Para borrado lógico
     }
 }

@@ -26,7 +26,7 @@ namespace Data.Repository
         {
             try
             {
-                entity.active = true; // Set active to true when adding a new form
+                entity.Active = true; // Set active to true when adding a new form
                 await _context.Set<Forms>().AddAsync(entity);
                 await _context.SaveChangesAsync();
                 return entity;
@@ -45,7 +45,7 @@ namespace Data.Repository
                 var formToDelete = await _context.Set<Forms>().FindAsync(id);
                 if (formToDelete != null)
                 {
-                    formToDelete.active = false; // Set active to false instead of deleting
+                    formToDelete.Active = false; // Set active to false instead of deleting
                     _context.Entry(formToDelete).State = EntityState.Modified;
                     await _context.SaveChangesAsync();
                     return true;
@@ -65,7 +65,7 @@ namespace Data.Repository
             {
                 return await _context.Set<Forms>()
                     .Include(u => u.FormModules)
-                    .Where(f => f.active) // Filter out inactive forms
+                    .Where(f => f.Active) // Filter out inactive forms
                     .ToListAsync();
             }
             catch (Exception ex)
@@ -81,7 +81,7 @@ namespace Data.Repository
             {
                 return await _context.Set<Forms>()
                     .Include(u => u.FormModules)
-                    .FirstOrDefaultAsync(u => u.id == id && u.active); // Get only active forms
+                    .FirstOrDefaultAsync(u => u.Id == id && u.Active); // Get only active forms
             }
             catch (Exception ex)
             {
@@ -100,12 +100,12 @@ namespace Data.Repository
             }
             catch (DbUpdateConcurrencyException ex)
             {
-                _logger.LogError(ex, "Concurrency error updating form with ID: {FormId}", entity.id);
+                _logger.LogError(ex, "Concurrency error updating form with ID: {FormId}", entity.Id);
                 return false;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error updating form with ID: {FormId}", entity.id);
+                _logger.LogError(ex, "Error updating form with ID: {FormId}", entity.Id);
                 return false;
             }
         }

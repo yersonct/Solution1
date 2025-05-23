@@ -43,7 +43,7 @@ namespace Data.Repository
                 var personToDelete = await _context.Set<Person>().FindAsync(id); // Usar _context.Set<Person>()
                 if (personToDelete != null)
                 {
-                    personToDelete.active = false; // Implementación del borrado lógico
+                    personToDelete.Active = false; // Implementación del borrado lógico
                     _context.Entry(personToDelete).State = EntityState.Modified;
                     await _context.SaveChangesAsync();
                     return true;
@@ -61,7 +61,7 @@ namespace Data.Repository
         {
             try
             {
-                return await _context.Set<Person>().Include(u => u.user).Where(p => p.active).ToListAsync(); // Solo trae los activos // Usar _context.Set<Person>()
+                return await _context.Set<Person>().Include(u => u.User).Where(p => p.Active).ToListAsync(); // Solo trae los activos // Usar _context.Set<Person>()
             }
             catch (Exception ex)
             {
@@ -74,7 +74,7 @@ namespace Data.Repository
         {
             try
             {
-                return await _context.Set<Person>().Include(u => u.user).FirstOrDefaultAsync(u => u.id == id && u.active); // Solo trae los activos // Usar _context.Set<Person>()
+                return await _context.Set<Person>().Include(u => u.User).FirstOrDefaultAsync(u => u.Id == id && u.Active); // Solo trae los activos // Usar _context.Set<Person>()
             }
             catch (Exception ex)
             {
@@ -93,19 +93,19 @@ namespace Data.Repository
             }
             catch (DbUpdateConcurrencyException ex)
             {
-                _logger.LogError(ex, "Error de concurrencia al actualizar la persona con ID: {PersonId}", entity.id);
+                _logger.LogError(ex, "Error de concurrencia al actualizar la persona con ID: {PersonId}", entity.Id);
                 return false;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error al actualizar la persona con ID: {PersonId}", entity.id);
+                _logger.LogError(ex, "Error al actualizar la persona con ID: {PersonId}", entity.Id);
                 return false;
             }
         }
 
         public async Task<bool> PersonExistsAsync(string document, string email)
         {
-            return await _context.Set<Person>().AnyAsync(p => p.document == document || p.email == email); // Usar _context.Set<Person>()
+            return await _context.Set<Person>().AnyAsync(p => p.Document == document || p.Email == email); // Usar _context.Set<Person>()
         }
     }
 }

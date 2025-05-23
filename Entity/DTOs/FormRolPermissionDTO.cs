@@ -8,10 +8,10 @@ namespace Entity.DTOs
 {
     public class FormRolPermissionDTO
     {
-        public int id { get; set; }
-        public string formName { get; set; }
-        public string rolName { get; set; }
-        public string permissionName { get; set; }
-        public bool active { get; set; } // Add the active property
+        public int Id { get; set; }
+        public string FormName { get; set; }
+        public string RolName { get; set; }
+        public string PermissionName { get; set; }
+        public bool Active { get; set; }
     }
 }

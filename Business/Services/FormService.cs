@@ -1,14 +1,17 @@
-﻿using Business.Interfaces;
-using Business.Validations;
+﻿// Business/Services/FormService.cs
+
+using Business.Interfaces;
+using Business.Validations; // Para tus validaciones de negocio (ej. FormValidations)
 using Data.Interfaces;
-using Entity.Model;
+using Entity.Model; // Asegúrate de que sea 'Form' singular
 using Microsoft.Extensions.Logging;
-using SendGrid.Helpers.Errors.Model;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
+using AutoMapper; // Necesario para AutoMapper
+using Entity.DTOs;
+using SendGrid.Helpers.Errors.Model; // Para NotFoundException si la usas
 
 namespace Business.Services
 {
@@ -16,99 +19,110 @@ namespace Business.Services
     {
         private readonly IFormRepository _formRepository;
         private readonly ILogger<FormService> _logger;
+        private readonly IMapper _mapper;
 
-        public FormService(IFormRepository formRepository, ILogger<FormService> logger)
+        public FormService(IFormRepository formRepository, ILogger<FormService> logger, IMapper mapper)
         {
             _formRepository = formRepository ?? throw new ArgumentNullException(nameof(formRepository));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper)); // Asegura que mapper no sea nulo
         }
 
-        public async Task<IEnumerable<Forms>> GetAllFormsAsync()
+        public async Task<IEnumerable<FormDTO>> GetAllFormsAsync()
         {
-              try
-            {
-                return await _formRepository.GetAllAsync();
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error al obtener todos los formularios.");
-                throw new ArgumentException("Error al acceder a los datos de los formularios.", ex);
-            }
+            _logger.LogInformation("Obteniendo todos los formularios para DTOs.");
+            var forms = await _formRepository.GetAllAsync(); // Obtiene entidades Form
+            return _mapper.Map<IEnumerable<FormDTO>>(forms); // Mapea la colección de entidades a DTOs
         }
 
-        public async Task<Forms?> GetFormByIdAsync(int id)
+        public async Task<FormDTO?> GetFormByIdAsync(int id)
         {
-            try
+            _logger.LogInformation("Obteniendo formulario con ID {Id} para DTO.", id);
+            var form = await _formRepository.GetByIdAsync(id); // Obtiene la entidad Form
+            if (form == null)
             {
-                var form = await _formRepository.GetByIdAsync(id);
-                if (form == null)
-                {
-                    _logger.LogWarning($"No se encontró el formulario con ID: {id}.");
-                    throw new NotFoundException($"Formulario con ID {id} no encontrado.");
-                }
-                return form;
+                _logger.LogWarning("Formulario con ID {Id} no encontrado en el repositorio.", id);
+                // Lanza una excepción que será capturada por el middleware de errores
+                throw new NotFoundException($"Formulario con ID {id} no encontrado.");
             }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, $"Error al obtener el formulario con ID: {id}.");
-                throw new ArgumentException("Error al acceder a los datos del formulario.", ex);
-            }
+            return _mapper.Map<FormDTO>(form); // Mapea la entidad a DTO
         }
 
-        public async Task<Forms> CreateFormAsync(Forms form)
+        public async Task<FormDTO> CreateFormAsync(FormCreateUpdateDTO formCreateDto)
         {
-            // You can add business logic here before creating the form
-            try
-            {
-                LogicValidations.FormValidations.ValidateForm(form); // Validar el formulario
+            _logger.LogInformation("Creando nuevo formulario desde DTO.");
 
-                return await _formRepository.AddAsync(form);
-            }
-            catch (ArgumentException ex)
-            {
-                _logger.LogError(ex, "Error de validación al crear el formulario.");
-                throw; // Re-lanzar la excepción de validación
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error al crear el formulario.");
-                throw new ArgumentException("Error al guardar los datos del formulario.", ex);
-            }
+            // Validaciones de negocio (ej. nombre único si es un requisito)
+            // Example: var existingForms = await _formRepository.GetAllAsync();
+            // LogicValidations.FormValidations.EnsureFormNameIsUnique(existingForms, formCreateDto.Name, _logger); // Asegúrate de implementar esto
+
+            var form = _mapper.Map<Forms>(formCreateDto); // ¡Mapea DTO de creación a entidad 'Form' singular!
+            form.Active = formCreateDto.Active; // Usar el valor de Active del DTO
+
+            // Si necesitas validar la entidad Form antes de añadirla, puedes usar LogicValidations.FormValidations.ValidateForm(form);
+            // Asegúrate de que este método lanza ArgumentException o similar en caso de error.
+
+            var createdForm = await _formRepository.AddAsync(form); // Guarda la entidad
+            _logger.LogInformation("Formulario con ID {Id} creado en la base de datos.", createdForm.Id);
+
+            return _mapper.Map<FormDTO>(createdForm); // Mapea la entidad creada a DTO para devolver
         }
 
-        public async Task<bool> UpdateFormAsync(Forms form)
+        public async Task<bool> UpdateFormAsync(int id, FormCreateUpdateDTO formUpdateDto)
         {
-            // You can add business logic here before updating the form
-            try
+            _logger.LogInformation("Actualizando formulario con ID {Id} desde DTO.", id);
+            var existingForm = await _formRepository.GetByIdAsync(id);
+            if (existingForm == null)
             {
-                LogicValidations.FormValidations.ValidateForm(form); // Validar el formulario
+                _logger.LogWarning("Intento de actualizar formulario con ID {Id} falló: no encontrado.", id);
+                return false; // El controlador devolverá NotFound si el servicio devuelve false
+            }
 
-                return await _formRepository.UpdateAsync(form);
-            }
-            catch (ArgumentException ex)
+            // Validaciones de negocio antes de actualizar (ej. si el nombre del formulario es único y se está cambiando)
+            // if (existingForm.Name != formUpdateDto.Name)
+            // {
+            //     var allForms = await _formRepository.GetAllAsync();
+            //     LogicValidations.FormValidations.EnsureFormNameIsUnique(allForms.Where(f => f.Id != id), formUpdateDto.Name, _logger);
+            // }
+
+            // Mapear los campos actualizables del DTO a la entidad existente
+            _mapper.Map(formUpdateDto, existingForm); // AutoMapper actualizará las propiedades coincidentes
+
+            // Si necesitas validar la entidad Form antes de actualizarla, puedes usar LogicValidations.FormValidations.ValidateForm(existingForm);
+
+            var result = await _formRepository.UpdateAsync(existingForm);
+            if (result)
             {
-                _logger.LogError(ex, "Error de validación al actualizar el formulario.");
-                throw; // Re-lanzar la excepción de validación
+                _logger.LogInformation("Formulario con ID {Id} actualizado exitosamente.", id);
             }
-            catch (Exception ex)
+            else
             {
-                _logger.LogError(ex, "Error al actualizar el formulario.");
-                throw new ArgumentException("Error al actualizar los datos del formulario.", ex);
+                _logger.LogError("Error al actualizar formulario con ID {Id} en el repositorio.", id);
             }
+            return result;
         }
 
         public async Task<bool> DeleteFormAsync(int id)
         {
-            // You can add business logic here before deleting the form
-            try
+            _logger.LogInformation("Realizando borrado lógico de formulario con ID {Id}.", id);
+            var formToDelete = await _formRepository.GetByIdAsync(id);
+            if (formToDelete == null)
             {
-                return await _formRepository.DeleteAsync(id);
+                _logger.LogWarning("Intento de borrado lógico de formulario con ID {Id} falló: no encontrado.", id);
+                return false;
             }
-            catch (Exception ex)
+
+            formToDelete.Active = false; // Borrado lógico: marcar como inactivo
+            var result = await _formRepository.UpdateAsync(formToDelete); // Usar Update para borrado lógico
+            if (result)
             {
-                _logger.LogError(ex, $"Error al eliminar el formulario con ID: {id}.");
-                throw new ArgumentException("Error al eliminar los datos del formulario.", ex);
+                _logger.LogInformation("Formulario con ID {Id} eliminado lógicamente exitosamente.", id);
             }
+            else
+            {
+                _logger.LogError("Error al realizar borrado lógico de formulario con ID {Id} en el repositorio.", id);
+            }
+            return result;
         }
     }
 }

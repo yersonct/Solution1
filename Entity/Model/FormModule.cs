@@ -1,20 +1,28 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Entity.Model
 {
+    [Table("FormModules")]
     public class FormModule
     {
-        public int id { get; set; }
-        public int id_forms { get; set; }
-        public int id_module { get; set; }
+        // Si 'id' es la clave primaria independiente para esta tabla intermedia
+        [Key]
+        [Column("id")]
+        public int Id { get; set; }
 
-        public bool active {  get; set; }
+        // Claves Foráneas
+        [Column("id_forms")]
+        public int FormId { get; set; } // Cambiado de id_forms a FormId
 
-        public Forms Forms { get; set; }
-        public Modules Modules { get; set; }
+        [Column("id_module")]
+        public int ModuleId { get; set; } // Cambiado de id_module a ModuleId
+
+        [Column("active")]
+        public bool Active { get; set; }
+
+        // Propiedades de Navegación
+        public virtual Forms Forms { get; set; } // Renombrado de Forms a Form para consistencia
+        public virtual Modules Modules { get; set; } // Renombrado de Modules a Module para consistencia
     }
 }

@@ -30,14 +30,14 @@ namespace Data.Repository
                     .Include(x => x.Forms)
                     .Include(x => x.Rol)
                     .Include(x => x.Permission)
-                    .Where(x => x.active) // Filter for active FormRolPermissions
+                    .Where(x => x.Active) // Filter for active FormRolPermissions
                     .Select(x => new FormRolPermissionDTO
                     {
-                        id = x.id,
-                        formName = x.Forms.name,
-                        rolName = x.Rol.name,
-                        permissionName = x.Permission.name,
-                        active = x.active
+                        Id = x.Id,
+                        FormName = x.Forms.Name,
+                        RolName = x.Rol.Name,
+                        PermissionName = x.Permission.Name,
+                        Active = x.Active
                     })
                     .ToListAsync();
             }
@@ -56,14 +56,14 @@ namespace Data.Repository
                     .Include(x => x.Forms)
                     .Include(x => x.Rol)
                     .Include(x => x.Permission)
-                    .Where(x => x.id == id && x.active) // Filter for active FormRolPermission
+                    .Where(x => x.Id == id && x.Active) // Filter for active FormRolPermission
                     .Select(x => new FormRolPermissionDTO
                     {
-                        id = x.id,
-                        formName = x.Forms.name,
-                        rolName = x.Rol.name,
-                        permissionName = x.Permission.name,
-                        active = x.active
+                        Id = x.Id,
+                        FormName = x.Forms.Name,
+                        RolName = x.Rol.Name,
+                        PermissionName = x.Permission.Name,
+                        Active = x.Active
                     })
                     .FirstOrDefaultAsync();
             }
@@ -80,16 +80,16 @@ namespace Data.Repository
             {
                 var entity = new FormRolPermission
                 {
-                    id_forms = dto.id_forms,
-                    id_rol = dto.id_rol,
-                    id_permission = dto.id_permission,
-                    active = true // Set active to true on creation
+                    FormId = dto.FormId,
+                    RolId = dto.RolId,
+                    PermissionId = dto.PermissionId,
+                    Active = true // Set active to true on creation
                 };
 
                 _context.Set<FormRolPermission>().Add(entity);
                 await _context.SaveChangesAsync();
 
-                return await GetByIdAsync(entity.id)
+                return await GetByIdAsync(entity.Id)
                        ?? throw new Exception("Could not retrieve the created FormRolPermission.");
             }
             catch (Exception ex)
@@ -103,16 +103,16 @@ namespace Data.Repository
         {
             try
             {
-                var entity = await _context.Set<FormRolPermission>().FindAsync(dto.id);
+                var entity = await _context.Set<FormRolPermission>().FindAsync(dto.Id);
                 if (entity == null) return false;
 
                 // Assuming you have DbSet properties for Forms, Rol, and Permission in IApplicationDbContext
-                entity.id_forms = await _context.Set<Forms>().Where(f => f.name == dto.formName).Select(f => f.id).SingleOrDefaultAsync();
-                entity.id_rol = await _context.Set<Rol>().Where(r => r.name == dto.rolName).Select(r => r.id).SingleOrDefaultAsync();
-                entity.id_permission = await _context.Set<Permission>().Where(p => p.name == dto.permissionName).Select(p => p.id).SingleOrDefaultAsync();
-                entity.active = dto.active;
+                entity.FormId = await _context.Set<Forms>().Where(f => f.Name == dto.FormName).Select(f => f.Id).SingleOrDefaultAsync();
+                entity.RolId = await _context.Set<Rol>().Where(r => r.Name == dto.RolName).Select(r => r.Id).SingleOrDefaultAsync();
+                entity.PermissionId = await _context.Set<Permission>().Where(p => p.Name == dto.PermissionName).Select(p => p.Id).SingleOrDefaultAsync();
+                entity.Active = dto.Active;
 
-                if (entity.id_forms == 0 || entity.id_rol == 0 || entity.id_permission == 0)
+                if (entity.FormId == 0 || entity.RolId == 0 || entity.PermissionId == 0)
                 {
                     _logger.LogError("Error updating FormRolPermission: Invalid Form, Rol, or Permission name.");
                     return false;
@@ -124,7 +124,7 @@ namespace Data.Repository
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error updating FormRolPermission with ID: {Id}.", dto.id);
+                _logger.LogError(ex, "Error updating FormRolPermission with ID: {Id}.", dto.Id);
                 return false;
             }
         }
@@ -136,7 +136,7 @@ namespace Data.Repository
                 var entity = await _context.Set<FormRolPermission>().FindAsync(id);
                 if (entity == null) return false;
 
-                entity.active = false; // Set active to false for logical delete
+                entity.Active = false; // Set active to false for logical delete
                 _context.Set<FormRolPermission>().Update(entity);
                 await _context.SaveChangesAsync();
                 return true;

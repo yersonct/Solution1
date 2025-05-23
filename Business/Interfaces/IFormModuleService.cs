@@ -11,8 +11,8 @@ namespace Business.Interfaces
     {
         Task<IEnumerable<FormModuleDTO>> GetAllFormModulesAsync();
         Task<FormModuleDTO?> GetFormModuleByIdAsync(int id);
-        Task<FormModuleDTO> CreateFormModuleAsync(FormModuleCreateDTO formModule);
-        Task<bool> UpdateFormModuleAsync(int id, FormModuleCreateDTO formModule);
+        Task<FormModuleDTO> CreateFormModuleAsync(FormModuleCreateDTO formModuleDto); // Recibe DTO de creación
+        Task<bool> UpdateFormModuleAsync(int id, FormModuleCreateDTO formModuleDto); // Recibe ID y DTO de actualización
         Task<bool> DeleteFormModuleAsync(int id);
     }
 }

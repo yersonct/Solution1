@@ -1,4 +1,6 @@
-﻿using System;
+﻿// Data/Repository/FormModuleRepository.cs
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -6,67 +8,52 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Data.Interfaces;
 using Entity.Context;
-using Entity.DTOs;
-using Entity.Model;
-using Dapper;
+// using Entity.DTOs; // YA NO NECESITAMOS ESTE USING AQUÍ, PORQUE EL REPOSITORIO MANEJA ENTIDADES
+using Entity.Model; // Este sí es necesario para FormModule
+// using Dapper; // Si no estás usando Dapper en este repo, puedes quitarlo
 
 namespace Data.Repository
 {
     public class FormModuleRepository : IFormModuleRepository
     {
-        private readonly IApplicationDbContextWithEntry _context; // Cambiado a IApplicationDbContext
+        private readonly IApplicationDbContextWithEntry _context;
         private readonly ILogger<FormModuleRepository> _logger;
 
-        public FormModuleRepository(IApplicationDbContextWithEntry context, ILogger<FormModuleRepository> logger) // Cambiado a IApplicationDbContext
+        public FormModuleRepository(IApplicationDbContextWithEntry context, ILogger<FormModuleRepository> logger)
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
-        public async Task<IEnumerable<FormModuleDTO>> GetAllAsync()
+        // CAMBIO: Ahora devuelve Task<IEnumerable<FormModule>> (entidades)
+        public async Task<IEnumerable<FormModule>> GetAllAsync()
         {
             try
             {
                 return await _context.Set<FormModule>()
                     .Include(fm => fm.Forms)
                     .Include(fm => fm.Modules)
-                    .Where(fm => fm.active) // Filtra solo los registros activos (true)
-                    .Select(fm => new FormModuleDTO
-                    {
-                        Id = fm.id,
-                        id_forms = fm.id_forms,
-                        FormName = fm.Forms.name,
-                        id_module = fm.id_module,
-                        ModuleName = fm.Modules.name,
-                        active = fm.active // Incluimos la propiedad Active en el DTO
-                    })
-                    .ToListAsync();
+                    .Where(fm => fm.Active) // Filtra solo los registros activos (true)
+                    .ToListAsync(); // Directamente la lista de entidades
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error al obtener todos los FormModule activos.");
-                return new List<FormModuleDTO>();
+                // Retorna una lista vacía de entidades en caso de error
+                return new List<FormModule>();
             }
         }
 
-        public async Task<FormModuleDTO?> GetByIdAsync(int id)
+        // CAMBIO: Ahora devuelve Task<FormModule?> (una entidad)
+        public async Task<FormModule?> GetByIdAsync(int id)
         {
             try
             {
                 return await _context.Set<FormModule>()
                     .Include(fm => fm.Forms)
                     .Include(fm => fm.Modules)
-                    .Where(fm => fm.id == id && fm.active) // Filtra por ID y solo registros activos (true)
-                    .Select(fm => new FormModuleDTO
-                    {
-                        Id = fm.id,
-                        id_forms = fm.id_forms,
-                        FormName = fm.Forms.name,
-                        id_module = fm.id_module,
-                        ModuleName = fm.Modules.name,
-                        active = fm.active // Incluimos la propiedad Active en el DTO
-                    })
-                    .FirstOrDefaultAsync();
+                    .Where(fm => fm.Id == id && fm.Active) // Filtra por ID y solo registros activos (true)
+                    .FirstOrDefaultAsync(); // Directamente la entidad
             }
             catch (Exception ex)
             {
@@ -75,22 +62,15 @@ namespace Data.Repository
             }
         }
 
-        public async Task<FormModuleDTO> AddAsync(FormModuleCreateDTO dto)
+        // CAMBIO: Ahora recibe FormModule (la entidad), no DTO
+        // Y devuelve la entidad que fue agregada (no DTO)
+        public async Task<FormModule> AddAsync(FormModule entity)
         {
             try
             {
-                var entity = new FormModule
-                {
-                    id_forms = dto.id_forms,
-                    id_module = dto.id_module,
-                    active = true // Establecer como activo al crear
-                };
-
                 _context.Set<FormModule>().Add(entity);
                 await _context.SaveChangesAsync();
-
-                return await GetByIdAsync(entity.id)
-                       ?? throw new Exception("No se pudo recuperar el FormModule recién creado.");
+                return entity; // Retorna la entidad con su ID ya asignado
             }
             catch (Exception ex)
             {
@@ -99,35 +79,33 @@ namespace Data.Repository
             }
         }
 
-        public async Task<bool> UpdateAsync(int id, FormModuleCreateDTO dto)
+        // CAMBIO: Ahora recibe FormModule (la entidad), no DTO
+        // La lógica de buscar y actualizar se maneja en el servicio
+        public async Task<bool> UpdateAsync(FormModule entity)
         {
             try
             {
-                var entity = await _context.Set<FormModule>().FindAsync(id);
-                if (entity == null || !entity.active) return false;
-
-                entity.id_forms = dto.id_forms;
-                entity.id_module = dto.id_module;
-
+                // Asegúrate de que la entidad no esté en estado 'Added' o 'Detached' si ya existe en el contexto
                 _context.Set<FormModule>().Update(entity);
                 await _context.SaveChangesAsync();
                 return true;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error al actualizar el FormModule con ID: {FormModuleId}.", id);
+                _logger.LogError(ex, "Error al actualizar el FormModule con ID: {FormModuleId}.", entity.Id);
                 return false;
             }
         }
 
+        // DeleteAsync está bien, ya que recibe el ID
         public async Task<bool> DeleteAsync(int id)
         {
             try
             {
                 var entity = await _context.Set<FormModule>().FindAsync(id);
-                if (entity == null || !entity.active) return false;
+                if (entity == null || !entity.Active) return false;
 
-                entity.active = false; // Realizar la eliminación lógica
+                entity.Active = false; // Realizar la eliminación lógica
                 _context.Set<FormModule>().Update(entity);
                 await _context.SaveChangesAsync();
                 return true;

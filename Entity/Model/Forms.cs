@@ -1,22 +1,34 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿    using System.Collections.Generic;
+    using System.ComponentModel.DataAnnotations;
+    using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Entity.Model
-{
-    public class Forms
+    namespace Entity.Model
     {
+        [Table("Forms")]
+        public class Forms
+        {
+            [Key]
+            [Column("id")]
+            public int Id { get; set; }
 
-        public int id { get; set; }
-        public string name { get; set; } 
-        public string url { get; set; }
+            [Column("name")]
+            [Required]
+            [StringLength(100)]
+            public string Name { get; set; }
 
-        public bool active { get; set; }
-        public List<FormModule> FormModules { get; set; } = new List<FormModule>();
-        public List<FormRolPermission> FormRolPermissions { get; set; } = new List<FormRolPermission>();
+            [Column("url")]
+            [StringLength(255)] // Longitud para una URL
+            public string Url { get; set; } // Considera renombrar a URL o Ruta
 
+            [Column("active")]
+            public bool Active { get; set; }
 
+            public virtual ICollection<FormModule> FormModules { get; set; } = new List<FormModule>();
+            public virtual ICollection<FormRolPermission> FormRolPermissions { get; set; } = new List<FormRolPermission>();
+
+            public Forms()
+            {
+                // Inicialización de colecciones
+            }
+        }
     }
-}

@@ -1,21 +1,32 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Entity.Model
 {
+    [Table("FormRolPermissions")]
     public class FormRolPermission
     {
-        public int id { get; set; }
-        public int id_forms { get; set; }
-        public int id_rol { get; set; }
-        public int id_permission { get; set; }
-        public Rol Rol { get; set; }
-        public Forms Forms { get; set; }
-        public Permission Permission { get; set; }
+        // Si 'id' es la clave primaria independiente para esta tabla intermedia
+        [Key]
+        [Column("id")]
+        public int Id { get; set; }
 
-        public bool active { get; set; } // Add the active property
+        // Claves Foráneas
+        [Column("id_forms")]
+        public int FormId { get; set; } // Cambiado de id_forms a FormId
+
+        [Column("id_rol")]
+        public int RolId { get; set; } // Cambiado de id_rol a RolId
+
+        [Column("id_permission")]
+        public int PermissionId { get; set; } // Cambiado de id_permission a PermissionId
+
+        // Propiedades de Navegación
+        public virtual Rol Rol { get; set; }
+        public virtual Forms Forms { get; set; } // Renombrado de Forms a Form para consistencia
+        public virtual Permission Permission { get; set; }
+
+        [Column("active")]
+        public bool Active { get; set; }
     }
 }

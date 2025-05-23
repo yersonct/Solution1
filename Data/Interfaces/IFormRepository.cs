@@ -1,4 +1,6 @@
-﻿using Entity.Model;
+﻿// Data/Interfaces/IFormRepository.cs
+
+using Entity.Model; // Asegúrate de que sea 'Form' singular
 using System;
 using System.Collections.Generic;
 using System.Linq;

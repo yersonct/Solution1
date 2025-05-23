@@ -1,4 +1,6 @@
-﻿using Entity.DTOs;
+﻿// Data/Interfaces/IFormModuleRepository.cs
+
+using Entity.DTOs; // Esto ya no es necesario aquí si el repositorio solo maneja entidades
 using Entity.Model;
 using System;
 using System.Collections.Generic;
@@ -10,10 +12,11 @@ namespace Data.Interfaces
 {
     public interface IFormModuleRepository
     {
-        Task<IEnumerable<FormModuleDTO>> GetAllAsync();
-        Task<FormModuleDTO?> GetByIdAsync(int id);
-        Task<FormModuleDTO> AddAsync(FormModuleCreateDTO entity);
-        Task<bool> UpdateAsync(int id, FormModuleCreateDTO entity);
+        // Los tipos de retorno y parámetros deben ser FormModule (la entidad)
+        Task<IEnumerable<FormModule>> GetAllAsync(); // Devuelve entidades
+        Task<FormModule?> GetByIdAsync(int id); // Devuelve una entidad
+        Task<FormModule> AddAsync(FormModule entity); // Recibe una entidad
+        Task<bool> UpdateAsync(FormModule entity); // Recibe una entidad para actualizar
         Task<bool> DeleteAsync(int id);
     }
 }

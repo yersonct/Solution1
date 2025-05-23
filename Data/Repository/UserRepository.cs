@@ -27,10 +27,10 @@ namespace Data.Repository
             try
             {
                 // Trunca el nombre de usuario antes de agregarlo al contexto
-                if (entity.username.Length > 20)
+                if (entity.Username.Length > 20)
                 {
-                    entity.username = entity.username.Substring(0, 20);
-                    _logger.LogWarning("AddAsync: Nombre de usuario truncado a: {Username}", entity.username);
+                    entity.Username = entity.Username.Substring(0, 20);
+                    _logger.LogWarning("AddAsync: Nombre de usuario truncado a: {Username}", entity.Username);
                 }
 
                 // Trunca la contraseña antes de agregarla al contexto
@@ -58,7 +58,7 @@ namespace Data.Repository
                 var userToDelete = await _context.Set<User>().FindAsync(id);
                 if (userToDelete != null)
                 {
-                    userToDelete.active = false; // Asumiendo que tienes un campo 'active'
+                    userToDelete.Active = false; // Asumiendo que tienes un campo 'active'
                     _context.Entry(userToDelete).State = EntityState.Modified;
                     await _context.SaveChangesAsync();
                     return true;
@@ -77,7 +77,7 @@ namespace Data.Repository
             try
             {
                 return await _context.Set<User>()
-                    .Include(u => u.person)
+                    .Include(u => u.Person)
                     .ToListAsync();
             }
             catch (Exception ex)
@@ -97,8 +97,8 @@ namespace Data.Repository
             try
             {
                 return await _context.Set<User>()
-                    .Include(u => u.person)
-                    .FirstOrDefaultAsync(u => u.id == id);
+                    .Include(u => u.Person)
+                    .FirstOrDefaultAsync(u => u.Id == id);
             }
             catch (Exception ex)
             {
@@ -112,10 +112,10 @@ namespace Data.Repository
             try
             {
                 // Trunca el nombre de usuario antes de actualizar la entidad
-                if (entity.username.Length > 20)
+                if (entity.Username.Length > 20)
                 {
-                    entity.username = entity.username.Substring(0, 20);
-                    _logger.LogWarning("UpdateAsync: Nombre de usuario truncado a: {Username}", entity.username);
+                    entity.Username = entity.Username.Substring(0, 20);
+                    _logger.LogWarning("UpdateAsync: Nombre de usuario truncado a: {Username}", entity.Username);
                 }
 
                 // Trunca la contraseña antes de actualizar la entidad
@@ -131,19 +131,29 @@ namespace Data.Repository
             }
             catch (DbUpdateConcurrencyException ex)
             {
-                _logger.LogError(ex, "Error de concurrencia al actualizar el usuario con ID: {UserId}", entity.id);
+                _logger.LogError(ex, "Error de concurrencia al actualizar el usuario con ID: {UserId}", entity.Id);
                 return false;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error al actualizar el usuario con ID: {UserId}", entity.id);
+                _logger.LogError(ex, "Error al actualizar el usuario con ID: {UserId}", entity.Id);
                 return false;
             }
         }
 
         public async Task<User> GetUserByUsernameAsync(string username)
         {
-            return await _context.Set<User>().FirstOrDefaultAsync(u => u.username == username);
+            return await _context.Set<User>().FirstOrDefaultAsync(u => u.Username == username);
+        }
+
+        public async Task<bool> UsernameExistsAsync(string username)
+        {
+            return await _context.Users.AnyAsync(u => u.Username == username);
+        }
+
+        public async Task<bool> PersonExistsAsync(int personId)
+        {
+            return await _context.Persons.AnyAsync(p => p.Id == personId);
         }
     }
 }

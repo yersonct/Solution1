@@ -1,18 +1,20 @@
-﻿using Entity.Model;
-using System;
+﻿// Business/Interfaces/IUserService.cs
+
+using Entity.DTOs; // Usar DTOs para la interfaz pública
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Business.Interfaces
 {
     public interface IUserService
     {
-        Task<IEnumerable<User>> GetAllUsersAsync();
-        Task<User?> GetUserByIdAsync(int id);
-        Task<User> CreateUserAsync(User user);
-        Task<bool> UpdateUserAsync(User user);
+        // Métodos de lectura que devuelven DTOs con el nombre de la persona
+        Task<IEnumerable<UserDTO>> GetAllUsersWithPersonNameAsync();
+        Task<UserDTO?> GetUserWithPersonNameByIdAsync(int id);
+
+        // Métodos de escritura que reciben DTOs y devuelven el DTO creado/actualizado
+        Task<UserDTO> CreateUserAsync(UserCreateDTO userCreateDto);
+        Task<bool> UpdateUserAsync(int id, UserUpdateDTO userUpdateDto); // Recibe el ID y el DTO de actualización
         Task<bool> DeleteUserAsync(int id);
     }
 }

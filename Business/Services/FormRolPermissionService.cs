@@ -56,22 +56,22 @@ namespace Business.Services
             {
                 var createDto = new FormRolPermissionCreateDTO
                 {
-                    id_forms = entity.id_forms,
-                    id_rol = entity.id_rol,
-                    id_permission = entity.id_permission
+                    FormId = entity.FormId,
+                    RolId = entity.RolId,
+                    PermissionId = entity.PermissionId
                 };
                 var createdDto = await _formRolPermissionRepository.AddAsync(createDto);
 
                 return new FormRolPermission
                 {
-                    id = createdDto.id,
-                    id_forms = entity.id_forms,
-                    id_rol = entity.id_rol,
-                    id_permission = entity.id_permission,
+                    Id = createdDto.Id,
+                    FormId = entity.FormId,
+                    RolId = entity.RolId,
+                    PermissionId = entity.PermissionId,
                     Forms = entity.Forms, // You might need to fetch these if not tracked
                     Rol = entity.Rol,     // depending on your context's change tracking
                     Permission = entity.Permission,
-                    active = createdDto.active
+                    Active = createdDto.Active
                 };
             }
             catch (Exception ex)
@@ -87,11 +87,11 @@ namespace Business.Services
             {
                 var updateDto = new FormRolPermissionDTO
                 {
-                    id = entity.id,
-                    formName = entity.Forms?.name ?? "",
-                    rolName = entity.Rol?.name ?? "",
-                    permissionName = entity.Permission?.name ?? "",
-                    active = entity.active
+                    Id = entity.Id,
+                    FormName = entity.Forms?.Name ?? "",
+                    RolName = entity.Rol?.Name ?? "",
+                    PermissionName = entity.Permission?.Name ?? "",
+                    Active = entity.Active
                 };
                 var result = await _formRolPermissionRepository.UpdateAsync(updateDto);
                 return result;

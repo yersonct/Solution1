@@ -30,7 +30,7 @@
 		<PackageReference Include="Serilog.Sinks.Console" Version="5.0.1" />
 		<PackageReference Include="Serilog.Sinks.MSSqlServer" Version="6.6.0" />
 		<PackageReference Include="Serilog.Sinks.MySQL" Version="5.0.0" />
-		<PackageReference Include="Serilog.Sinks.PostgreSQL" Version="8.0.0" />
+		<PackageReference Include="Serilog.Sinks.Postgresql.Alternative" Version="4.2.0" />
 		<PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
 		<PackageReference Include="System.Formats.Asn1" Version="8.0.0" />
 		<PackageReference Include="System.Text.Json" Version="8.0.4" />
